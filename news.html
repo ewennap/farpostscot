@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>News — Far Post</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #111213; color: #e8e6e1; font-family: 'Barlow', sans-serif; min-height: 100vh; }
+    .nav { display: flex; align-items: center; justify-content: space-between; padding: 0 1.25rem; height: 52px; border-bottom: 1px solid #2a2b2d; background: #0d0e0f; }
+    .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: 0.12em; color: #e8e6e1; text-decoration: none; white-space: nowrap; }
+    .logo-dot { color: #e84040; }
+    .nav-links { display: flex; gap: 20px; }
+    .nav-links a { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-decoration: none; color: #888; text-transform: uppercase; }
+    .nav-links a:hover { color: #e8e6e1; }
+    .nav-links a.active { color: #e8e6e1; border-bottom: 2px solid #e84040; padding-bottom: 2px; }
+    .nav-hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; background: none; border: none; flex-shrink: 0; }
+    .nav-hamburger span { display: block; width: 22px; height: 2px; background: #888; }
+    .mobile-menu { display: none; flex-direction: column; background: #0d0e0f; border-bottom: 1px solid #2a2b2d; }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #888; text-decoration: none; padding: 0.875rem 1.25rem; border-bottom: 1px solid #1a1b1d; }
+    .mobile-menu a:last-child { border-bottom: none; }
+
+    .page-header { padding: 2rem 1.5rem 1.5rem; border-bottom: 1px solid #2a2b2d; }
+    .page-title { font-family: 'Barlow Condensed', sans-serif; font-size: 48px; font-weight: 700; letter-spacing: 0.02em; color: #e8e6e1; }
+    .page-title span { color: #e84040; }
+    .page-subtitle { font-size: 14px; color: #555; margin-top: 6px; }
+
+    .news-grid { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid #2a2b2d; }
+    .news-card { border-right: 1px solid #2a2b2d; border-bottom: 1px solid #2a2b2d; cursor: pointer; transition: background 0.15s; text-decoration: none; display: block; overflow: hidden; }
+    .news-card:nth-child(3n) { border-right: none; }
+    .news-card:hover { background: #161718; }
+    .news-card-image { width: 100%; height: 200px; object-fit: cover; display: block; }
+    .news-card-image-placeholder { width: 100%; height: 200px; background: #1a1b1c; display: block; }
+    .news-card-body { padding: 1.25rem; }
+    .news-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #e84040; margin-bottom: 8px; }
+    .news-headline { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700; line-height: 1.1; color: #e8e6e1; margin-bottom: 10px; }
+    .news-excerpt { font-size: 13px; color: #777; line-height: 1.6; margin-bottom: 12px; }
+    .news-author { display: flex; align-items: center; gap: 8px; }
+    .author-avatar { width: 24px; height: 24px; border-radius: 50%; background: #2a2b2d; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; color: #888; flex-shrink: 0; }
+    .author-name { font-size: 11px; color: #555; }
+
+    .load-more { display: flex; justify-content: center; padding: 2rem; border-bottom: 1px solid #2a2b2d; }
+    .load-more-btn { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #888; border: 1px solid #2a2b2d; background: none; padding: 10px 24px; border-radius: 2px; cursor: pointer; transition: all 0.15s; }
+    .load-more-btn:hover { color: #e8e6e1; border-color: #555; }
+    .load-more-btn:disabled { opacity: 0.4; cursor: default; }
+
+    .loading-text { font-size: 12px; color: #555; padding: 3rem; text-align: center; grid-column: 1/-1; }
+
+    .footer { padding: 1.25rem; border-top: 1px solid #2a2b2d; background: #0d0e0f; display: flex; align-items: center; justify-content: space-between; }
+    .footer-logo { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 0.12em; color: #333; }
+    .footer-logo span { color: #e84040; }
+    .footer-copy { font-size: 12px; color: #444; }
+
+    @media (max-width: 680px) {
+      .nav-links { display: none; }
+      .nav-hamburger { display: flex; }
+      .page-header { padding: 1.5rem 1.25rem 1rem; }
+      .page-title { font-size: 36px; }
+      .news-grid { grid-template-columns: 1fr; }
+      .news-card { border-right: none; }
+      .news-card:nth-child(3n) { border-right: none; }
+      .news-card-image { height: 200px; }
+      .footer { flex-direction: column; gap: 6px; text-align: center; }
+    }
+
+    @media (min-width: 681px) and (max-width: 1024px) {
+      .news-grid { grid-template-columns: repeat(2, 1fr); }
+      .news-card:nth-child(3n) { border-right: 1px solid #2a2b2d; }
+      .news-card:nth-child(2n) { border-right: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a href="index.html" class="logo">FAR POST<span class="logo-dot">.</span></a>
+    <div class="nav-links">
+      <a href="news.html" class="active">News</a>
+      <a href="opinions.html">Opinions</a>
+      <a href="podcasts.html">Podcasts</a>
+      <a href="results.html">Results</a>
+      <a href="fixtures.html">Fixtures</a>
+    </div>
+    <button class="nav-hamburger" onclick="document.getElementById('mobile-menu').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="news.html">News</a>
+    <a href="opinions.html">Opinions</a>
+    <a href="podcasts.html">Podcasts</a>
+    <a href="results.html">Results</a>
+    <a href="fixtures.html">Fixtures</a>
+  </div>
+
+  <div class="page-header">
+    <div class="page-title">Latest <span>News</span></div>
+    <div class="page-subtitle">Everything from across the Scottish game</div>
+  </div>
+
+  <div class="news-grid" id="news-grid">
+    <div class="loading-text">Loading articles...</div>
+  </div>
+
+  <div class="load-more" id="load-more" style="display:none;">
+    <button class="load-more-btn" id="load-more-btn" onclick="loadMore()">Load more</button>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-logo">FAR POST<span>.</span></div>
+    <div class="footer-copy">Scottish football. No filter.</div>
+  </footer>
+
+  <script>
+    const SANITY_PROJECT_ID = 't11tx9if';
+    const SANITY_DATASET = 'production';
+    const SANITY_TOKEN = 'skVvgExK1VnABKd7JxR8yI1WlsvrbWE9cffTvN3I0okHzn7XiYHSN1hJEgAr0dYTPdTgKdsPnMIth8l7DegjuF1FOoT2arqWnt5SGpMfOUoMCvker7W68zP1IyV2m9NR8S5qJFMPitco6Qt0UorzMynZ32I0EcoUdgv505fao2ey9c3wiIRs';
+    const SANITY_API = `https://${SANITY_PROJECT_ID}.api.sanity.io/v2023-05-03/data/query/${SANITY_DATASET}`;
+
+    const fmt = d => new Date(d).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'});
+    const initials = n => n ? n.split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2) : 'FP';
+    const catLabel = c => ({opinion:'Opinion',analysis:'Analysis',news:'News',interview:'Interview',feature:'Feature'}[c]||'Article');
+
+    function imageUrl(ref) {
+      if (!ref) return null;
+      const parts = ref.replace('image-','').split('-');
+      const ext = parts.pop();
+      const id = parts.join('-');
+      return `https://cdn.sanity.io/images/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${id}.${ext}`;
+    }
+
+    let offset = 0;
+    const PAGE_SIZE = 9;
+    let total = 0;
+
+    function renderCards(posts) {
+      return posts.map(p => {
+        const date = p.publishedAt ? fmt(p.publishedAt) : '';
+        const imgRef = p.mainImage?.asset?._ref;
+        const imgUrl = imgRef ? imageUrl(imgRef) : null;
+        const imgHtml = imgUrl
+          ? `<img class="news-card-image" src="${imgUrl}?w=600&h=400&fit=crop&auto=format" alt="${p.title}" loading="lazy">`
+          : `<div class="news-card-image-placeholder"></div>`;
+        return `<a class="news-card" href="article.html?id=${p._id}">
+          ${imgHtml}
+          <div class="news-card-body">
+            <div class="news-label">${catLabel(p.category)}</div>
+            <div class="news-headline">${p.title}</div>
+            ${p.excerpt ? `<p class="news-excerpt">${p.excerpt}</p>` : ''}
+            <div class="news-author">
+              <div class="author-avatar">${initials(p.author)}</div>
+              <div class="author-name">${p.author||'Far Post'}${date?' · '+date:''}</div>
+            </div>
+          </div>
+        </a>`;
+      }).join('');
+    }
+
+    async function loadArticles() {
+      const grid = document.getElementById('news-grid');
+      try {
+        const countQ = encodeURIComponent('count(*[_type=="post"])');
+        const countRes = await fetch(`${SANITY_API}?query=${countQ}`, {headers:{Authorization:`Bearer ${SANITY_TOKEN}`}});
+        total = (await countRes.json()).result || 0;
+
+        const q = encodeURIComponent(`*[_type=="post"]|order(publishedAt desc)[0...${PAGE_SIZE}]{_id,title,category,excerpt,author,publishedAt,mainImage}`);
+        const res = await fetch(`${SANITY_API}?query=${q}`, {headers:{Authorization:`Bearer ${SANITY_TOKEN}`}});
+        const posts = (await res.json()).result;
+
+        if (!posts?.length) { grid.innerHTML='<div class="loading-text">No articles yet.</div>'; return; }
+
+        grid.innerHTML = renderCards(posts);
+        offset = posts.length;
+
+        if (total > offset) {
+          document.getElementById('load-more').style.display = 'flex';
+        }
+      } catch(e) {
+        grid.innerHTML='<div class="loading-text">Could not load articles.</div>';
+      }
+    }
+
+    async function loadMore() {
+      const btn = document.getElementById('load-more-btn');
+      btn.disabled = true;
+      btn.textContent = 'Loading...';
+      try {
+        const q = encodeURIComponent(`*[_type=="post"]|order(publishedAt desc)[${offset}...${offset+PAGE_SIZE}]{_id,title,category,excerpt,author,publishedAt,mainImage}`);
+        const res = await fetch(`${SANITY_API}?query=${q}`, {headers:{Authorization:`Bearer ${SANITY_TOKEN}`}});
+        const posts = (await res.json()).result;
+        if (!posts?.length) { document.getElementById('load-more').style.display='none'; return; }
+        document.getElementById('news-grid').innerHTML += renderCards(posts);
+        offset += posts.length;
+        if (offset >= total) document.getElementById('load-more').style.display='none';
+      } catch(e) {}
+      btn.disabled = false;
+      btn.textContent = 'Load more';
+    }
+
+    loadArticles();
+  </script>
+</body>
+</html>

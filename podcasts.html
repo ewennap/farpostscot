@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Podcasts — Far Post</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #111213; color: #e8e6e1; font-family: 'Barlow', sans-serif; min-height: 100vh; }
+    .nav { display: flex; align-items: center; justify-content: space-between; padding: 0 1.25rem; height: 52px; border-bottom: 1px solid #2a2b2d; background: #0d0e0f; }
+    .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: 0.12em; color: #e8e6e1; text-decoration: none; white-space: nowrap; }
+    .logo-dot { color: #e84040; }
+    .nav-links { display: flex; gap: 20px; }
+    .nav-links a { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-decoration: none; color: #888; text-transform: uppercase; }
+    .nav-links a:hover { color: #e8e6e1; }
+    .nav-links a.active { color: #e8e6e1; border-bottom: 2px solid #e84040; padding-bottom: 2px; }
+    .nav-hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; background: none; border: none; flex-shrink: 0; }
+    .nav-hamburger span { display: block; width: 22px; height: 2px; background: #888; }
+    .mobile-menu { display: none; flex-direction: column; background: #0d0e0f; border-bottom: 1px solid #2a2b2d; }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #888; text-decoration: none; padding: 0.875rem 1.25rem; border-bottom: 1px solid #1a1b1d; }
+    .mobile-menu a:last-child { border-bottom: none; }
+
+    .show-header { display: grid; grid-template-columns: 180px 1fr; gap: 0; border-bottom: 1px solid #2a2b2d; }
+    .show-art { width: 180px; height: 180px; background: #1a1b1c; display: flex; align-items: center; justify-content: center; border-right: 1px solid #2a2b2d; flex-shrink: 0; }
+    .show-art svg { width: 60px; height: 60px; }
+    .show-info { padding: 2rem 1.5rem; }
+    .show-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #e84040; margin-bottom: 10px; }
+    .show-title { font-family: 'Barlow Condensed', sans-serif; font-size: 42px; font-weight: 700; line-height: 1.0; color: #e8e6e1; margin-bottom: 12px; }
+    .show-desc { font-size: 14px; color: #777; line-height: 1.65; margin-bottom: 20px; max-width: 560px; }
+    .show-links { display: flex; gap: 10px; flex-wrap: wrap; }
+    .show-link { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #888; border: 1px solid #2a2b2d; padding: 6px 14px; border-radius: 2px; text-decoration: none; transition: all 0.15s; }
+    .show-link:hover { color: #e8e6e1; border-color: #555; }
+    .show-link.primary { background: #e84040; color: #fff; border-color: #e84040; }
+    .show-link.primary:hover { background: #c43030; border-color: #c43030; }
+
+    .section-header { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 1.25rem; border-bottom: 1px solid #2a2b2d; background: #0d0e0f; }
+    .section-title { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #555; }
+    .section-title span { color: #e84040; margin-right: 8px; }
+
+    .episodes-list { border-bottom: 1px solid #2a2b2d; }
+    .episode-row { display: flex; align-items: flex-start; gap: 16px; padding: 1.25rem 1.5rem; border-bottom: 1px solid #2a2b2d; cursor: pointer; transition: background 0.15s; text-decoration: none; }
+    .episode-row:last-child { border-bottom: none; }
+    .episode-row:hover { background: #161718; }
+    .ep-number { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 700; color: #2a2b2d; min-width: 44px; text-align: right; flex-shrink: 0; line-height: 1; padding-top: 2px; }
+    .ep-play { width: 36px; height: 36px; border-radius: 50%; border: 1px solid #2a2b2d; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
+    .episode-row:hover .ep-play { border-color: #e84040; background: #e84040; }
+    .ep-play svg { width: 12px; height: 12px; fill: #888; margin-left: 2px; }
+    .episode-row:hover .ep-play svg { fill: #fff; }
+    .ep-info { flex: 1; min-width: 0; }
+    .ep-tag { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #e84040; margin-bottom: 4px; }
+    .ep-title { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; line-height: 1.1; color: #e8e6e1; margin-bottom: 6px; }
+    .ep-desc { font-size: 13px; color: #666; line-height: 1.5; margin-bottom: 8px; }
+    .ep-meta { font-size: 11px; color: #444; }
+
+    .loading-text { font-size: 12px; color: #555; padding: 3rem; text-align: center; }
+
+    .footer { padding: 1.25rem; border-top: 1px solid #2a2b2d; background: #0d0e0f; display: flex; align-items: center; justify-content: space-between; }
+    .footer-logo { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 0.12em; color: #333; }
+    .footer-logo span { color: #e84040; }
+    .footer-copy { font-size: 12px; color: #444; }
+
+    @media (max-width: 680px) {
+      .nav-links { display: none; }
+      .nav-hamburger { display: flex; }
+      .show-header { grid-template-columns: 1fr; }
+      .show-art { width: 100%; height: 140px; border-right: none; border-bottom: 1px solid #2a2b2d; }
+      .show-title { font-size: 32px; }
+      .ep-number { display: none; }
+      .episode-row { padding: 1rem 1.25rem; }
+      .footer { flex-direction: column; gap: 6px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a href="index.html" class="logo">FAR POST<span class="logo-dot">.</span></a>
+    <div class="nav-links">
+      <a href="news.html">News</a>
+      <a href="opinions.html">Opinions</a>
+      <a href="podcasts.html" class="active">Podcasts</a>
+      <a href="results.html">Results</a>
+      <a href="fixtures.html">Fixtures</a>
+    </div>
+    <button class="nav-hamburger" onclick="document.getElementById('mobile-menu').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="news.html">News</a>
+    <a href="opinions.html">Opinions</a>
+    <a href="podcasts.html">Podcasts</a>
+    <a href="results.html">Results</a>
+    <a href="fixtures.html">Fixtures</a>
+  </div>
+
+  <div class="show-header">
+    <div class="show-art">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#e84040" stroke-width="1">
+        <circle cx="12" cy="12" r="10"/>
+        <polygon points="10,8 16,12 10,16" fill="#e84040" stroke="none"/>
+      </svg>
+    </div>
+    <div class="show-info">
+      <div class="show-label">Far Post Podcast</div>
+      <div class="show-title">Across the Tiers</div>
+      <p class="show-desc">Scottish football from top to bottom. The Premiership, the Championship, the lower leagues, the national team — every tier of the Scottish game covered without the press release filter. New episodes regularly.</p>
+      <div class="show-links">
+        <a href="https://feeds.acast.com/public/shows/across-the-tiers" class="show-link primary" target="_blank">Subscribe</a>
+        <a href="https://open.spotify.com" class="show-link" target="_blank">Spotify</a>
+        <a href="https://podcasts.apple.com" class="show-link" target="_blank">Apple Podcasts</a>
+        <a href="https://feeds.acast.com/public/shows/across-the-tiers" class="show-link" target="_blank">RSS</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <div class="section-title"><span>//</span>All episodes</div>
+  </div>
+
+  <div class="episodes-list" id="episodes-list">
+    <div class="loading-text">Loading episodes...</div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-logo">FAR POST<span>.</span></div>
+    <div class="footer-copy">Scottish football. No filter.</div>
+  </footer>
+
+  <script>
+    const FEED_URL = 'https://feeds.acast.com/public/shows/across-the-tiers';
+    const PROXY = 'https://api.allorigins.win/get?url=' + encodeURIComponent(FEED_URL);
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      return new Date(dateStr).toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'});
+    }
+
+    function formatDuration(seconds) {
+      if (!seconds) return '';
+      const total = parseInt(seconds);
+      const m = Math.floor(total / 60);
+      const h = Math.floor(m / 60);
+      const mins = m % 60;
+      return h > 0 ? `${h}h ${mins}m` : `${m} min`;
+    }
+
+    async function loadEpisodes() {
+      const list = document.getElementById('episodes-list');
+      try {
+        const r = await fetch(PROXY);
+        const data = await r.json();
+        const xml = new DOMParser().parseFromString(data.contents, 'text/xml');
+        const items = xml.querySelectorAll('item');
+        if (!items.length) throw new Error();
+
+        let html = '';
+        items.forEach((item, i) => {
+          const title = item.querySelector('title')?.textContent || 'Episode';
+          const pubDate = item.querySelector('pubDate')?.textContent || '';
+          const duration = item.querySelector('duration')?.textContent || '';
+          const link = item.querySelector('link')?.textContent || FEED_URL;
+          const rawDesc = item.querySelector('description')?.textContent || '';
+          const desc = rawDesc.replace(/<[^>]*>/g, '').slice(0, 180) + '...';
+          const epNum = items.length - i;
+          const dateStr = formatDate(pubDate);
+          const dur = formatDuration(duration);
+
+          html += `<a class="episode-row" href="${link}" target="_blank">
+            <div class="ep-number">${epNum}</div>
+            <div class="ep-play">
+              <svg viewBox="0 0 12 12"><polygon points="2,1 10,6 2,11"/></svg>
+            </div>
+            <div class="ep-info">
+              <div class="ep-tag">Across the Tiers · Ep. ${epNum}</div>
+              <div class="ep-title">${title}</div>
+              <p class="ep-desc">${desc}</p>
+              <div class="ep-meta">${dur}${dateStr ? ' &nbsp;·&nbsp; ' + dateStr : ''}</div>
+            </div>
+          </a>`;
+        });
+
+        list.innerHTML = html;
+      } catch(e) {
+        list.innerHTML = `
+          <a class="episode-row" href="https://feeds.acast.com/public/shows/across-the-tiers" target="_blank">
+            <div class="ep-number">6</div>
+            <div class="ep-play"><svg viewBox="0 0 12 12"><polygon points="2,1 10,6 2,11"/></svg></div>
+            <div class="ep-info">
+              <div class="ep-tag">Across the Tiers · Ep. 6</div>
+              <div class="ep-title">Old Firm | League Two Title Race | Scotland Friendlies</div>
+              <p class="ep-desc">The latest from across the Scottish game.</p>
+            </div>
+          </a>
+          <a class="episode-row" href="https://feeds.acast.com/public/shows/across-the-tiers" target="_blank">
+            <div class="ep-number">5</div>
+            <div class="ep-play"><svg viewBox="0 0 12 12"><polygon points="2,1 10,6 2,11"/></svg></div>
+            <div class="ep-info">
+              <div class="ep-tag">Across the Tiers · Ep. 5</div>
+              <div class="ep-title">SPFL Transfer Window Roundup | Scottish Cup | Interview With Joelle Murray</div>
+              <p class="ep-desc">A packed episode covering the transfer window and cup action.</p>
+            </div>
+          </a>`;
+      }
+    }
+
+    loadEpisodes();
+  </script>
+</body>
+</html>

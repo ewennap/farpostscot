@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Far Post — Scottish Football</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #111213; color: #e8e6e1; font-family: 'Barlow', sans-serif; min-height: 100vh; }
+    .nav { display: flex; align-items: center; justify-content: space-between; padding: 0 1.25rem; height: 52px; border-bottom: 1px solid #2a2b2d; background: #0d0e0f; }
+    .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: 0.12em; color: #e8e6e1; text-decoration: none; white-space: nowrap; }
+    .logo-dot { color: #e84040; }
+    .nav-links { display: flex; gap: 20px; }
+    .nav-links a { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-decoration: none; color: #888; text-transform: uppercase; }
+    .nav-links a:hover { color: #e8e6e1; }
+    .nav-hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; background: none; border: none; flex-shrink: 0; }
+    .nav-hamburger span { display: block; width: 22px; height: 2px; background: #888; }
+    .mobile-menu { display: none; flex-direction: column; background: #0d0e0f; border-bottom: 1px solid #2a2b2d; }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #888; text-decoration: none; padding: 0.875rem 1.25rem; border-bottom: 1px solid #1a1b1d; }
+    .mobile-menu a:last-child { border-bottom: none; }
+
+    .article-hero { position: relative; height: 420px; overflow: hidden; border-bottom: 1px solid #2a2b2d; }
+    .article-hero-img { width: 100%; height: 100%; object-fit: cover; }
+    .article-hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.1) 60%); }
+    .article-hero-empty { height: 0; }
+
+    .article-wrap { max-width: 740px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #555; text-decoration: none; margin-bottom: 2rem; }
+    .back-link:hover { color: #e8e6e1; }
+    .back-link svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; }
+    .article-tag { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; background: #e84040; color: #fff; padding: 3px 8px; border-radius: 2px; display: inline-block; margin-bottom: 16px; }
+    .article-title { font-family: 'Barlow Condensed', sans-serif; font-size: 52px; font-weight: 700; line-height: 1.0; color: #e8e6e1; margin-bottom: 16px; }
+    .article-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid #2a2b2d; }
+    .meta-avatar { width: 32px; height: 32px; border-radius: 50%; background: #2a2b2d; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; color: #888; flex-shrink: 0; }
+    .meta-details { font-size: 13px; color: #555; }
+    .meta-details strong { color: #888; font-weight: 500; }
+    .article-body { font-size: 17px; line-height: 1.8; color: #c8c6c1; }
+    .article-body p { margin-bottom: 1.4rem; }
+    .article-body p:last-child { margin-bottom: 0; }
+    .article-loading { font-size: 14px; color: #555; padding: 4rem 0; text-align: center; }
+    .article-error { font-size: 14px; color: #e84040; padding: 4rem 0; text-align: center; }
+
+    .related-section { border-top: 1px solid #2a2b2d; padding: 2rem 1.5rem; max-width: 740px; margin: 0 auto; }
+    .related-title { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #555; margin-bottom: 1.25rem; }
+    .related-title span { color: #e84040; margin-right: 8px; }
+    .related-grid { display: grid; grid-template-columns: repeat(2, 1fr); border: 1px solid #2a2b2d; }
+    .related-card { cursor: pointer; transition: background 0.15s; text-decoration: none; display: block; overflow: hidden; border-right: 1px solid #2a2b2d; }
+    .related-card:last-child { border-right: none; }
+    .related-card:hover { background: #161718; }
+    .related-card-img { width: 100%; height: 120px; object-fit: cover; display: block; }
+    .related-card-img-placeholder { width: 100%; height: 120px; background: #1a1b1c; display: block; }
+    .related-card-body { padding: 0.875rem 1.25rem; }
+    .related-card-tag { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #e84040; margin-bottom: 5px; }
+    .related-card-title { font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 700; line-height: 1.1; color: #e8e6e1; }
+
+    .footer { padding: 1.25rem; border-top: 1px solid #2a2b2d; background: #0d0e0f; display: flex; align-items: center; justify-content: space-between; }
+    .footer-logo { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 0.12em; color: #333; }
+    .footer-logo span { color: #e84040; }
+    .footer-copy { font-size: 12px; color: #444; }
+
+    @media (max-width: 680px) {
+      .nav-links { display: none; }
+      .nav-hamburger { display: flex; }
+      .article-hero { height: 260px; }
+      .article-wrap { padding: 1.5rem 1.25rem 3rem; }
+      .article-title { font-size: 32px; }
+      .article-body { font-size: 16px; }
+      .back-link { margin-bottom: 1.25rem; }
+      .related-grid { grid-template-columns: 1fr; }
+      .related-card { border-right: none; border-bottom: 1px solid #2a2b2d; }
+      .related-card:last-child { border-bottom: none; }
+      .footer { flex-direction: column; gap: 6px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a href="index.html" class="logo">FAR POST<span class="logo-dot">.</span></a>
+    <div class="nav-links">
+      <a href="index.html">News</a>
+      <a href="index.html">Opinions</a>
+      <a href="index.html">Podcasts</a>
+      <a href="index.html">Results</a>
+      <a href="index.html">Fixtures</a>
+    </div>
+    <button class="nav-hamburger" onclick="document.getElementById('mobile-menu').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="index.html">News</a>
+    <a href="index.html">Opinions</a>
+    <a href="index.html">Podcasts</a>
+    <a href="index.html">Results</a>
+    <a href="index.html">Fixtures</a>
+  </div>
+
+  <div id="article-hero"></div>
+
+  <div class="article-wrap">
+    <a href="index.html" class="back-link">
+      <svg viewBox="0 0 24 24"><polyline points="15,18 9,12 15,6"/></svg>
+      Back to Far Post
+    </a>
+    <div id="article-content">
+      <div class="article-loading">Loading article...</div>
+    </div>
+  </div>
+
+  <div class="related-section" id="related-section">
+    <div class="related-title"><span>//</span>More from Far Post</div>
+    <div class="related-grid" id="related-grid"></div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-logo">FAR POST<span>.</span></div>
+    <div class="footer-copy">Scottish football. No filter.</div>
+  </footer>
+
+  <script>
+    const SANITY_PROJECT_ID = 't11tx9if';
+    const SANITY_DATASET = 'production';
+    const SANITY_TOKEN = 'skVvgExK1VnABKd7JxR8yI1WlsvrbWE9cffTvN3I0okHzn7XiYHSN1hJEgAr0dYTPdTgKdsPnMIth8l7DegjuF1FOoT2arqWnt5SGpMfOUoMCvker7W68zP1IyV2m9NR8S5qJFMPitco6Qt0UorzMynZ32I0EcoUdgv505fao2ey9c3wiIRs';
+    const SANITY_API = `https://${SANITY_PROJECT_ID}.api.sanity.io/v2023-05-03/data/query/${SANITY_DATASET}`;
+
+    const getParam = k => new URLSearchParams(window.location.search).get(k);
+    const fmt = d => d ? new Date(d).toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'}) : '';
+    const initials = n => n ? n.split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2) : 'FP';
+    const catLabel = c => ({opinion:'Opinion',analysis:'Analysis',news:'News',interview:'Interview',feature:'Feature'}[c]||'Article');
+
+    function imageUrl(ref) {
+      if (!ref) return null;
+      const parts = ref.replace('image-','').split('-');
+      const ext = parts.pop();
+      const id = parts.join('-');
+      return `https://cdn.sanity.io/images/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${id}.${ext}`;
+    }
+
+    function renderBody(blocks) {
+      if (!blocks?.length) return '';
+      return blocks.map(b => {
+        if (b._type !== 'block') return '';
+        const text = (b.children||[]).map(c=>c.text||'').join('');
+        return text.trim() ? `<p>${text}</p>` : '';
+      }).join('');
+    }
+
+    async function loadArticle() {
+      const id = getParam('id');
+      const el = document.getElementById('article-content');
+      const heroEl = document.getElementById('article-hero');
+      if (!id) { el.innerHTML='<div class="article-error">No article specified.</div>'; return; }
+      try {
+        const q = encodeURIComponent(`*[_type=="post"&&_id=="${id}"][0]{title,category,excerpt,body,author,publishedAt,mainImage}`);
+        const res = await fetch(`${SANITY_API}?query=${q}`, {headers:{Authorization:`Bearer ${SANITY_TOKEN}`}});
+        const post = (await res.json()).result;
+        if (!post) { el.innerHTML='<div class="article-error">Article not found.</div>'; return; }
+        document.title = `${post.title} — Far Post`;
+
+        const imgRef = post.mainImage?.asset?._ref;
+        const imgUrl = imgRef ? imageUrl(imgRef) : null;
+
+        if (imgUrl) {
+          heroEl.className = 'article-hero';
+          heroEl.innerHTML = `<img class="article-hero-img" src="${imgUrl}?w=1400&h=600&fit=crop&auto=format" alt="${post.title}"><div class="article-hero-overlay"></div>`;
+        }
+
+        el.innerHTML = `
+          <div class="article-tag">${catLabel(post.category)}</div>
+          <h1 class="article-title">${post.title}</h1>
+          <div class="article-meta">
+            <div class="meta-avatar">${initials(post.author)}</div>
+            <div class="meta-details"><strong>${post.author||'Ewen Napier'}</strong>${post.publishedAt?' &nbsp;·&nbsp; '+fmt(post.publishedAt):''}</div>
+          </div>
+          <div class="article-body">
+            ${post.excerpt?`<p><em style="color:#aaa;">${post.excerpt}</em></p>`:''}
+            ${renderBody(post.body)||'<p>Full article coming soon.</p>'}
+          </div>`;
+
+        loadRelated(id);
+      } catch(e) {
+        el.innerHTML='<div class="article-error">Could not load article.</div>';
+      }
+    }
+
+    async function loadRelated(currentId) {
+      const grid = document.getElementById('related-grid');
+      const section = document.getElementById('related-section');
+      try {
+        const q = encodeURIComponent(`*[_type=="post"&&_id!="${currentId}"]|order(publishedAt desc)[0...2]{_id,title,category,mainImage}`);
+        const res = await fetch(`${SANITY_API}?query=${q}`, {headers:{Authorization:`Bearer ${SANITY_TOKEN}`}});
+        const posts = (await res.json()).result;
+        if (!posts?.length) { section.style.display='none'; return; }
+        grid.innerHTML = posts.map(p => {
+          const imgRef = p.mainImage?.asset?._ref;
+          const imgUrl = imgRef ? imageUrl(imgRef) : null;
+          return `<a class="related-card" href="article.html?id=${p._id}">
+            ${imgUrl ? `<img class="related-card-img" src="${imgUrl}?w=600&h=240&fit=crop&auto=format" alt="${p.title}" loading="lazy">` : '<div class="related-card-img-placeholder"></div>'}
+            <div class="related-card-body">
+              <div class="related-card-tag">${catLabel(p.category)}</div>
+              <div class="related-card-title">${p.title}</div>
+            </div>
+          </a>`;
+        }).join('');
+      } catch(e) { section.style.display='none'; }
+    }
+
+    loadArticle();
+  </script>
+</body>
+</html>

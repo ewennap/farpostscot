@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Far Post — Scottish Football</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #111213; color: #e8e6e1; font-family: 'Barlow', sans-serif; min-height: 100vh; }
+
+    .nav { display: flex; align-items: center; justify-content: space-between; padding: 0 1.25rem; height: 52px; border-bottom: 1px solid #2a2b2d; background: #0d0e0f; }
+    .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: 0.12em; color: #e8e6e1; text-decoration: none; white-space: nowrap; }
+    .logo-dot { color: #e84040; }
+    .nav-links { display: flex; gap: 20px; }
+    .nav-links a { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-decoration: none; color: #888; text-transform: uppercase; }
+    .nav-links a:hover { color: #e8e6e1; }
+    .nav-hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; background: none; border: none; flex-shrink: 0; }
+    .nav-hamburger span { display: block; width: 22px; height: 2px; background: #888; }
+    .mobile-menu { display: none; flex-direction: column; background: #0d0e0f; border-bottom: 1px solid #2a2b2d; }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #888; text-decoration: none; padding: 0.875rem 1.25rem; border-bottom: 1px solid #1a1b1d; }
+    .mobile-menu a:last-child { border-bottom: none; }
+
+    .hero { display: grid; grid-template-columns: 1fr 320px; border-bottom: 1px solid #2a2b2d; }
+    .hero-main { position: relative; border-right: 1px solid #2a2b2d; cursor: pointer; transition: opacity 0.15s; overflow: hidden; min-height: 380px; }
+    .hero-main:hover { opacity: 0.92; }
+    .hero-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.15) 100%); }
+    .hero-content { position: relative; z-index: 2; padding: 2rem 1.5rem; display: flex; flex-direction: column; justify-content: flex-end; min-height: 380px; }
+    .hero-eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .tag-pill { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; background: #e84040; color: #fff; padding: 3px 8px; border-radius: 2px; }
+    .hero-date { font-size: 12px; color: #aaa; }
+    .hero-headline { font-family: 'Barlow Condensed', sans-serif; font-size: 48px; font-weight: 700; line-height: 1.0; color: #fff; margin-bottom: 16px; }
+    .hero-headline em { font-style: normal; color: #e84040; }
+    .hero-deck { font-size: 15px; color: #ccc; line-height: 1.65; margin-bottom: 16px; }
+    .byline { font-size: 12px; color: #aaa; }
+    .byline span { color: #ccc; }
+
+    .hero-stack { display: flex; flex-direction: column; }
+    .stacked-story { padding: 1rem 1.25rem; border-bottom: 1px solid #2a2b2d; cursor: pointer; transition: background 0.15s; }
+    .stacked-story:last-child { border-bottom: none; }
+    .stacked-story:hover { background: #161718; }
+    .stacked-tag { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #e84040; margin-bottom: 5px; }
+    .stacked-headline { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 600; line-height: 1.15; color: #e8e6e1; margin-bottom: 4px; }
+    .stacked-meta { font-size: 11px; color: #555; }
+
+    .section-header { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 1.25rem; border-bottom: 1px solid #2a2b2d; border-top: 1px solid #2a2b2d; background: #0d0e0f; }
+    .section-title { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #555; }
+    .section-title span { color: #e84040; margin-right: 8px; }
+    .see-all { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #555; text-decoration: none; }
+    .see-all:hover { color: #e8e6e1; }
+
+    .opinions-grid { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid #2a2b2d; }
+    .opinion-card { border-right: 1px solid #2a2b2d; cursor: pointer; transition: background 0.15s; text-decoration: none; display: block; overflow: hidden; }
+    .opinion-card:last-child { border-right: none; }
+    .opinion-card:hover { background: #161718; }
+    .opinion-card-image { width: 100%; height: 160px; object-fit: cover; display: block; }
+    .opinion-card-image-placeholder { width: 100%; height: 160px; background: #1a1b1c; display: block; }
+    .opinion-card-body { padding: 1rem 1.25rem; }
+    .opinion-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #e84040; margin-bottom: 8px; }
+    .opinion-headline { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; line-height: 1.1; color: #e8e6e1; margin-bottom: 10px; }
+    .opinion-excerpt { font-size: 13px; color: #777; line-height: 1.6; margin-bottom: 12px; }
+    .opinion-author { display: flex; align-items: center; gap: 8px; }
+    .author-avatar { width: 24px; height: 24px; border-radius: 50%; background: #2a2b2d; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; color: #888; flex-shrink: 0; }
+    .author-name { font-size: 11px; color: #555; }
+
+    .pod-grid { display: grid; grid-template-columns: repeat(2, 1fr); border-bottom: 1px solid #2a2b2d; }
+    .pod-card { display: flex; gap: 12px; align-items: flex-start; padding: 1.25rem; border-right: 1px solid #2a2b2d; cursor: pointer; transition: background 0.15s; text-decoration: none; }
+    .pod-card:last-child { border-right: none; }
+    .pod-card:hover { background: #161718; }
+    .pod-art { width: 56px; height: 56px; background: #1e1f20; border: 1px solid #2a2b2d; border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .pod-ep-tag { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #e84040; margin-bottom: 4px; }
+    .pod-title { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; line-height: 1.15; color: #e8e6e1; margin-bottom: 6px; }
+    .pod-desc { font-size: 12px; color: #666; line-height: 1.5; margin-bottom: 6px; }
+    .pod-meta { font-size: 11px; color: #444; }
+    .play-pill { display: inline-flex; align-items: center; gap: 5px; margin-top: 6px; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #888; border: 1px solid #2a2b2d; padding: 3px 8px; border-radius: 2px; }
+
+    .ticker { background: #0d0e0f; border-top: 1px solid #2a2b2d; border-bottom: 1px solid #2a2b2d; padding: 0.5rem 1.25rem; display: flex; align-items: center; gap: 12px; overflow-x: auto; }
+    .ticker-label { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #e84040; white-space: nowrap; }
+    .ticker-items { display: flex; gap: 0; }
+    .ticker-item { display: flex; align-items: center; gap: 6px; white-space: nowrap; padding-right: 14px; margin-right: 14px; border-right: 1px solid #2a2b2d; }
+    .ticker-item:last-child { border-right: none; }
+    .ticker-teams { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; color: #aaa; }
+    .ticker-score { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; color: #e8e6e1; }
+    .ticker-status { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: #555; }
+    .ticker-live { color: #e84040; }
+
+    .results-grid { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid #2a2b2d; }
+    .result-card { padding: 0.875rem 1.25rem; border-right: 1px solid #2a2b2d; }
+    .result-card:last-child { border-right: none; }
+    .result-competition { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #555; margin-bottom: 8px; }
+    .result-teams { display: flex; flex-direction: column; gap: 4px; }
+    .result-team { display: flex; align-items: center; justify-content: space-between; }
+    .result-name { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600; color: #aaa; }
+    .result-name.winner { color: #e8e6e1; }
+    .result-goals { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; color: #aaa; }
+    .result-goals.winner { color: #e84040; }
+
+    .footer { padding: 1.25rem; border-top: 1px solid #2a2b2d; background: #0d0e0f; display: flex; align-items: center; justify-content: space-between; }
+    .footer-logo { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 0.12em; color: #333; }
+    .footer-logo span { color: #e84040; }
+    .footer-copy { font-size: 12px; color: #444; }
+    .loading-text { font-size: 12px; color: #555; padding: 1rem 1.25rem; }
+
+    @media (max-width: 680px) {
+      .nav-links { display: none; }
+      .nav-hamburger { display: flex; }
+      .hero { grid-template-columns: 1fr; }
+      .hero-main { border-right: none; border-bottom: 1px solid #2a2b2d; min-height: 300px; }
+      .hero-content { min-height: 300px; }
+      .hero-headline { font-size: 32px; }
+      .hero-stack { display: none; }
+      .opinions-grid { grid-template-columns: 1fr; }
+      .opinion-card { border-right: none; border-bottom: 1px solid #2a2b2d; }
+      .opinion-card:last-child { border-bottom: none; }
+      .opinion-excerpt { display: none; }
+      .pod-grid { grid-template-columns: 1fr; }
+      .pod-card { border-right: none; border-bottom: 1px solid #2a2b2d; }
+      .pod-card:last-child { border-bottom: none; }
+      .pod-desc { display: none; }
+      .results-grid { grid-template-columns: repeat(2, 1fr); }
+      .result-card:nth-child(2n) { border-right: none; }
+      .result-card:nth-child(n+3) { border-top: 1px solid #2a2b2d; }
+      .footer { flex-direction: column; gap: 6px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a href="index.html" class="logo">FAR POST<span class="logo-dot">.</span></a>
+    <div class="nav-links">
+      <a href="news.html">News</a>
+      <a href="opinions.html">Opinions</a>
+      <a href="opinions.html">Podcasts</a>
+      <a href="#">Results</a>
+      <a href="#">Fixtures</a>
+    </div>
+    <button class="nav-hamburger" onclick="document.getElementById('mobile-menu').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="news.html">News</a>
+    <a href="opinions.html">Opinions</a>
+    <a href="opinions.html">Podcasts</a>
+    <a href="#">Results</a>
+    <a href="#">Fixtures</a>
+  </div>
+
+  <div class="hero">
+    <div class="hero-main" id="hero-main">
+      <div class="hero-content">
+        <div class="hero-eyebrow">
+          <span class="tag-pill">Welcome</span>
+          <span class="hero-date">April 2026</span>
+        </div>
+        <h1 class="hero-headline">Scottish football.<br>Honest takes.<br><em>No agenda.</em></h1>
+        <p class="hero-deck">Far Post is a new Scottish football platform built for fans who are done with press release journalism.</p>
+        <div class="byline">By <span>Ewen Napier</span> &nbsp;·&nbsp; Founder, Far Post</div>
+      </div>
+    </div>
+    <div class="hero-stack">
+      <div class="stacked-story">
+        <div class="stacked-tag">National team</div>
+        <div class="stacked-headline">Scotland fall to Japan and Ivory Coast in World Cup warm-up friendlies</div>
+        <div class="stacked-meta">This week</div>
+      </div>
+      <div class="stacked-story">
+        <div class="stacked-tag">Premiership</div>
+        <div class="stacked-headline">Hearts on the brink — seven games to seal a historic title</div>
+        <div class="stacked-meta">This week</div>
+      </div>
+      <div class="stacked-story">
+        <div class="stacked-tag">Finance</div>
+        <div class="stacked-headline">Club accounts published — Hibs among those facing tough questions</div>
+        <div class="stacked-meta">This week</div>
+      </div>
+      <div class="stacked-story">
+        <div class="stacked-tag">Infrastructure</div>
+        <div class="stacked-headline">Artificial pitch debate reignites as clubs push for Premiership ban</div>
+        <div class="stacked-meta">This week</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <div class="section-title"><span>//</span>Latest results</div>
+    <a href="#" class="see-all">All results</a>
+  </div>
+  <div class="ticker">
+    <div class="ticker-label">FT</div>
+    <div class="ticker-items" id="ticker-items"><span class="loading-text">Loading...</span></div>
+  </div>
+  <div class="results-grid" id="results-grid">
+    <div class="loading-text" style="grid-column:1/-1;">Loading results...</div>
+  </div>
+
+  <div class="section-header">
+    <div class="section-title"><span>//</span>Opinions & features</div>
+    <a href="#" class="see-all">All opinions</a>
+  </div>
+  <div class="opinions-grid" id="opinions-grid">
+    <div class="loading-text" style="grid-column:1/-1;">Loading articles...</div>
+  </div>
+
+  <div class="section-header">
+    <div class="section-title"><span>//</span>Latest podcasts — Across the Tiers</div>
+    <a href="https://feeds.acast.com/public/shows/across-the-tiers" class="see-all" target="_blank">All episodes</a>
+  </div>
+  <div class="pod-grid" id="podcast-grid">
+    <div class="pod-card" style="cursor:default;"><div class="loading-text">Loading episodes...</div></div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-logo">FAR POST<span>.</span></div>
+    <div class="footer-copy">Scottish football. No filter.</div>
+  </footer>
+
+  <script>
+    const SANITY_PROJECT_ID = 't11tx9if';
+    const SANITY_DATASET = 'production';
+    const SANITY_TOKEN = 'skVvgExK1VnABKd7JxR8yI1WlsvrbWE9cffTvN3I0okHzn7XiYHSN1hJEgAr0dYTPdTgKdsPnMIth8l7DegjuF1FOoT2arqWnt5SGpMfOUoMCvker7W68zP1IyV2m9NR8S5qJFMPitco6Qt0UorzMynZ32I0EcoUdgv505fao2ey9c3wiIRs';
+    const SANITY_API = `https://${SANITY_PROJECT_ID}.api.sanity.io/v2023-05-03/data/query/${SANITY_DATASET}`;
+    const SM_TOKEN = 'sEs4cAx766H5Bo0TfQtWTINfgSqRBn7JQnISn0oI81pqbrWU3afdVoNGcwEf';
+    const SM_BASE = 'https://api.sportmonks.com/v3/football';
+    const PREM_ID = 501;
+
+    const fmt = d => new Date(d).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'});
+    const initials = n => n ? n.split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2) : 'FP';
+    const catLabel = c => ({opinion:'Opinion',analysis:'Analysis',news:'News',interview:'Interview',feature:'Feature'}[c]||'Article');
+    const podArt = () => `<div class="pod-art"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e84040" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16" fill="#e84040" stroke="none"/></svg></div>`;
+    const playIcon = () => `<svg width="9" height="9" viewBox="0 0 12 12" fill="#888"><polygon points="2,1 10,6 2,11"/></svg>`;
+
+    function imageUrl(ref) {
+      if (!ref) return null;
+      const parts = ref.replace('image-','').split('-');
+      const ext = parts.pop();
+      const id = parts.join('-');
+      return `https://cdn.sanity.io/images/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${id}.${ext}`;
+    }
+
+    async function loadArticles() {
+      const grid = document.getElementById('opinions-grid');
+      try {
+        const q = encodeURIComponent('*[_type=="post"]|order(publishedAt desc)[0...6]{_id,title,category,excerpt,author,publishedAt,mainImage}');
+        const res = await fetch(`${SANITY_API}?query=${q}`, {headers:{Authorization:`Bearer ${SANITY_TOKEN}`}});
+        const posts = (await res.json()).result;
+        if (!posts?.length) { grid.innerHTML='<div class="loading-text" style="grid-column:1/-1;">No articles yet.</div>'; return; }
+
+        let html = '';
+        posts.forEach(p => {
+          const date = p.publishedAt ? fmt(p.publishedAt) : '';
+          const imgRef = p.mainImage?.asset?._ref;
+          const imgUrl = imgRef ? imageUrl(imgRef) : null;
+          const imgHtml = imgUrl
+            ? `<img class="opinion-card-image" src="${imgUrl}?w=600&h=320&fit=crop&auto=format" alt="${p.title}" loading="lazy">`
+            : `<div class="opinion-card-image-placeholder"></div>`;
+          html += `<a class="opinion-card" href="article.html?id=${p._id}">
+            ${imgHtml}
+            <div class="opinion-card-body">
+              <div class="opinion-label">${catLabel(p.category)}</div>
+              <div class="opinion-headline">${p.title}</div>
+              ${p.excerpt ? `<p class="opinion-excerpt">${p.excerpt}</p>` : ''}
+              <div class="opinion-author"><div class="author-avatar">${initials(p.author)}</div><div class="author-name">${p.author||'Far Post'}${date?' · '+date:''}</div></div>
+            </div>
+          </a>`;
+        });
+        if (posts.length < 3) for (let i=posts.length;i<3;i++) html+=`<div class="opinion-card" style="border-right:1px solid #2a2b2d;"></div>`;
+        grid.innerHTML = html;
+
+        const p = posts[0];
+        if (p) {
+          const hero = document.getElementById('hero-main');
+          const imgRef = p.mainImage?.asset?._ref;
+          const imgUrl = imgRef ? imageUrl(imgRef) : null;
+          hero.onclick = () => window.location.href = `article.html?id=${p._id}`;
+          hero.innerHTML = `
+            ${imgUrl ? `<img class="hero-image" src="${imgUrl}?w=1200&h=600&fit=crop&auto=format" alt="${p.title}">` : ''}
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+              <div class="hero-eyebrow"><span class="tag-pill">${catLabel(p.category)}</span><span class="hero-date">${p.publishedAt?fmt(p.publishedAt):''}</span></div>
+              <h1 class="hero-headline">${p.title}</h1>
+              ${p.excerpt?`<p class="hero-deck">${p.excerpt}</p>`:''}
+              <div class="byline">By <span>${p.author||'Ewen Napier'}</span></div>
+            </div>`;
+        }
+      } catch(e) {
+        grid.innerHTML = `
+          <a class="opinion-card" href="#"><div class="opinion-card-image-placeholder"></div><div class="opinion-card-body"><div class="opinion-label">Opinion</div><div class="opinion-headline">Is Steve Clarke the right man to take Scotland to the World Cup?</div><div class="opinion-author"><div class="author-avatar">EN</div><div class="author-name">Ewen Napier</div></div></div></a>
+          <a class="opinion-card" href="#"><div class="opinion-card-image-placeholder"></div><div class="opinion-card-body"><div class="opinion-label">Analysis</div><div class="opinion-headline">Are Hibs in financial trouble?</div><div class="opinion-author"><div class="author-avatar">EN</div><div class="author-name">Ewen Napier</div></div></div></a>
+          <a class="opinion-card" href="#"><div class="opinion-card-image-placeholder"></div><div class="opinion-card-body"><div class="opinion-label">Take</div><div class="opinion-headline">Hearts will win the league. Here's why.</div><div class="opinion-author"><div class="author-avatar">EN</div><div class="author-name">Ewen Napier</div></div></div></a>`;
+      }
+    }
+
+    async function loadScores() {
+      try {
+        const today = new Date(), from = new Date(today);
+        from.setDate(from.getDate()-7);
+        const res = await fetch(`${SM_BASE}/fixtures/between/${from.toISOString().split('T')[0]}/${today.toISOString().split('T')[0]}?api_token=${SM_TOKEN}&filters=fixtureLeagues:${PREM_ID}&include=participants;state;scores&per_page=20`);
+        const data = await res.json();
+        if (!data.data?.length) { fallbackScores(); return; }
+        const fixtures = data.data.filter(f=>['FT','AET','LIVE','1H','2H','HT'].includes(f.state?.short||'')).slice(0,8);
+        if (!fixtures.length) { fallbackScores(); return; }
+        let tHtml='', rHtml='';
+        fixtures.forEach(f => {
+          const parts=f.participants||[];
+          const home=parts.find(p=>p.meta?.location==='home')||parts[0]||{};
+          const away=parts.find(p=>p.meta?.location==='away')||parts[1]||{};
+          const ft=(f.scores||[]).find(s=>s.description==='CURRENT'||s.description==='FT');
+          let hg='-',ag='-';
+          if (ft?.score) { hg=ft.score.home??'-'; ag=ft.score.away??'-'; }
+          const s=f.state?.short||'';
+          const live=['LIVE','1H','2H','HT'].includes(s);
+          const hw=parseInt(hg)>parseInt(ag), aw=parseInt(ag)>parseInt(hg);
+          tHtml+=`<div class="ticker-item"><span class="ticker-teams">${(home.short_code||home.name||'Home').substring(0,10)}</span><span class="ticker-score">${hg}–${ag}</span><span class="ticker-teams">${(away.short_code||away.name||'Away').substring(0,10)}</span>${live?'<span class="ticker-status ticker-live">Live</span>':'<span class="ticker-status">FT</span>'}</div>`;
+          rHtml+=`<div class="result-card"><div class="result-competition">Premiership</div><div class="result-teams"><div class="result-team"><span class="result-name ${hw?'winner':''}">${home.name||'Home'}</span><span class="result-goals ${hw?'winner':''}">${hg}</span></div><div class="result-team"><span class="result-name ${aw?'winner':''}">${away.name||'Away'}</span><span class="result-goals ${aw?'winner':''}">${ag}</span></div></div></div>`;
+        });
+        document.getElementById('ticker-items').innerHTML=tHtml;
+        document.getElementById('results-grid').innerHTML=rHtml;
+      } catch(e) { fallbackScores(); }
+    }
+
+    function fallbackScores() {
+      document.getElementById('ticker-items').innerHTML=`
+        <div class="ticker-item"><span class="ticker-teams">Hearts</span><span class="ticker-score">2–0</span><span class="ticker-teams">Aberdeen</span><span class="ticker-status">FT</span></div>
+        <div class="ticker-item"><span class="ticker-teams">Celtic</span><span class="ticker-score">3–1</span><span class="ticker-teams">Rangers</span><span class="ticker-status">FT</span></div>
+        <div class="ticker-item"><span class="ticker-teams">Scotland</span><span class="ticker-score">0–2</span><span class="ticker-teams">Japan</span><span class="ticker-status">FT</span></div>`;
+      document.getElementById('results-grid').innerHTML=`
+        <div class="result-card"><div class="result-competition">Premiership</div><div class="result-teams"><div class="result-team"><span class="result-name winner">Hearts</span><span class="result-goals winner">2</span></div><div class="result-team"><span class="result-name">Aberdeen</span><span class="result-goals">0</span></div></div></div>
+        <div class="result-card"><div class="result-competition">Premiership</div><div class="result-teams"><div class="result-team"><span class="result-name winner">Celtic</span><span class="result-goals winner">3</span></div><div class="result-team"><span class="result-name">Rangers</span><span class="result-goals">1</span></div></div></div>
+        <div class="result-card"><div class="result-competition">Friendly</div><div class="result-teams"><div class="result-team"><span class="result-name">Scotland</span><span class="result-goals">0</span></div><div class="result-team"><span class="result-name winner">Japan</span><span class="result-goals winner">2</span></div></div></div>
+        <div class="result-card"><div class="result-competition">Friendly</div><div class="result-teams"><div class="result-team"><span class="result-name">Scotland</span><span class="result-goals">1</span></div><div class="result-team"><span class="result-name winner">Ivory Coast</span><span class="result-goals winner">2</span></div></div></div>`;
+    }
+
+    async function loadPodcasts() {
+      const FEED='https://feeds.acast.com/public/shows/across-the-tiers';
+      const grid=document.getElementById('podcast-grid');
+      try {
+        const r=await fetch('https://api.allorigins.win/get?url='+encodeURIComponent(FEED));
+        const xml=new DOMParser().parseFromString((await r.json()).contents,'text/xml');
+        const items=xml.querySelectorAll('item');
+        if (!items.length) throw new Error();
+        let html='';
+        for (let i=0;i<Math.min(items.length,2);i++) {
+          const item=items[i];
+          const title=item.querySelector('title')?.textContent||'Episode';
+          const pubDate=item.querySelector('pubDate')?.textContent||'';
+          const duration=item.querySelector('duration')?.textContent||'';
+          const link=item.querySelector('link')?.textContent||FEED;
+          const desc=(item.querySelector('description')?.textContent||'').replace(/<[^>]*>/g,'').slice(0,100)+'...';
+          const epNum='Ep. '+(items.length-i);
+          const dateStr=pubDate?new Date(pubDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'';
+          const mins=duration?Math.round(parseInt(duration)/60)+' min':'';
+          html+=`<a class="pod-card" href="${link}" target="_blank">${podArt()}<div><div class="pod-ep-tag">Across the Tiers · ${epNum}</div><div class="pod-title">${title}</div><p class="pod-desc">${desc}</p><div class="pod-meta">${mins}${dateStr?' · '+dateStr:''}</div><div class="play-pill">${playIcon()} Listen now</div></div></a>`;
+        }
+        grid.innerHTML=html;
+      } catch(e) {
+        grid.innerHTML=`
+          <a class="pod-card" href="https://feeds.acast.com/public/shows/across-the-tiers" target="_blank">${podArt()}<div><div class="pod-ep-tag">Across the Tiers · Ep. 6</div><div class="pod-title">Old Firm | League Two Title Race | Scotland Friendlies</div><p class="pod-desc">The latest from across the Scottish game.</p><div class="play-pill">${playIcon()} Listen now</div></div></a>
+          <a class="pod-card" href="https://feeds.acast.com/public/shows/across-the-tiers" target="_blank">${podArt()}<div><div class="pod-ep-tag">Across the Tiers · Ep. 5</div><div class="pod-title">SPFL Transfer Window Roundup | Scottish Cup | Interview With Joelle Murray</div><p class="pod-desc">A packed episode covering the transfer window.</p><div class="play-pill">${playIcon()} Listen now</div></div></a>`;
+      }
+    }
+
+    loadArticles(); loadScores(); loadPodcasts();
+  </script>
+</body>
+</html>
