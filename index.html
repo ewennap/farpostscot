@@ -225,10 +225,6 @@
     const SANITY_DATASET = 'production';
     const SANITY_TOKEN = 'skVvgExK1VnABKd7JxR8yI1WlsvrbWE9cffTvN3I0okHzn7XiYHSN1hJEgAr0dYTPdTgKdsPnMIth8l7DegjuF1FOoT2arqWnt5SGpMfOUoMCvker7W68zP1IyV2m9NR8S5qJFMPitco6Qt0UorzMynZ32I0EcoUdgv505fao2ey9c3wiIRs';
     const SANITY_API = `https://${SANITY_PROJECT_ID}.api.sanity.io/v2023-05-03/data/query/${SANITY_DATASET}`;
-    const SM_TOKEN = 'sEs4cAx766H5Bo0TfQtWTINfgSqRBn7JQnISn0oI81pqbrWU3afdVoNGcwEf';
-    const SM_BASE = 'https://api.sportmonks.com/v3/football';
-    const PREM_ID = 501;
-
     const fmt = d => new Date(d).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'});
     const initials = n => n ? n.split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2) : 'FP';
     const catLabel = c => ({opinion:'Opinion',analysis:'Analysis',news:'News',interview:'Interview',feature:'Feature'}[c]||'Article');
@@ -296,34 +292,27 @@
       }
     }
 
-    async function loadScores() {
-      try {
-        const today = new Date(), from = new Date(today);
-        from.setDate(from.getDate()-7);
-        const res = await fetch(`${SM_BASE}/fixtures/between/${from.toISOString().split('T')[0]}/${today.toISOString().split('T')[0]}?api_token=${SM_TOKEN}&filters=fixtureLeagues:${PREM_ID}&include=participants;state;scores&per_page=20`);
-        const data = await res.json();
-        if (!data.data?.length) { fallbackScores(); return; }
-        const fixtures = data.data.filter(f=>['FT','AET','LIVE','1H','2H','HT'].includes(f.state?.short||'')).slice(0,8);
-        if (!fixtures.length) { fallbackScores(); return; }
-        let tHtml='', rHtml='';
-        fixtures.forEach(f => {
-          const parts=f.participants||[];
-          const home=parts.find(p=>p.meta?.location==='home')||parts[0]||{};
-          const away=parts.find(p=>p.meta?.location==='away')||parts[1]||{};
-          const ft=(f.scores||[]).find(s=>s.description==='CURRENT'||s.description==='FT');
-          let hg='-',ag='-';
-          if (ft?.score) { hg=ft.score.home??'-'; ag=ft.score.away??'-'; }
-          const s=f.state?.short||'';
-          const live=['LIVE','1H','2H','HT'].includes(s);
-          const hw=parseInt(hg)>parseInt(ag), aw=parseInt(ag)>parseInt(hg);
-          tHtml+=`<div class="ticker-item"><span class="ticker-teams">${(home.short_code||home.name||'Home').substring(0,10)}</span><span class="ticker-score">${hg}–${ag}</span><span class="ticker-teams">${(away.short_code||away.name||'Away').substring(0,10)}</span>${live?'<span class="ticker-status ticker-live">Live</span>':'<span class="ticker-status">FT</span>'}</div>`;
-          rHtml+=`<div class="result-card"><div class="result-competition">Premiership</div><div class="result-teams"><div class="result-team"><span class="result-name ${hw?'winner':''}">${home.name||'Home'}</span><span class="result-goals ${hw?'winner':''}">${hg}</span></div><div class="result-team"><span class="result-name ${aw?'winner':''}">${away.name||'Away'}</span><span class="result-goals ${aw?'winner':''}">${ag}</span></div></div></div>`;
-        });
-        document.getElementById('ticker-items').innerHTML=tHtml;
-        document.getElementById('results-grid').innerHTML=rHtml;
-      } catch(e) { fallbackScores(); }
-    }
+async function loadScores() {
+  try {
+    const res = await fetch('/.netlify/functions/results');
+    const data = await res.json();
+    const fixtures = data.fixtures;
 
+    if (!fixtures || !fixtures.length) { fallbackScores(); return; }
+
+    let tHtml = '', rHtml = '';
+    fixtures.forEach(f => {
+      const live = ['LIVE','1H','2H','HT'].includes(f.state);
+      const hw = parseInt(f.score.home) > parseInt(f.score.away);
+      const aw = parseInt(f.score.away) > parseInt(f.score.home);
+      tHtml += `<div class="ticker-item"><span class="ticker-teams">${f.home.short}</span><span class="ticker-score">${f.score.home}–${f.score.away}</span><span class="ticker-teams">${f.away.short}</span>${live ? '<span class="ticker-status ticker-live">Live</span>' : '<span class="ticker-status">FT</span>'}</div>`;
+      rHtml += `<div class="result-card"><div class="result-competition">Premiership</div><div class="result-teams"><div class="result-team"><span class="result-name ${hw ? 'winner' : ''}">${f.home.name}</span><span class="result-goals ${hw ? 'winner' : ''}">${f.score.home}</span></div><div class="result-team"><span class="result-name ${aw ? 'winner' : ''}">${f.away.name}</span><span class="result-goals ${aw ? 'winner' : ''}">${f.score.away}</span></div></div></div>`;
+    });
+
+    document.getElementById('ticker-items').innerHTML = tHtml;
+    document.getElementById('results-grid').innerHTML = rHtml;
+  } catch(e) { fallbackScores(); }
+}
     function fallbackScores() {
       document.getElementById('ticker-items').innerHTML=`
         <div class="ticker-item"><span class="ticker-teams">Hearts</span><span class="ticker-score">2–0</span><span class="ticker-teams">Aberdeen</span><span class="ticker-status">FT</span></div>
