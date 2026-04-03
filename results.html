@@ -357,6 +357,7 @@
         if (!res.ok) throw new Error('Failed to fetch fixtures');
         const data = await res.json();
         fixturesData = data.fixtures || [];
+        if (!fixturesData.length) throw new Error('No fixtures');
         renderFixtures(fixturesData);
       } catch(e) {
         // Fallback data
