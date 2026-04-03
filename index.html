@@ -343,7 +343,9 @@ async function loadScores() {
           const desc=(item.querySelector('description')?.textContent||'').replace(/<[^>]*>/g,'').slice(0,100)+'...';
           const epNum='Ep. '+(items.length-i);
           const dateStr=pubDate?new Date(pubDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'';
-          const mins=duration?Math.round(parseInt(duration)/60)+' min':'';
+          let mins='';
+          if(duration){let total;if(String(duration).includes(':')){const parts=String(duration).split(':').map(Number);total=parts.length===3?parts[0]*3600+parts[1]*60+parts[2]:parts[0]*60+parts[1];}else{total=parseInt(duration);}if(total){const h=Math.floor(total/3600),m=Math.floor((total%3600)/60);mins=h>0?`${h}h ${m}m`:`${m} min`;}}
+
           html+=`<a class="pod-card" href="${link}" target="_blank">${podArt()}<div><div class="pod-ep-tag">Across the Tiers · ${epNum}</div><div class="pod-title">${title}</div><p class="pod-desc">${desc}</p><div class="pod-meta">${mins}${dateStr?' · '+dateStr:''}</div><div class="play-pill">${playIcon()} Listen now</div></div></a>`;
         }
         grid.innerHTML=html;

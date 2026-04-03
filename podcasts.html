@@ -137,13 +137,21 @@
       return new Date(dateStr).toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'});
     }
 
-    function formatDuration(seconds) {
-      if (!seconds) return '';
-      const total = parseInt(seconds);
-      const m = Math.floor(total / 60);
-      const h = Math.floor(m / 60);
-      const mins = m % 60;
-      return h > 0 ? `${h}h ${mins}m` : `${m} min`;
+    function formatDuration(raw) {
+      if (!raw) return '';
+      let total;
+      if (String(raw).includes(':')) {
+        const parts = String(raw).split(':').map(Number);
+        total = parts.length === 3
+          ? parts[0] * 3600 + parts[1] * 60 + parts[2]
+          : parts[0] * 60 + parts[1];
+      } else {
+        total = parseInt(raw);
+      }
+      if (!total) return '';
+      const h = Math.floor(total / 3600);
+      const m = Math.floor((total % 3600) / 60);
+      return h > 0 ? `${h}h ${m}m` : `${m} min`;
     }
 
     async function loadEpisodes() {
