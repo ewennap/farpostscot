@@ -61,6 +61,8 @@
     .footer-logo span { color: #e84040; }
     .footer-copy { font-size: 12px; color: #444; }
 
+    #reading-progress { position: fixed; top: 0; left: 0; width: 0%; height: 3px; background: #e84040; z-index: 200; transition: width 0.1s linear; pointer-events: none; }
+
     @media (max-width: 680px) {
       .nav-links { display: none; }
       .nav-hamburger { display: flex; }
@@ -77,6 +79,8 @@
   </style>
 </head>
 <body>
+
+  <div id="reading-progress"></div>
 
   <nav class="nav">
     <a href="index.html" class="logo">FAR POST<span class="logo-dot">.</span></a>
@@ -211,6 +215,20 @@
     }
 
     loadArticle();
+
+    (function() {
+      const bar = document.getElementById('reading-progress');
+      window.addEventListener('scroll', function() {
+        const content = document.getElementById('article-content');
+        if (!content) return;
+        const rect = content.getBoundingClientRect();
+        const contentTop = rect.top + window.scrollY;
+        const contentHeight = content.offsetHeight;
+        const scrolled = window.scrollY - contentTop;
+        const progress = Math.min(Math.max(scrolled / contentHeight, 0), 1);
+        bar.style.width = (progress * 100) + '%';
+      }, { passive: true });
+    })();
   </script>
 </body>
 </html>
