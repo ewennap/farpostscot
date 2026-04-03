@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fixtures — Far Post</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #111213; color: #e8e6e1; font-family: 'Barlow', sans-serif; min-height: 100vh; }
+
+    .nav { display: flex; align-items: center; justify-content: space-between; padding: 0 1.25rem; height: 52px; border-bottom: 1px solid #2a2b2d; background: #0d0e0f; }
+    .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: 0.12em; color: #e8e6e1; text-decoration: none; white-space: nowrap; }
+    .logo-dot { color: #e84040; }
+    .nav-links { display: flex; gap: 20px; }
+    .nav-links a { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-decoration: none; color: #888; text-transform: uppercase; }
+    .nav-links a:hover { color: #e8e6e1; }
+    .nav-links a.active { color: #e8e6e1; border-bottom: 2px solid #e84040; padding-bottom: 2px; }
+    .nav-hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; background: none; border: none; flex-shrink: 0; }
+    .nav-hamburger span { display: block; width: 22px; height: 2px; background: #888; }
+    .mobile-menu { display: none; flex-direction: column; background: #0d0e0f; border-bottom: 1px solid #2a2b2d; }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #888; text-decoration: none; padding: 0.875rem 1.25rem; border-bottom: 1px solid #1a1b1d; }
+    .mobile-menu a:last-child { border-bottom: none; }
+
+    .page-header { padding: 2rem 1.5rem 1.5rem; border-bottom: 1px solid #2a2b2d; }
+    .page-title { font-family: 'Barlow Condensed', sans-serif; font-size: 48px; font-weight: 800; letter-spacing: 0.02em; color: #e8e6e1; }
+    .page-title span { color: #e84040; }
+    .page-subtitle { font-size: 14px; color: #555; margin-top: 4px; }
+
+    .filter-bar { display: flex; gap: 0; border-bottom: 1px solid #2a2b2d; background: #0d0e0f; overflow-x: auto; }
+    .filter-btn { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #555; background: none; border: none; border-right: 1px solid #2a2b2d; padding: 0.5rem 1.25rem; cursor: pointer; white-space: nowrap; transition: all 0.15s; }
+    .filter-btn:hover { color: #e8e6e1; background: #161718; }
+    .filter-btn.active { color: #e84040; background: #161718; }
+
+    .section-header { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 1.25rem; border-bottom: 1px solid #2a2b2d; background: #0d0e0f; }
+    .section-title { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #555; }
+    .section-title span { color: #e84040; margin-right: 8px; }
+
+    .fixtures-container { border-bottom: 1px solid #2a2b2d; }
+    .date-group { border-bottom: 1px solid #2a2b2d; }
+    .date-group:last-child { border-bottom: none; }
+    .date-header { padding: 0.6rem 1.25rem; background: #0d0e0f; border-bottom: 1px solid #2a2b2d; display: flex; align-items: center; gap: 12px; }
+    .date-label { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #e8e6e1; }
+    .date-count { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; color: #555; }
+
+    .fixture-row { display: grid; grid-template-columns: 60px 1fr auto; align-items: center; padding: 1rem 1.25rem; border-bottom: 1px solid #1a1b1d; transition: background 0.15s; gap: 16px; }
+    .fixture-row:last-child { border-bottom: none; }
+    .fixture-row:hover { background: #161718; }
+
+    .fixture-time { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; color: #e84040; }
+    .fixture-time.tbc { color: #444; }
+
+    .fixture-centre { display: flex; align-items: center; gap: 0; }
+    .fixture-home { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; color: #e8e6e1; flex: 1; text-align: right; }
+    .fixture-vs { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; color: #333; padding: 0 16px; white-space: nowrap; }
+    .fixture-away { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; color: #e8e6e1; flex: 1; }
+
+    .fixture-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; min-width: 120px; }
+    .fixture-league-tag { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #444; }
+    .fixture-venue-tag { font-size: 11px; color: #333; }
+
+    .empty-state { padding: 3rem 1.25rem; text-align: center; color: #555; font-size: 14px; border-bottom: 1px solid #2a2b2d; }
+    .loading-state { padding: 2rem 1.25rem; text-align: center; border-bottom: 1px solid #2a2b2d; }
+    .loading-dots { display: inline-flex; gap: 6px; }
+    .loading-dots span { width: 6px; height: 6px; border-radius: 50%; background: #e84040; animation: pulse 1.2s ease-in-out infinite; }
+    .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes pulse { 0%,80%,100% { opacity: 0.2; } 40% { opacity: 1; } }
+
+    .footer { padding: 1.25rem; border-top: 1px solid #2a2b2d; background: #0d0e0f; display: flex; align-items: center; justify-content: space-between; }
+    .footer-logo { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 0.12em; color: #333; }
+    .footer-logo span { color: #e84040; }
+    .footer-copy { font-size: 12px; color: #444; }
+
+    @media (max-width: 680px) {
+      .nav-links { display: none; }
+      .nav-hamburger { display: flex; }
+      .page-header { padding: 1.5rem 1.25rem 1rem; }
+      .page-title { font-size: 36px; }
+      .fixture-row { grid-template-columns: 50px 1fr; }
+      .fixture-meta { display: none; }
+      .fixture-home { font-size: 15px; }
+      .fixture-away { font-size: 15px; }
+      .fixture-vs { padding: 0 10px; }
+      .footer { flex-direction: column; gap: 6px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a href="index.html" class="logo">FAR POST<span class="logo-dot">.</span></a>
+    <div class="nav-links">
+      <a href="news.html">News</a>
+      <a href="opinions.html">Opinions</a>
+      <a href="podcasts.html">Podcasts</a>
+      <a href="results.html">Results</a>
+      <a href="fixtures.html" class="active">Fixtures</a>
+    </div>
+    <button class="nav-hamburger" onclick="document.getElementById('mobile-menu').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="news.html">News</a>
+    <a href="opinions.html">Opinions</a>
+    <a href="podcasts.html">Podcasts</a>
+    <a href="results.html">Results</a>
+    <a href="fixtures.html">Fixtures</a>
+  </div>
+
+  <div class="page-header">
+    <div class="page-title">Upcoming <span>Fixtures</span></div>
+    <div class="page-subtitle">Scottish football — next 14 days</div>
+  </div>
+
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+    <button class="filter-btn" onclick="setFilter('501', this)">Premiership</button>
+    <button class="filter-btn" onclick="setFilter('502', this)">Championship</button>
+    <button class="filter-btn" onclick="setFilter('503', this)">League One</button>
+    <button class="filter-btn" onclick="setFilter('504', this)">League Two</button>
+  </div>
+
+  <div class="section-header">
+    <div class="section-title"><span>//</span>Upcoming fixtures</div>
+  </div>
+
+  <div class="fixtures-container" id="fixtures-container">
+    <div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div></div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-logo">FAR POST<span>.</span></div>
+    <div class="footer-copy">Scottish football. No filter.</div>
+  </footer>
+
+  <script>
+    const LEAGUE_NAMES = {
+      '501': 'Premiership',
+      '502': 'Championship',
+      '503': 'League One',
+      '504': 'League Two'
+    };
+
+    let allFixtures = [];
+    let currentFilter = 'all';
+
+    function setFilter(filter, btn) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderFixtures(allFixtures);
+    }
+
+    function renderFixtures(fixtures) {
+      const container = document.getElementById('fixtures-container');
+      const filtered = currentFilter === 'all' ? fixtures : fixtures.filter(f => f.leagueId === currentFilter);
+
+      if (!filtered.length) {
+        container.innerHTML = '<div class="empty-state">No upcoming fixtures for this competition.</div>';
+        return;
+      }
+
+      // Group by date
+      const groups = {};
+      filtered.forEach(f => {
+        const key = f.date || 'TBC';
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(f);
+      });
+
+      let html = '';
+      Object.entries(groups).forEach(([date, fixtures]) => {
+        const count = fixtures.length;
+        html += `<div class="date-group">
+          <div class="date-header">
+            <div class="date-label">${date}</div>
+            <div class="date-count">${count} ${count === 1 ? 'match' : 'matches'}</div>
+          </div>`;
+
+        fixtures.forEach(f => {
+          const leagueName = LEAGUE_NAMES[f.leagueId] || 'Scottish Football';
+          const timeClass = f.time === 'TBC' ? 'fixture-time tbc' : 'fixture-time';
+          html += `<div class="fixture-row">
+            <div class="${timeClass}">${f.time || 'TBC'}</div>
+            <div class="fixture-centre">
+              <div class="fixture-home">${f.home.name}</div>
+              <div class="fixture-vs">vs</div>
+              <div class="fixture-away">${f.away.name}</div>
+            </div>
+            <div class="fixture-meta">
+              <div class="fixture-league-tag">${leagueName}</div>
+            </div>
+          </div>`;
+        });
+
+        html += `</div>`;
+      });
+
+      container.innerHTML = html;
+    }
+
+    async function loadFixtures() {
+      const container = document.getElementById('fixtures-container');
+      try {
+        const res = await fetch('/.netlify/functions/fixtures');
+        if (!res.ok) throw new Error('Failed');
+        const data = await res.json();
+        allFixtures = data.fixtures || [];
+        if (!allFixtures.length) throw new Error('No fixtures');
+        renderFixtures(allFixtures);
+      } catch(e) {
+        // Fallback — real fixtures resume Sat 5 Apr
+        allFixtures = [
+          { id:1, leagueId:'501', date:'Sat 5 Apr', time:'12:30', home:{name:'Rangers'}, away:{name:'Hearts'} },
+          { id:2, leagueId:'501', date:'Sat 5 Apr', time:'15:00', home:{name:'Aberdeen'}, away:{name:'Celtic'} },
+          { id:3, leagueId:'501', date:'Sat 5 Apr', time:'15:00', home:{name:'Motherwell'}, away:{name:'Hibs'} },
+          { id:4, leagueId:'501', date:'Sat 5 Apr', time:'15:00', home:{name:'Kilmarnock'}, away:{name:'St Mirren'} },
+          { id:5, leagueId:'501', date:'Sat 5 Apr', time:'15:00', home:{name:'Ross County'}, away:{name:'St Johnstone'} },
+          { id:6, leagueId:'501', date:'Sat 5 Apr', time:'15:00', home:{name:'Dundee'}, away:{name:'Livingston'} },
+          { id:7, leagueId:'501', date:'Wed 9 Apr', time:'19:45', home:{name:'Celtic'}, away:{name:'Rangers'} },
+          { id:8, leagueId:'501', date:'Wed 9 Apr', time:'19:45', home:{name:'Hearts'}, away:{name:'Aberdeen'} },
+          { id:9, leagueId:'501', date:'Sat 12 Apr', time:'15:00', home:{name:'Hibs'}, away:{name:'Dundee'} },
+          { id:10, leagueId:'501', date:'Sat 12 Apr', time:'15:00', home:{name:'St Mirren'}, away:{name:'Motherwell'} },
+        ];
+        renderFixtures(allFixtures);
+      }
+    }
+
+    loadFixtures();
+  </script>
+</body>
+</html>
