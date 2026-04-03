@@ -5,89 +5,100 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Far Post — Scottish Football</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #111213; color: #e8e6e1; font-family: 'Barlow', sans-serif; min-height: 100vh; }
 
-    .nav { display: flex; align-items: center; justify-content: space-between; padding: 0 1.25rem; height: 52px; border-bottom: 1px solid #2a2b2d; background: #0d0e0f; }
-    .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: 0.12em; color: #e8e6e1; text-decoration: none; white-space: nowrap; }
+    /* ── STICKY NAV ── */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.25rem;
+      height: 52px;
+      border-bottom: 1px solid #2a2b2d;
+      background: rgba(13, 14, 15, 0.96);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: height 0.2s ease, box-shadow 0.2s ease;
+    }
+    .nav.scrolled {
+      height: 44px;
+      box-shadow: 0 2px 24px rgba(0,0,0,0.5);
+      border-bottom-color: #1a1b1d;
+    }
+    .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: 0.12em; color: #e8e6e1; text-decoration: none; white-space: nowrap; transition: font-size 0.2s; }
+    .nav.scrolled .logo { font-size: 22px; }
     .logo-dot { color: #e84040; }
     .nav-links { display: flex; gap: 20px; }
-    .nav-links a { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-decoration: none; color: #888; text-transform: uppercase; }
+    .nav-links a { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-decoration: none; color: #888; text-transform: uppercase; transition: color 0.15s; }
     .nav-links a:hover { color: #e8e6e1; }
     .nav-hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; background: none; border: none; flex-shrink: 0; }
     .nav-hamburger span { display: block; width: 22px; height: 2px; background: #888; }
-    .mobile-menu { display: none; flex-direction: column; background: #0d0e0f; border-bottom: 1px solid #2a2b2d; }
+    .mobile-menu { display: none; flex-direction: column; background: rgba(13,14,15,0.98); border-bottom: 1px solid #2a2b2d; position: sticky; top: 52px; z-index: 99; }
     .mobile-menu.open { display: flex; }
     .mobile-menu a { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #888; text-decoration: none; padding: 0.875rem 1.25rem; border-bottom: 1px solid #1a1b1d; }
     .mobile-menu a:last-child { border-bottom: none; }
 
-    .hero { display: grid; grid-template-columns: 1fr 320px; border-bottom: 1px solid #2a2b2d; }
-    .hero-main { position: relative; border-right: 1px solid #2a2b2d; cursor: pointer; transition: opacity 0.15s; overflow: hidden; min-height: 380px; }
-    .hero-main:hover { opacity: 0.92; }
-    .hero-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-    .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.15) 100%); }
-    .hero-content { position: relative; z-index: 2; padding: 2rem 1.5rem; display: flex; flex-direction: column; justify-content: flex-end; min-height: 380px; }
+    /* ── HERO CAROUSEL ── */
+    .hero-carousel { position: relative; border-bottom: 1px solid #2a2b2d; overflow: hidden; }
+    .hero-slides { display: flex; transition: transform 0.5s cubic-bezier(0.4,0,0.2,1); will-change: transform; }
+    .hero-slide { min-width: 100%; display: grid; grid-template-columns: 1fr 320px; }
+
+    .hero-main { position: relative; cursor: pointer; overflow: hidden; min-height: 420px; border-right: 1px solid #2a2b2d; }
+    .hero-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
+    .hero-main:hover .hero-image { transform: scale(1.02); }
+    .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.93) 0%, rgba(0,0,0,0.5) 55%, rgba(0,0,0,0.1) 100%); }
+    .hero-content { position: relative; z-index: 2; padding: 2rem 1.5rem; display: flex; flex-direction: column; justify-content: flex-end; min-height: 420px; }
     .hero-eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
     .tag-pill { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; background: #e84040; color: #fff; padding: 3px 8px; border-radius: 2px; }
-    .hero-date { font-size: 12px; color: #aaa; }
-    .hero-headline { font-family: 'Barlow Condensed', sans-serif; font-size: 48px; font-weight: 700; line-height: 1.0; color: #fff; margin-bottom: 16px; }
-    .hero-headline em { font-style: normal; color: #e84040; }
-    .hero-deck { font-size: 15px; color: #ccc; line-height: 1.65; margin-bottom: 16px; }
-    .byline { font-size: 12px; color: #aaa; }
+    .hero-date { font-size: 12px; color: #bbb; }
+    .hero-headline { font-family: 'Barlow Condensed', sans-serif; font-size: 46px; font-weight: 800; line-height: 1.0; color: #fff; margin-bottom: 14px; }
+    .hero-deck { font-size: 15px; color: #ccc; line-height: 1.65; margin-bottom: 14px; }
+    .byline { font-size: 12px; color: #aaa; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
     .byline span { color: #ccc; }
+    .read-time { color: #666; }
 
+    /* Carousel dots + arrows */
+    .carousel-footer { position: absolute; bottom: 1.25rem; left: 1.5rem; right: 1.5rem; z-index: 10; display: flex; align-items: center; justify-content: space-between; pointer-events: none; }
+    .carousel-dots { display: flex; gap: 6px; pointer-events: all; }
+    .carousel-dot { width: 6px; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.25); border: none; cursor: pointer; transition: all 0.25s; padding: 0; }
+    .carousel-dot.active { width: 22px; background: #e84040; }
+    .carousel-arrows { display: flex; gap: 6px; pointer-events: all; }
+    .carousel-btn { width: 30px; height: 30px; border-radius: 50%; background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.1); color: #aaa; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.15s; }
+    .carousel-btn:hover { background: rgba(0,0,0,0.85); color: #fff; border-color: rgba(255,255,255,0.3); }
+
+    /* Hero stack */
     .hero-stack { display: flex; flex-direction: column; }
     .stacked-story { padding: 1rem 1.25rem; border-bottom: 1px solid #2a2b2d; cursor: pointer; transition: background 0.15s; }
     .stacked-story:last-child { border-bottom: none; }
     .stacked-story:hover { background: #161718; }
     .stacked-tag { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #e84040; margin-bottom: 5px; }
-    .stacked-headline { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 600; line-height: 1.15; color: #e8e6e1; margin-bottom: 4px; }
+    .stacked-headline { font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 600; line-height: 1.15; color: #e8e6e1; margin-bottom: 4px; }
     .stacked-meta { font-size: 11px; color: #555; }
 
+    /* ── SECTION HEADER ── */
     .section-header { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 1.25rem; border-bottom: 1px solid #2a2b2d; border-top: 1px solid #2a2b2d; background: #0d0e0f; }
     .section-title { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #555; }
     .section-title span { color: #e84040; margin-right: 8px; }
-    .see-all { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #555; text-decoration: none; }
+    .see-all { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #555; text-decoration: none; transition: color 0.15s; }
     .see-all:hover { color: #e8e6e1; }
 
-    .opinions-grid { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid #2a2b2d; }
-    .opinion-card { border-right: 1px solid #2a2b2d; cursor: pointer; transition: background 0.15s; text-decoration: none; display: block; overflow: hidden; }
-    .opinion-card:last-child { border-right: none; }
-    .opinion-card:hover { background: #161718; }
-    .opinion-card-image { width: 100%; height: 160px; object-fit: cover; display: block; }
-    .opinion-card-image-placeholder { width: 100%; height: 160px; background: #1a1b1c; display: block; }
-    .opinion-card-body { padding: 1rem 1.25rem; }
-    .opinion-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #e84040; margin-bottom: 8px; }
-    .opinion-headline { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; line-height: 1.1; color: #e8e6e1; margin-bottom: 10px; }
-    .opinion-excerpt { font-size: 13px; color: #777; line-height: 1.6; margin-bottom: 12px; }
-    .opinion-author { display: flex; align-items: center; gap: 8px; }
-    .author-avatar { width: 24px; height: 24px; border-radius: 50%; background: #2a2b2d; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; color: #888; flex-shrink: 0; }
-    .author-name { font-size: 11px; color: #555; }
-
-    .pod-grid { display: grid; grid-template-columns: repeat(2, 1fr); border-bottom: 1px solid #2a2b2d; }
-    .pod-card { display: flex; gap: 12px; align-items: flex-start; padding: 1.25rem; border-right: 1px solid #2a2b2d; cursor: pointer; transition: background 0.15s; text-decoration: none; }
-    .pod-card:last-child { border-right: none; }
-    .pod-card:hover { background: #161718; }
-    .pod-art { width: 56px; height: 56px; background: #1e1f20; border: 1px solid #2a2b2d; border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-    .pod-ep-tag { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #e84040; margin-bottom: 4px; }
-    .pod-title { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; line-height: 1.15; color: #e8e6e1; margin-bottom: 6px; }
-    .pod-desc { font-size: 12px; color: #666; line-height: 1.5; margin-bottom: 6px; }
-    .pod-meta { font-size: 11px; color: #444; }
-    .play-pill { display: inline-flex; align-items: center; gap: 5px; margin-top: 6px; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #888; border: 1px solid #2a2b2d; padding: 3px 8px; border-radius: 2px; }
-
-    .ticker { background: #0d0e0f; border-top: 1px solid #2a2b2d; border-bottom: 1px solid #2a2b2d; padding: 0.5rem 1.25rem; display: flex; align-items: center; gap: 12px; overflow-x: auto; }
+    /* ── SCORES ── */
+    .ticker { background: #0d0e0f; border-bottom: 1px solid #2a2b2d; padding: 0.5rem 1.25rem; display: flex; align-items: center; gap: 12px; overflow-x: auto; }
     .ticker-label { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #e84040; white-space: nowrap; }
-    .ticker-items { display: flex; gap: 0; }
+    .ticker-items { display: flex; }
     .ticker-item { display: flex; align-items: center; gap: 6px; white-space: nowrap; padding-right: 14px; margin-right: 14px; border-right: 1px solid #2a2b2d; }
     .ticker-item:last-child { border-right: none; }
     .ticker-teams { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; color: #aaa; }
     .ticker-score { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; color: #e8e6e1; }
-    .ticker-status { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: #555; }
+    .ticker-status { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; color: #555; }
     .ticker-live { color: #e84040; }
-
-    .results-grid { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid #2a2b2d; }
+    .results-grid { display: grid; grid-template-columns: repeat(4,1fr); border-bottom: 1px solid #2a2b2d; }
     .result-card { padding: 0.875rem 1.25rem; border-right: 1px solid #2a2b2d; }
     .result-card:last-child { border-right: none; }
     .result-competition { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #555; margin-bottom: 8px; }
@@ -98,19 +109,49 @@
     .result-goals { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; color: #aaa; }
     .result-goals.winner { color: #e84040; }
 
+    /* ── OPINIONS ── */
+    .opinions-grid { display: grid; grid-template-columns: repeat(3,1fr); border-bottom: 1px solid #2a2b2d; }
+    .opinion-card { border-right: 1px solid #2a2b2d; cursor: pointer; transition: background 0.15s; text-decoration: none; display: block; overflow: hidden; }
+    .opinion-card:last-child { border-right: none; }
+    .opinion-card:hover { background: #161718; }
+    .opinion-card-image { width: 100%; height: 160px; object-fit: cover; display: block; transition: transform 0.4s ease; }
+    .opinion-card:hover .opinion-card-image { transform: scale(1.03); }
+    .opinion-card-image-placeholder { width: 100%; height: 160px; background: #1a1b1c; display: block; }
+    .opinion-card-body { padding: 1rem 1.25rem; }
+    .opinion-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #e84040; margin-bottom: 6px; }
+    .opinion-headline { font-family: 'Barlow Condensed', sans-serif; font-size: 19px; font-weight: 700; line-height: 1.1; color: #e8e6e1; margin-bottom: 8px; }
+    .opinion-excerpt { font-size: 13px; color: #777; line-height: 1.6; margin-bottom: 10px; }
+    .opinion-author { display: flex; align-items: center; gap: 8px; }
+    .author-avatar { width: 22px; height: 22px; border-radius: 50%; background: #2a2b2d; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 9px; font-weight: 700; color: #888; flex-shrink: 0; }
+    .author-name { font-size: 11px; color: #555; }
+
+    /* ── PODCASTS ── */
+    .pod-grid { display: grid; grid-template-columns: repeat(2,1fr); border-bottom: 1px solid #2a2b2d; }
+    .pod-card { display: flex; gap: 12px; align-items: flex-start; padding: 1.25rem; border-right: 1px solid #2a2b2d; cursor: pointer; transition: background 0.15s; text-decoration: none; }
+    .pod-card:last-child { border-right: none; }
+    .pod-card:hover { background: #161718; }
+    .pod-art { width: 56px; height: 56px; background: #1e1f20; border: 1px solid #2a2b2d; border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .pod-ep-tag { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #e84040; margin-bottom: 4px; }
+    .pod-title { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; line-height: 1.15; color: #e8e6e1; margin-bottom: 6px; }
+    .pod-desc { font-size: 12px; color: #666; line-height: 1.5; margin-bottom: 6px; }
+    .pod-meta { font-size: 11px; color: #444; }
+    .play-pill { display: inline-flex; align-items: center; gap: 5px; margin-top: 6px; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #888; border: 1px solid #2a2b2d; padding: 3px 8px; border-radius: 2px; }
+
+    /* ── FOOTER ── */
     .footer { padding: 1.25rem; border-top: 1px solid #2a2b2d; background: #0d0e0f; display: flex; align-items: center; justify-content: space-between; }
     .footer-logo { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 0.12em; color: #333; }
     .footer-logo span { color: #e84040; }
     .footer-copy { font-size: 12px; color: #444; }
     .loading-text { font-size: 12px; color: #555; padding: 1rem 1.25rem; }
 
+    /* ── MOBILE ── */
     @media (max-width: 680px) {
       .nav-links { display: none; }
       .nav-hamburger { display: flex; }
-      .hero { grid-template-columns: 1fr; }
+      .hero-slide { grid-template-columns: 1fr; }
       .hero-main { border-right: none; border-bottom: 1px solid #2a2b2d; min-height: 300px; }
-      .hero-content { min-height: 300px; }
-      .hero-headline { font-size: 32px; }
+      .hero-content { min-height: 300px; padding: 1.25rem; }
+      .hero-headline { font-size: 30px; }
       .hero-stack { display: none; }
       .opinions-grid { grid-template-columns: 1fr; }
       .opinion-card { border-right: none; border-bottom: 1px solid #2a2b2d; }
@@ -120,7 +161,7 @@
       .pod-card { border-right: none; border-bottom: 1px solid #2a2b2d; }
       .pod-card:last-child { border-bottom: none; }
       .pod-desc { display: none; }
-      .results-grid { grid-template-columns: repeat(2, 1fr); }
+      .results-grid { grid-template-columns: repeat(2,1fr); }
       .result-card:nth-child(2n) { border-right: none; }
       .result-card:nth-child(n+3) { border-top: 1px solid #2a2b2d; }
       .footer { flex-direction: column; gap: 6px; text-align: center; }
@@ -129,14 +170,14 @@
 </head>
 <body>
 
-  <nav class="nav">
+  <nav class="nav" id="main-nav">
     <a href="index.html" class="logo">FAR POST<span class="logo-dot">.</span></a>
     <div class="nav-links">
       <a href="news.html">News</a>
       <a href="opinions.html">Opinions</a>
-      <a href="opinions.html">Podcasts</a>
-      <a href="results.html">ResultsResults</a>
-      <a href="#">Fixtures</a>
+      <a href="podcasts.html">Podcasts</a>
+      <a href="results.html">Results</a>
+      <a href="fixtures.html">Fixtures</a>
     </div>
     <button class="nav-hamburger" onclick="document.getElementById('mobile-menu').classList.toggle('open')" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -146,50 +187,40 @@
   <div class="mobile-menu" id="mobile-menu">
     <a href="news.html">News</a>
     <a href="opinions.html">Opinions</a>
-    <a href="opinions.html">Podcasts</a>
+    <a href="podcasts.html">Podcasts</a>
     <a href="results.html">Results</a>
-    <a href="#">Fixtures</a>
+    <a href="fixtures.html">Fixtures</a>
   </div>
 
-  <div class="hero">
-    <div class="hero-main" id="hero-main">
-      <div class="hero-content">
-        <div class="hero-eyebrow">
-          <span class="tag-pill">Welcome</span>
-          <span class="hero-date">April 2026</span>
+  <!-- HERO CAROUSEL -->
+  <div class="hero-carousel">
+    <div class="hero-slides" id="hero-slides">
+      <div class="hero-slide">
+        <div class="hero-main">
+          <div class="hero-overlay"></div>
+          <div class="hero-content">
+            <div class="hero-eyebrow"><span class="tag-pill">Welcome</span></div>
+            <h1 class="hero-headline">Scottish football.<br>No filter.</h1>
+            <p class="hero-deck">Loading latest articles...</p>
+          </div>
         </div>
-        <h1 class="hero-headline">Scottish football.<br>Honest takes.<br><em>No agenda.</em></h1>
-        <p class="hero-deck">Far Post is a new Scottish football platform built for fans who are done with press release journalism.</p>
-        <div class="byline">By <span>Ewen Napier</span> &nbsp;·&nbsp; Founder, Far Post</div>
+        <div class="hero-stack">
+          <div class="stacked-story"><div class="stacked-tag">Loading</div><div class="stacked-headline">Fetching latest articles...</div></div>
+        </div>
       </div>
     </div>
-    <div class="hero-stack">
-      <div class="stacked-story">
-        <div class="stacked-tag">National team</div>
-        <div class="stacked-headline">Scotland fall to Japan and Ivory Coast in World Cup warm-up friendlies</div>
-        <div class="stacked-meta">This week</div>
-      </div>
-      <div class="stacked-story">
-        <div class="stacked-tag">Premiership</div>
-        <div class="stacked-headline">Hearts on the brink — seven games to seal a historic title</div>
-        <div class="stacked-meta">This week</div>
-      </div>
-      <div class="stacked-story">
-        <div class="stacked-tag">Finance</div>
-        <div class="stacked-headline">Club accounts published — Hibs among those facing tough questions</div>
-        <div class="stacked-meta">This week</div>
-      </div>
-      <div class="stacked-story">
-        <div class="stacked-tag">Infrastructure</div>
-        <div class="stacked-headline">Artificial pitch debate reignites as clubs push for Premiership ban</div>
-        <div class="stacked-meta">This week</div>
+    <div class="carousel-footer">
+      <div class="carousel-dots" id="carousel-dots"></div>
+      <div class="carousel-arrows">
+        <button class="carousel-btn" onclick="changeSlide(-1)">&#8592;</button>
+        <button class="carousel-btn" onclick="changeSlide(1)">&#8594;</button>
       </div>
     </div>
   </div>
 
   <div class="section-header">
     <div class="section-title"><span>//</span>Latest results</div>
-    <a href="#" class="see-all">All results</a>
+    <a href="results.html" class="see-all">All results</a>
   </div>
   <div class="ticker">
     <div class="ticker-label">FT</div>
@@ -201,7 +232,7 @@
 
   <div class="section-header">
     <div class="section-title"><span>//</span>Opinions & features</div>
-    <a href="#" class="see-all">All opinions</a>
+    <a href="opinions.html" class="see-all">All opinions</a>
   </div>
   <div class="opinions-grid" id="opinions-grid">
     <div class="loading-text" style="grid-column:1/-1;">Loading articles...</div>
@@ -209,7 +240,7 @@
 
   <div class="section-header">
     <div class="section-title"><span>//</span>Latest podcasts — Across the Tiers</div>
-    <a href="https://feeds.acast.com/public/shows/across-the-tiers" class="see-all" target="_blank">All episodes</a>
+    <a href="podcasts.html" class="see-all">All episodes</a>
   </div>
   <div class="pod-grid" id="podcast-grid">
     <div class="pod-card" style="cursor:default;"><div class="loading-text">Loading episodes...</div></div>
@@ -225,7 +256,8 @@
     const SANITY_DATASET = 'production';
     const SANITY_TOKEN = 'skVvgExK1VnABKd7JxR8yI1WlsvrbWE9cffTvN3I0okHzn7XiYHSN1hJEgAr0dYTPdTgKdsPnMIth8l7DegjuF1FOoT2arqWnt5SGpMfOUoMCvker7W68zP1IyV2m9NR8S5qJFMPitco6Qt0UorzMynZ32I0EcoUdgv505fao2ey9c3wiIRs';
     const SANITY_API = `https://${SANITY_PROJECT_ID}.api.sanity.io/v2023-05-03/data/query/${SANITY_DATASET}`;
-    const fmt = d => new Date(d).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'});
+
+    const fmt = d => new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
     const initials = n => n ? n.split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2) : 'FP';
     const catLabel = c => ({opinion:'Opinion',analysis:'Analysis',news:'News',interview:'Interview',feature:'Feature'}[c]||'Article');
     const podArt = () => `<div class="pod-art"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e84040" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16" fill="#e84040" stroke="none"/></svg></div>`;
@@ -235,84 +267,132 @@
       if (!ref) return null;
       const parts = ref.replace('image-','').split('-');
       const ext = parts.pop();
-      const id = parts.join('-');
-      return `https://cdn.sanity.io/images/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${id}.${ext}`;
+      return `https://cdn.sanity.io/images/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${parts.join('-')}.${ext}`;
     }
 
+    function readTime(body) {
+      if (!body?.length) return '';
+      const words = body.flatMap(b => (b.children||[]).map(c=>c.text||'')).join(' ').trim().split(/\s+/).length;
+      return `${Math.max(1,Math.round(words/200))} min read`;
+    }
+
+    // ── STICKY NAV ──
+    window.addEventListener('scroll', () => {
+      document.getElementById('main-nav').classList.toggle('scrolled', window.scrollY > 40);
+    }, {passive:true});
+
+    // ── CAROUSEL ──
+    let currentSlide = 0;
+    let totalSlides = 1;
+    let autoTimer = null;
+
+    function goToSlide(n) {
+      currentSlide = ((n % totalSlides) + totalSlides) % totalSlides;
+      document.getElementById('hero-slides').style.transform = `translateX(-${currentSlide * 100}%)`;
+      document.querySelectorAll('.carousel-dot').forEach((d,i) => d.classList.toggle('active', i===currentSlide));
+      clearInterval(autoTimer);
+      autoTimer = setInterval(() => changeSlide(1), 5000);
+    }
+
+    function changeSlide(dir) { goToSlide(currentSlide + dir); }
+
+    function buildCarousel(posts) {
+      totalSlides = posts.length;
+      const slidesEl = document.getElementById('hero-slides');
+      const dotsEl = document.getElementById('carousel-dots');
+
+      slidesEl.innerHTML = posts.map((p,i) => {
+        const imgRef = p.mainImage?.asset?._ref;
+        const imgUrl = imgRef ? imageUrl(imgRef) : null;
+        const rt = readTime(p.body);
+        const others = posts.filter((_,j) => j !== i).slice(0,4);
+        const stackHtml = others.map(o =>
+          `<div class="stacked-story" onclick="event.stopPropagation();window.location.href='article.html?id=${o._id}'">
+            <div class="stacked-tag">${catLabel(o.category)}</div>
+            <div class="stacked-headline">${o.title}</div>
+            <div class="stacked-meta">${o.publishedAt?fmt(o.publishedAt):''}</div>
+          </div>`
+        ).join('');
+        return `<div class="hero-slide">
+          <div class="hero-main" onclick="window.location.href='article.html?id=${p._id}'">
+            ${imgUrl?`<img class="hero-image" src="${imgUrl}?w=1200&h=600&fit=crop&auto=format" alt="${p.title}" loading="${i===0?'eager':'lazy'}">` : ''}
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+              <div class="hero-eyebrow">
+                <span class="tag-pill">${catLabel(p.category)}</span>
+                <span class="hero-date">${p.publishedAt?fmt(p.publishedAt):''}</span>
+              </div>
+              <h1 class="hero-headline">${p.title}</h1>
+              ${p.excerpt?`<p class="hero-deck">${p.excerpt}</p>`:''}
+              <div class="byline">By <span>${p.author||'Ewen Napier'}</span>${rt?`<span class="read-time">&nbsp;·&nbsp;${rt}</span>`:''}</div>
+            </div>
+          </div>
+          <div class="hero-stack">${stackHtml}</div>
+        </div>`;
+      }).join('');
+
+      dotsEl.innerHTML = posts.map((_,i) =>
+        `<button class="carousel-dot${i===0?' active':''}" onclick="goToSlide(${i})" aria-label="Slide ${i+1}"></button>`
+      ).join('');
+
+      autoTimer = setInterval(() => changeSlide(1), 5000);
+    }
+
+    // ── ARTICLES ──
     async function loadArticles() {
       const grid = document.getElementById('opinions-grid');
       try {
-        const q = encodeURIComponent('*[_type=="post"]|order(publishedAt desc)[0...6]{_id,title,category,excerpt,author,publishedAt,mainImage}');
-        const res = await fetch(`${SANITY_API}?query=${q}`, {headers:{Authorization:`Bearer ${SANITY_TOKEN}`}});
+        const q = encodeURIComponent('*[_type=="post"]|order(publishedAt desc)[0...6]{_id,title,category,excerpt,author,publishedAt,mainImage,body}');
+        const res = await fetch(`${SANITY_API}?query=${q}`,{headers:{Authorization:`Bearer ${SANITY_TOKEN}`}});
         const posts = (await res.json()).result;
         if (!posts?.length) { grid.innerHTML='<div class="loading-text" style="grid-column:1/-1;">No articles yet.</div>'; return; }
 
-        let html = '';
-        posts.forEach(p => {
-          const date = p.publishedAt ? fmt(p.publishedAt) : '';
+        buildCarousel(posts);
+
+        grid.innerHTML = posts.slice(0,3).map(p => {
           const imgRef = p.mainImage?.asset?._ref;
           const imgUrl = imgRef ? imageUrl(imgRef) : null;
-          const imgHtml = imgUrl
-            ? `<img class="opinion-card-image" src="${imgUrl}?w=600&h=320&fit=crop&auto=format" alt="${p.title}" loading="lazy">`
-            : `<div class="opinion-card-image-placeholder"></div>`;
-          html += `<a class="opinion-card" href="article.html?id=${p._id}">
-            ${imgHtml}
+          const rt = readTime(p.body);
+          const date = p.publishedAt ? fmt(p.publishedAt) : '';
+          return `<a class="opinion-card" href="article.html?id=${p._id}">
+            ${imgUrl?`<img class="opinion-card-image" src="${imgUrl}?w=600&h=320&fit=crop&auto=format" alt="${p.title}" loading="lazy">`:'<div class="opinion-card-image-placeholder"></div>'}
             <div class="opinion-card-body">
               <div class="opinion-label">${catLabel(p.category)}</div>
               <div class="opinion-headline">${p.title}</div>
-              ${p.excerpt ? `<p class="opinion-excerpt">${p.excerpt}</p>` : ''}
-              <div class="opinion-author"><div class="author-avatar">${initials(p.author)}</div><div class="author-name">${p.author||'Far Post'}${date?' · '+date:''}</div></div>
+              ${p.excerpt?`<p class="opinion-excerpt">${p.excerpt}</p>`:''}
+              <div class="opinion-author">
+                <div class="author-avatar">${initials(p.author)}</div>
+                <div class="author-name">${p.author||'Far Post'}${date?' · '+date:''}${rt?' · '+rt:''}</div>
+              </div>
             </div>
           </a>`;
-        });
-        if (posts.length < 3) for (let i=posts.length;i<3;i++) html+=`<div class="opinion-card" style="border-right:1px solid #2a2b2d;"></div>`;
-        grid.innerHTML = html;
+        }).join('') + (posts.length < 3 ? '<div class="opinion-card" style="border-right:1px solid #2a2b2d;"></div>'.repeat(3-posts.length) : '');
 
-        const p = posts[0];
-        if (p) {
-          const hero = document.getElementById('hero-main');
-          const imgRef = p.mainImage?.asset?._ref;
-          const imgUrl = imgRef ? imageUrl(imgRef) : null;
-          hero.onclick = () => window.location.href = `article.html?id=${p._id}`;
-          hero.innerHTML = `
-            ${imgUrl ? `<img class="hero-image" src="${imgUrl}?w=1200&h=600&fit=crop&auto=format" alt="${p.title}">` : ''}
-            <div class="hero-overlay"></div>
-            <div class="hero-content">
-              <div class="hero-eyebrow"><span class="tag-pill">${catLabel(p.category)}</span><span class="hero-date">${p.publishedAt?fmt(p.publishedAt):''}</span></div>
-              <h1 class="hero-headline">${p.title}</h1>
-              ${p.excerpt?`<p class="hero-deck">${p.excerpt}</p>`:''}
-              <div class="byline">By <span>${p.author||'Ewen Napier'}</span></div>
-            </div>`;
-        }
       } catch(e) {
-        grid.innerHTML = `
-          <a class="opinion-card" href="#"><div class="opinion-card-image-placeholder"></div><div class="opinion-card-body"><div class="opinion-label">Opinion</div><div class="opinion-headline">Is Steve Clarke the right man to take Scotland to the World Cup?</div><div class="opinion-author"><div class="author-avatar">EN</div><div class="author-name">Ewen Napier</div></div></div></a>
-          <a class="opinion-card" href="#"><div class="opinion-card-image-placeholder"></div><div class="opinion-card-body"><div class="opinion-label">Analysis</div><div class="opinion-headline">Are Hibs in financial trouble?</div><div class="opinion-author"><div class="author-avatar">EN</div><div class="author-name">Ewen Napier</div></div></div></a>
-          <a class="opinion-card" href="#"><div class="opinion-card-image-placeholder"></div><div class="opinion-card-body"><div class="opinion-label">Take</div><div class="opinion-headline">Hearts will win the league. Here's why.</div><div class="opinion-author"><div class="author-avatar">EN</div><div class="author-name">Ewen Napier</div></div></div></a>`;
+        grid.innerHTML = '<div class="loading-text" style="grid-column:1/-1;">Could not load articles.</div>';
       }
     }
 
-async function loadScores() {
-  try {
-    const res = await fetch('/.netlify/functions/results');
-    const data = await res.json();
-    const fixtures = data.fixtures;
+    // ── SCORES ──
+    async function loadScores() {
+      try {
+        const res = await fetch('/.netlify/functions/results');
+        const data = await res.json();
+        const fixtures = data.fixtures;
+        if (!fixtures?.length) { fallbackScores(); return; }
+        let tHtml='', rHtml='';
+        fixtures.forEach(f => {
+          const live=['LIVE','1H','2H','HT'].includes(f.state);
+          const hw=parseInt(f.score.home)>parseInt(f.score.away);
+          const aw=parseInt(f.score.away)>parseInt(f.score.home);
+          tHtml+=`<div class="ticker-item"><span class="ticker-teams">${f.home.short}</span><span class="ticker-score">${f.score.home}–${f.score.away}</span><span class="ticker-teams">${f.away.short}</span>${live?'<span class="ticker-status ticker-live">Live</span>':'<span class="ticker-status">FT</span>'}</div>`;
+          rHtml+=`<div class="result-card"><div class="result-competition">Premiership</div><div class="result-teams"><div class="result-team"><span class="result-name ${hw?'winner':''}">${f.home.name}</span><span class="result-goals ${hw?'winner':''}">${f.score.home}</span></div><div class="result-team"><span class="result-name ${aw?'winner':''}">${f.away.name}</span><span class="result-goals ${aw?'winner':''}">${f.score.away}</span></div></div></div>`;
+        });
+        document.getElementById('ticker-items').innerHTML=tHtml;
+        document.getElementById('results-grid').innerHTML=rHtml;
+      } catch(e) { fallbackScores(); }
+    }
 
-    if (!fixtures || !fixtures.length) { fallbackScores(); return; }
-
-    let tHtml = '', rHtml = '';
-    fixtures.forEach(f => {
-      const live = ['LIVE','1H','2H','HT'].includes(f.state);
-      const hw = parseInt(f.score.home) > parseInt(f.score.away);
-      const aw = parseInt(f.score.away) > parseInt(f.score.home);
-      tHtml += `<div class="ticker-item"><span class="ticker-teams">${f.home.short}</span><span class="ticker-score">${f.score.home}–${f.score.away}</span><span class="ticker-teams">${f.away.short}</span>${live ? '<span class="ticker-status ticker-live">Live</span>' : '<span class="ticker-status">FT</span>'}</div>`;
-      rHtml += `<div class="result-card"><div class="result-competition">Premiership</div><div class="result-teams"><div class="result-team"><span class="result-name ${hw ? 'winner' : ''}">${f.home.name}</span><span class="result-goals ${hw ? 'winner' : ''}">${f.score.home}</span></div><div class="result-team"><span class="result-name ${aw ? 'winner' : ''}">${f.away.name}</span><span class="result-goals ${aw ? 'winner' : ''}">${f.score.away}</span></div></div></div>`;
-    });
-
-    document.getElementById('ticker-items').innerHTML = tHtml;
-    document.getElementById('results-grid').innerHTML = rHtml;
-  } catch(e) { fallbackScores(); }
-}
     function fallbackScores() {
       document.getElementById('ticker-items').innerHTML=`
         <div class="ticker-item"><span class="ticker-teams">Hearts</span><span class="ticker-score">2–0</span><span class="ticker-teams">Aberdeen</span><span class="ticker-status">FT</span></div>
@@ -325,38 +405,47 @@ async function loadScores() {
         <div class="result-card"><div class="result-competition">Friendly</div><div class="result-teams"><div class="result-team"><span class="result-name">Scotland</span><span class="result-goals">1</span></div><div class="result-team"><span class="result-name winner">Ivory Coast</span><span class="result-goals winner">2</span></div></div></div>`;
     }
 
+    // ── PODCASTS ──
     async function loadPodcasts() {
-      const FEED='https://feeds.acast.com/public/shows/across-the-tiers';
-      const grid=document.getElementById('podcast-grid');
+      const grid = document.getElementById('podcast-grid');
       try {
-        const r=await fetch('/.netlify/functions/podcast');
-        const xml=new DOMParser().parseFromString(await r.text(),'text/xml');
-        const items=xml.querySelectorAll('item');
+        const r = await fetch('/.netlify/functions/podcast');
+        const xml = new DOMParser().parseFromString(await r.text(), 'text/xml');
+        const items = xml.querySelectorAll('item');
         if (!items.length) throw new Error();
-        let html='';
-        for (let i=0;i<Math.min(items.length,2);i++) {
-          const item=items[i];
-          const title=item.querySelector('title')?.textContent||'Episode';
-          const pubDate=item.querySelector('pubDate')?.textContent||'';
-          const duration=item.querySelector('duration')?.textContent||'';
-          const link=item.querySelector('link')?.textContent||FEED;
-          const desc=(item.querySelector('description')?.textContent||'').replace(/<[^>]*>/g,'').slice(0,100)+'...';
-          const epNum='Ep. '+(items.length-i);
-          const dateStr=pubDate?new Date(pubDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'';
-          let mins='';
-          if(duration){let total;if(String(duration).includes(':')){const parts=String(duration).split(':').map(Number);total=parts.length===3?parts[0]*3600+parts[1]*60+parts[2]:parts[0]*60+parts[1];}else{total=parseInt(duration);}if(total){const h=Math.floor(total/3600),m=Math.floor((total%3600)/60);mins=h>0?`${h}h ${m}m`:`${m} min`;}}
-
-          html+=`<a class="pod-card" href="${link}" target="_blank">${podArt()}<div><div class="pod-ep-tag">Across the Tiers · ${epNum}</div><div class="pod-title">${title}</div><p class="pod-desc">${desc}</p><div class="pod-meta">${mins}${dateStr?' · '+dateStr:''}</div><div class="play-pill">${playIcon()} Listen now</div></div></a>`;
+        let html = '';
+        for (let i=0; i<Math.min(items.length,2); i++) {
+          const item = items[i];
+          const title = item.querySelector('title')?.textContent||'Episode';
+          const pubDate = item.querySelector('pubDate')?.textContent||'';
+          const dur = item.querySelector('duration')?.textContent||'';
+          const link = item.querySelector('link')?.textContent||'#';
+          const desc = (item.querySelector('description')?.textContent||'').replace(/<[^>]*>/g,'').slice(0,100)+'...';
+          const epNum = 'Ep. '+(items.length-i);
+          const dateStr = pubDate ? new Date(pubDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '';
+          let mins = '';
+          if (dur) {
+            if (dur.includes(':')) {
+              const parts = dur.split(':').map(Number);
+              const secs = parts.length===3 ? parts[0]*3600+parts[1]*60+parts[2] : parts[0]*60+parts[1];
+              mins = Math.round(secs/60)+' min';
+            } else {
+              mins = Math.round(parseInt(dur)/60)+' min';
+            }
+          }
+          html += `<a class="pod-card" href="${link}" target="_blank">${podArt()}<div><div class="pod-ep-tag">Across the Tiers · ${epNum}</div><div class="pod-title">${title}</div><p class="pod-desc">${desc}</p><div class="pod-meta">${mins}${dateStr?' · '+dateStr:''}</div><div class="play-pill">${playIcon()} Listen now</div></div></a>`;
         }
-        grid.innerHTML=html;
+        grid.innerHTML = html;
       } catch(e) {
-        grid.innerHTML=`
-          <a class="pod-card" href="https://feeds.acast.com/public/shows/across-the-tiers" target="_blank">${podArt()}<div><div class="pod-ep-tag">Across the Tiers · Ep. 6</div><div class="pod-title">Old Firm | League Two Title Race | Scotland Friendlies</div><p class="pod-desc">The latest from across the Scottish game.</p><div class="play-pill">${playIcon()} Listen now</div></div></a>
-          <a class="pod-card" href="https://feeds.acast.com/public/shows/across-the-tiers" target="_blank">${podArt()}<div><div class="pod-ep-tag">Across the Tiers · Ep. 5</div><div class="pod-title">SPFL Transfer Window Roundup | Scottish Cup | Interview With Joelle Murray</div><p class="pod-desc">A packed episode covering the transfer window.</p><div class="play-pill">${playIcon()} Listen now</div></div></a>`;
+        grid.innerHTML = `
+          <a class="pod-card" href="https://feeds.acast.com/public/shows/across-the-tiers" target="_blank">${podArt()}<div><div class="pod-ep-tag">Across the Tiers · Latest</div><div class="pod-title">Old Firm | League Two Title Race | Scotland Friendlies</div><p class="pod-desc">The latest from across the Scottish game.</p><div class="play-pill">${playIcon()} Listen now</div></div></a>
+          <a class="pod-card" href="https://feeds.acast.com/public/shows/across-the-tiers" target="_blank">${podArt()}<div><div class="pod-ep-tag">Across the Tiers · Previous</div><div class="pod-title">SPFL Transfer Window Roundup | Scottish Cup | Joelle Murray</div><p class="pod-desc">A packed episode covering the transfer window.</p><div class="play-pill">${playIcon()} Listen now</div></div></a>`;
       }
     }
 
-    loadArticles(); loadScores(); loadPodcasts();
+    loadArticles();
+    loadScores();
+    loadPodcasts();
   </script>
 </body>
 </html>
