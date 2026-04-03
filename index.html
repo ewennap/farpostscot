@@ -329,8 +329,8 @@ async function loadScores() {
       const FEED='https://feeds.acast.com/public/shows/across-the-tiers';
       const grid=document.getElementById('podcast-grid');
       try {
-        const r=await fetch('https://api.allorigins.win/get?url='+encodeURIComponent(FEED));
-        const xml=new DOMParser().parseFromString((await r.json()).contents,'text/xml');
+        const r=await fetch('/.netlify/functions/podcast');
+        const xml=new DOMParser().parseFromString(await r.text(),'text/xml');
         const items=xml.querySelectorAll('item');
         if (!items.length) throw new Error();
         let html='';

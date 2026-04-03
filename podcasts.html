@@ -132,9 +132,6 @@
   </footer>
 
   <script>
-    const FEED_URL = 'https://feeds.acast.com/public/shows/across-the-tiers';
-    const PROXY = 'https://api.allorigins.win/get?url=' + encodeURIComponent(FEED_URL);
-
     function formatDate(dateStr) {
       if (!dateStr) return '';
       return new Date(dateStr).toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'});
@@ -152,9 +149,8 @@
     async function loadEpisodes() {
       const list = document.getElementById('episodes-list');
       try {
-        const r = await fetch(PROXY);
-        const data = await r.json();
-        const xml = new DOMParser().parseFromString(data.contents, 'text/xml');
+        const r = await fetch('/.netlify/functions/podcast');
+        const xml = new DOMParser().parseFromString(await r.text(), 'text/xml');
         const items = xml.querySelectorAll('item');
         if (!items.length) throw new Error();
 
