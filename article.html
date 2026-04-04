@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
   <title>Far Post — Scottish Football</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
@@ -129,8 +134,6 @@
   <script>
     const SANITY_PROJECT_ID = 't11tx9if';
     const SANITY_DATASET = 'production';
-    const SANITY_TOKEN = 'skVvgExK1VnABKd7JxR8yI1WlsvrbWE9cffTvN3I0okHzn7XiYHSN1hJEgAr0dYTPdTgKdsPnMIth8l7DegjuF1FOoT2arqWnt5SGpMfOUoMCvker7W68zP1IyV2m9NR8S5qJFMPitco6Qt0UorzMynZ32I0EcoUdgv505fao2ey9c3wiIRs';
-    const SANITY_API = `https://${SANITY_PROJECT_ID}.api.sanity.io/v2023-05-03/data/query/${SANITY_DATASET}`;
 
     const getParam = k => new URLSearchParams(window.location.search).get(k);
     const fmt = d => d ? new Date(d).toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'}) : '';
@@ -161,7 +164,7 @@
       if (!id) { el.innerHTML='<div class="article-error">No article specified.</div>'; return; }
       try {
         const q = encodeURIComponent(`*[_type=="post"&&_id=="${id}"][0]{title,category,excerpt,body,author,publishedAt,mainImage}`);
-        const res = await fetch(`${SANITY_API}?query=${q}`, {headers:{Authorization:`Bearer ${SANITY_TOKEN}`}});
+        const res = await fetch(`/.netlify/functions/sanity-fetch?query=${q}`);
         const post = (await res.json()).result;
         if (!post) { el.innerHTML='<div class="article-error">Article not found.</div>'; return; }
         document.title = `${post.title} — Far Post`;
@@ -197,7 +200,7 @@
       const section = document.getElementById('related-section');
       try {
         const q = encodeURIComponent(`*[_type=="post"&&_id!="${currentId}"]|order(publishedAt desc)[0...2]{_id,title,category,mainImage}`);
-        const res = await fetch(`${SANITY_API}?query=${q}`, {headers:{Authorization:`Bearer ${SANITY_TOKEN}`}});
+        const res = await fetch(`/.netlify/functions/sanity-fetch?query=${q}`);
         const posts = (await res.json()).result;
         if (!posts?.length) { section.style.display='none'; return; }
         grid.innerHTML = posts.map(p => {

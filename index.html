@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
   <title>Far Post — Scottish Football</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
@@ -152,7 +157,7 @@
       .nav-hamburger { display: flex; }
       .hero-inner { grid-template-columns: 1fr; }
       .hero-main { border-right: none; border-bottom: 1px solid #2a2b2d; min-height: 300px; }
-      .hero-content { min-height: 300px; padding: 1.25rem; }
+      .hero-content { min-height: 300px; padding: 1.25rem 1.25rem 3.5rem; }
       .hero-headline { font-size: 30px; }
       .hero-stack { display: none; }
       .opinions-grid { grid-template-columns: 1fr; }
@@ -260,8 +265,6 @@
   <script>
     const SANITY_PROJECT_ID = 't11tx9if';
     const SANITY_DATASET = 'production';
-    const SANITY_TOKEN = 'skVvgExK1VnABKd7JxR8yI1WlsvrbWE9cffTvN3I0okHzn7XiYHSN1hJEgAr0dYTPdTgKdsPnMIth8l7DegjuF1FOoT2arqWnt5SGpMfOUoMCvker7W68zP1IyV2m9NR8S5qJFMPitco6Qt0UorzMynZ32I0EcoUdgv505fao2ey9c3wiIRs';
-    const SANITY_API = `https://${SANITY_PROJECT_ID}.api.sanity.io/v2023-05-03/data/query/${SANITY_DATASET}`;
 
     const fmt = d => new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
     const initials = n => n ? n.split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2) : 'FP';
@@ -349,7 +352,7 @@
       const grid = document.getElementById('opinions-grid');
       try {
         const q = encodeURIComponent('*[_type=="post"]|order(publishedAt desc)[0...6]{_id,title,category,excerpt,author,publishedAt,mainImage,body}');
-        const res = await fetch(`${SANITY_API}?query=${q}`,{headers:{Authorization:`Bearer ${SANITY_TOKEN}`}});
+        const res = await fetch(`/.netlify/functions/sanity-fetch?query=${q}`);
         const posts = (await res.json()).result;
         if (!posts?.length) { grid.innerHTML='<div class="loading-text" style="grid-column:1/-1;">No articles yet.</div>'; return; }
 
