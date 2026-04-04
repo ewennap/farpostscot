@@ -1,12 +1,11 @@
 // netlify/functions/standings.js
-// Sportmonks V3 API — league standings
-// Accepts optional `league` query param (default '501')
+// Sportmonks V3 — league standings
 //
-// Step 1 — get current season ID:
-// GET https://api.sportmonks.com/v3/football/leagues/{leagueId}?api_token={TOKEN}&include=currentSeason
+// Step 1: GET /v3/football/seasons?filters=seasonLeagueId:{leagueId}
+//         Find the most recent active season ID.
 //
-// Step 2 — get standings for that season:
-// GET https://api.sportmonks.com/v3/football/standings/seasons/{seasonId}?api_token={TOKEN}&include=participant;details.type
+// Step 2: GET /v3/football/standings/seasons/{seasonId}?include=participant;details.type
+//         Fetch standings for that season.
 
 const SPORTMONKS_TOKEN = process.env.SPORTMONKS_TOKEN;
 
@@ -14,104 +13,111 @@ function findDetail(details, keywords) {
   if (!Array.isArray(details)) return 0;
   for (const d of details) {
     const typeName = (d.type?.name || '').toLowerCase();
-    if (keywords.some(kw => typeName.includes(kw))) {
-      return d.value ?? 0;
-    }
+    if (keywords.some(kw => typeName.includes(kw))) return d.value ?? 0;
   }
   return 0;
 }
 
 exports.handler = async function (event) {
   if (!SPORTMONKS_TOKEN) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: 'API token not configured' })
-    };
+    return { statusCode: 500, body: JSON.stringify({ error: 'SPORTMONKS_TOKEN not set' }) };
   }
 
-  const leagueId =
-    (event.queryStringParameters && event.queryStringParameters.league) || '501';
+  const leagueId = (event.queryStringParameters?.league) || '501';
 
   try {
-    // Step 1: get current season ID
-    const leagueUrl =
-      `https://api.sportmonks.com/v3/football/leagues/${leagueId}` +
+    // ── Step 1: get seasons for this league ──────────────────────────────────
+    const seasonsUrl =
+      `https://api.sportmonks.com/v3/football/seasons` +
       `?api_token=${SPORTMONKS_TOKEN}` +
-      `&include=currentSeason`;
+      `&filters=seasonLeagueId:${leagueId}` +
+      `&per_page=25`;
 
-    const leagueResponse = await fetch(leagueUrl);
+    console.log('[standings] Fetching seasons for league', leagueId);
+    const seasonsRes  = await fetch(seasonsUrl);
+    const seasonsData = await seasonsRes.json();
 
-    if (!leagueResponse.ok) {
-      throw new Error(`Sportmonks league error: ${leagueResponse.status}`);
+    if (!seasonsRes.ok) {
+      console.error('[standings] Seasons API error:', seasonsData.message);
+      return { statusCode: 502, body: JSON.stringify({ error: seasonsData.message || 'Seasons fetch failed' }) };
     }
 
-    const leagueData = await leagueResponse.json();
-    const seasonId = leagueData.data?.currentSeason?.id;
+    const seasons = seasonsData.data || [];
+    console.log('[standings] Seasons returned:', seasons.length);
+    if (seasons.length) {
+      console.log('[standings] First season sample:', JSON.stringify(seasons[0]));
+    }
+
+    // Pick the most recent season — sort descending by id (higher = newer)
+    const sorted   = seasons.slice().sort((a, b) => b.id - a.id);
+    const season   = sorted[0];
+    const seasonId = season?.id;
 
     if (!seasonId) {
+      console.log('[standings] No season found for league', leagueId);
       return {
         statusCode: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'public, max-age=600'
-        },
+        headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=600' },
         body: JSON.stringify({ standings: [] })
       };
     }
 
-    // Step 2: get standings for the current season
+    console.log('[standings] Using season ID:', seasonId, 'name:', season?.name);
+
+    // ── Step 2: fetch standings for that season ──────────────────────────────
     const standingsUrl =
       `https://api.sportmonks.com/v3/football/standings/seasons/${seasonId}` +
       `?api_token=${SPORTMONKS_TOKEN}` +
       `&include=participant;details.type`;
 
-    const standingsResponse = await fetch(standingsUrl);
+    console.log('[standings] Fetching standings for season', seasonId);
+    const standingsRes  = await fetch(standingsUrl);
+    const standingsData = await standingsRes.json();
 
-    if (!standingsResponse.ok) {
-      throw new Error(`Sportmonks standings error: ${standingsResponse.status}`);
+    if (!standingsRes.ok) {
+      console.error('[standings] Standings API error:', standingsData.message);
+      return { statusCode: 502, body: JSON.stringify({ error: standingsData.message || 'Standings fetch failed' }) };
     }
 
-    const standingsData = await standingsResponse.json();
+    const rows = standingsData.data || [];
+    console.log('[standings] Standings rows returned:', rows.length);
+    if (rows.length) {
+      console.log('[standings] First row sample:', JSON.stringify(rows[0]));
+    }
 
-    const standings = (standingsData.data || [])
+    const standings = rows
       .sort((a, b) => (a.position || 0) - (b.position || 0))
       .map(row => {
         const details = row.details || [];
-
-        const played = findDetail(details, ['played', 'matches played']);
-        const won = findDetail(details, ['won', 'wins']);
-        const drawn = findDetail(details, ['drawn', 'draws']);
-        const lost = findDetail(details, ['lost', 'losses']);
-        const gf = findDetail(details, ['goals for', 'goals scored']);
-        const ga = findDetail(details, ['goals against', 'goals conceded']);
-        const gd = gf - ga;
+        const played  = findDetail(details, ['played', 'matches played', 'games played']);
+        const won     = findDetail(details, ['won', 'wins']);
+        const drawn   = findDetail(details, ['drawn', 'draw', 'draws']);
+        const lost    = findDetail(details, ['lost', 'loss', 'losses']);
+        const gf      = findDetail(details, ['goals for', 'goals scored']);
+        const ga      = findDetail(details, ['goals against', 'goals conceded']);
 
         return {
           position: row.position,
-          team: row.participant?.name || '',
-          points: row.points ?? 0,
+          team:     row.participant?.name || '',
+          points:   row.points ?? 0,
           played,
           won,
           drawn,
           lost,
           gf,
           ga,
-          gd
+          gd: gf - ga
         };
       });
 
     return {
       statusCode: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'public, max-age=600'
-      },
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=600' },
       body: JSON.stringify({ standings })
     };
-  } catch (error) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: error.message })
-    };
+
+  } catch (err) {
+    console.error('[standings] Unexpected error:', err.message);
+    return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
   }
 };
