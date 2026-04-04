@@ -58,9 +58,10 @@
     .fixture-time.tbc { color: #444; }
 
     .fixture-centre { display: flex; align-items: center; gap: 0; }
-    .fixture-home { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; color: #e8e6e1; flex: 1; text-align: right; }
+    .fixture-home { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; color: #e8e6e1; flex: 1; text-align: right; display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
     .fixture-vs { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; color: #333; padding: 0 16px; white-space: nowrap; }
-    .fixture-away { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; color: #e8e6e1; flex: 1; }
+    .fixture-away { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; color: #e8e6e1; flex: 1; display: flex; align-items: center; gap: 8px; }
+    .fixture-crest { width: 20px; height: 20px; object-fit: contain; flex-shrink: 0; }
 
     .fixture-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; min-width: 120px; }
     .fixture-league-tag { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #444; }
@@ -205,9 +206,13 @@
           html += `<div class="fixture-row">
             <div class="${timeClass}">${timeStr}</div>
             <div class="fixture-centre">
-              <div class="fixture-home">${f.home.name}</div>
+              <div class="fixture-home">
+                ${f.home.crest ? `<img class="fixture-crest" src="${f.home.crest}" alt="" onerror="this.style.display='none'">` : ''}${f.home.name}
+              </div>
               <div class="fixture-vs">vs</div>
-              <div class="fixture-away">${f.away.name}</div>
+              <div class="fixture-away">
+                ${f.away.crest ? `<img class="fixture-crest" src="${f.away.crest}" alt="" onerror="this.style.display='none'">` : ''}${f.away.name}
+              </div>
             </div>
             <div class="fixture-meta">
               <div class="fixture-league-tag">${leagueName}</div>

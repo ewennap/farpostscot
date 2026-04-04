@@ -3,32 +3,8 @@
 //
 // API call:
 // GET https://api.sportmonks.com/v3/football/fixtures/between/{from}/{to}?api_token={TOKEN}&filters=fixtureLeagues:{ID}&include=participants;state;scores&per_page=50
-//
-// Scores V3 structure: scores[] each has { description, score: { participant: 'home'|'away', goals } }
-// The 'CURRENT' description holds the live/final scoreline.
 
 const SPORTMONKS_TOKEN = process.env.SPORTMONKS_TOKEN;
-
-function extractScore(scores) {
-  const current = (scores || []).filter(s => s.description === 'CURRENT');
-  const homeEntry = current.find(s => s.score?.participant === 'home');
-  const awayEntry = current.find(s => s.score?.participant === 'away');
-
-  // Fallback: try description '2ND_HALF' or any entry with goals if CURRENT missing
-  if (!homeEntry || !awayEntry) {
-    const allHome = (scores || []).find(s => s.score?.participant === 'home');
-    const allAway = (scores || []).find(s => s.score?.participant === 'away');
-    return {
-      home: allHome?.score?.goals ?? '-',
-      away: allAway?.score?.goals ?? '-'
-    };
-  }
-
-  return {
-    home: homeEntry.score.goals ?? '-',
-    away: awayEntry.score.goals ?? '-'
-  };
-}
 
 exports.handler = async function (event) {
   console.log('[results] SPORTMONKS_TOKEN set:', !!SPORTMONKS_TOKEN);
@@ -42,6 +18,7 @@ exports.handler = async function (event) {
 
   const leagueId = (event.queryStringParameters && event.queryStringParameters.league) || '501';
 
+  // Look back 30 days
   const today = new Date();
   const from = new Date(today);
   from.setDate(from.getDate() - 30);
@@ -72,10 +49,12 @@ exports.handler = async function (event) {
       };
     }
 
+    // Log first fixture in full to inspect the real data structure
     if (data.data && data.data[0]) {
       console.log('[results] First fixture raw:', JSON.stringify(data.data[0], null, 2));
     }
 
+    // No state filtering — return all fixtures so we can inspect the raw structure
     const fixtures = (data.data || [])
       .sort((a, b) => new Date(b.starting_at) - new Date(a.starting_at))
       .slice(0, 30)
@@ -83,16 +62,21 @@ exports.handler = async function (event) {
         const parts = f.participants || [];
         const home = parts.find(p => p.meta?.location === 'home') || parts[0] || {};
         const away = parts.find(p => p.meta?.location === 'away') || parts[1] || {};
-        const score = extractScore(f.scores);
+        const ftScores = (f.scores || []).filter(s => s.description === 'CURRENT' || s.description === 'FT');
+        const homeScore = ftScores.find(s => s.score?.participant === 'home');
+        const awayScore = ftScores.find(s => s.score?.participant === 'away');
 
         return {
           id: f.id,
           leagueId: String(leagueId),
           state: f.state?.short || '',
           date: f.starting_at || null,
-          home: { name: home.name || 'Home', short: home.short_code || home.name || 'Home' },
-          away: { name: away.name || 'Away', short: away.short_code || away.name || 'Away' },
-          score
+          home: { name: home.name || 'Home', short: home.short_code || home.name || 'Home', crest: home.image_path || null },
+          away: { name: away.name || 'Away', short: away.short_code || away.name || 'Away', crest: away.image_path || null },
+          score: {
+            home: homeScore?.score?.goals ?? '-',
+            away: awayScore?.score?.goals ?? '-'
+          }
         };
       });
 

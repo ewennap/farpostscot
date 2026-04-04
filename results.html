@@ -102,6 +102,7 @@
     .standings-table td.pts { font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 800; color: #e8e6e1; text-align: center; background: #161718; }
     .standings-table tr:hover td.pts { background: #1e1f20; }
     .team-crest { width: 20px; height: 20px; object-fit: contain; margin-right: 10px; vertical-align: middle; border-radius: 2px; }
+    .result-crest { width: 20px; height: 20px; object-fit: contain; margin-right: 8px; vertical-align: middle; flex-shrink: 0; }
     .split-row td { border-top: 2px solid #333 !important; }
     .zone-europe td.pos { border-left: 3px solid #4caf50; }
     .zone-relegation td.pos { border-left: 3px solid #e84040; }
@@ -372,8 +373,12 @@
           var status = live ? '<span class="match-status live">Live</span>' : '<span class="match-status">FT</span>';
           var time   = f.date ? '<span class="match-time">' + fmtTime(f.date) + '</span>' : '';
           html += '<div class="match-card"><div class="match-teams">'
-            + '<div class="match-team"><span class="team-name' + (hw?' winner':'') + '">' + f.home.name + '</span><span class="team-score' + (hw?' winner':'') + '">' + f.score.home + '</span></div>'
-            + '<div class="match-team"><span class="team-name' + (aw?' winner':'') + '">' + f.away.name + '</span><span class="team-score' + (aw?' winner':'') + '">' + f.score.away + '</span></div>'
+            + '<div class="match-team">'
+            + (f.home.crest ? '<img class="result-crest" src="' + f.home.crest + '" alt="" onerror="this.style.display=\'none\'">' : '')
+            + '<span class="team-name' + (hw?' winner':'') + '">' + f.home.name + '</span><span class="team-score' + (hw?' winner':'') + '">' + f.score.home + '</span></div>'
+            + '<div class="match-team">'
+            + (f.away.crest ? '<img class="result-crest" src="' + f.away.crest + '" alt="" onerror="this.style.display=\'none\'">' : '')
+            + '<span class="team-name' + (aw?' winner':'') + '">' + f.away.name + '</span><span class="team-score' + (aw?' winner':'') + '">' + f.score.away + '</span></div>'
             + '</div><div class="match-meta">' + status + time + '</div></div>';
         });
         html += '</div></div>';
