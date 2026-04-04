@@ -2,7 +2,7 @@
 // Sportmonks V3 API — recent results
 //
 // API call:
-// GET https://api.sportmonks.com/v3/football/fixtures?api_token={TOKEN}&filters=fixtureLeagues:{ID}&include=participants;state;scores&per_page=50&filterTypes=between:{from};{to}
+// GET https://api.sportmonks.com/v3/football/fixtures/between/{from}/{to}?api_token={TOKEN}&filters=fixtureLeagues:{ID}&include=participants;state;scores&per_page=50
 
 const SPORTMONKS_TOKEN = process.env.SPORTMONKS_TOKEN;
 
@@ -26,12 +26,11 @@ exports.handler = async function (event) {
   const toStr = today.toISOString().split('T')[0];
 
   const url =
-    `https://api.sportmonks.com/v3/football/fixtures` +
+    `https://api.sportmonks.com/v3/football/fixtures/between/${fromStr}/${toStr}` +
     `?api_token=${SPORTMONKS_TOKEN}` +
     `&filters=fixtureLeagues:${leagueId}` +
     `&include=participants;state;scores` +
-    `&per_page=50` +
-    `&filters[starting_at_between]=${fromStr},${toStr}`;
+    `&per_page=50`;
 
   console.log('[results] Fetching:', url.replace(SPORTMONKS_TOKEN, 'TOKEN_REDACTED'));
 

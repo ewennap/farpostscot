@@ -3,18 +3,17 @@
 // Accepts optional `league` query param: '501', '507', or 'all' (default 'all')
 //
 // API call:
-// GET https://api.sportmonks.com/v3/football/fixtures?api_token={TOKEN}&filters=fixtureLeagues:{ID}&include=participants;state&per_page=50&filters[starting_at_between]={from},{to}
+// GET https://api.sportmonks.com/v3/football/fixtures/between/{from}/{to}?api_token={TOKEN}&filters=fixtureLeagues:{ID}&include=participants;state&per_page=50
 
 const SPORTMONKS_TOKEN = process.env.SPORTMONKS_TOKEN;
 
 async function fetchFixturesForLeague(leagueId, fromStr, toStr) {
   const url =
-    `https://api.sportmonks.com/v3/football/fixtures` +
+    `https://api.sportmonks.com/v3/football/fixtures/between/${fromStr}/${toStr}` +
     `?api_token=${SPORTMONKS_TOKEN}` +
     `&filters=fixtureLeagues:${leagueId}` +
     `&include=participants;state` +
-    `&per_page=50` +
-    `&filters[starting_at_between]=${fromStr},${toStr}`;
+    `&per_page=50`;
 
   console.log(`[fixtures] Fetching league ${leagueId}:`, url.replace(SPORTMONKS_TOKEN, 'TOKEN_REDACTED'));
 
