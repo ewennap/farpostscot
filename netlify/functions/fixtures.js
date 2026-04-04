@@ -67,9 +67,9 @@ exports.handler = async function (event) {
     }
 
     console.log('[fixtures] Raw total before filter:', raw.length);
+    if (raw[0]) console.log('[fixtures] First fixture state:', JSON.stringify(raw[0].state));
 
     const fixtures = raw
-      .filter(f => f.state?.short === 'NS')
       .sort((a, b) => new Date(a.starting_at) - new Date(b.starting_at))
       .slice(0, 40)
       .map(f => {
