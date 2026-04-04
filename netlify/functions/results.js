@@ -49,10 +49,13 @@ exports.handler = async function (event) {
       };
     }
 
-    const validStates = ['FT', 'AET', 'LIVE', '1H', '2H', 'HT', 'PEN'];
+    // Log first fixture in full to inspect the real data structure
+    if (data.data && data.data[0]) {
+      console.log('[results] First fixture raw:', JSON.stringify(data.data[0], null, 2));
+    }
 
+    // No state filtering — return all fixtures so we can inspect the raw structure
     const fixtures = (data.data || [])
-      .filter(f => validStates.includes(f.state?.short || ''))
       .sort((a, b) => new Date(b.starting_at) - new Date(a.starting_at))
       .slice(0, 30)
       .map(f => {
