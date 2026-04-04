@@ -18,10 +18,13 @@ exports.handler = async function (event) {
 
   const leagueId = (event.queryStringParameters && event.queryStringParameters.league) || '501';
 
-  // Look back 30 days
+  // Cups may have their last game weeks or months ago — look back 180 days
+  const CUPS = ['507', '510'];
+  const lookbackDays = CUPS.includes(String(leagueId)) ? 180 : 30;
+
   const today = new Date();
   const from = new Date(today);
-  from.setDate(from.getDate() - 30);
+  from.setDate(from.getDate() - lookbackDays);
   const fromStr = from.toISOString().split('T')[0];
   const toStr = today.toISOString().split('T')[0];
 
@@ -29,7 +32,7 @@ exports.handler = async function (event) {
     `https://api.sportmonks.com/v3/football/fixtures/between/${fromStr}/${toStr}` +
     `?api_token=${SPORTMONKS_TOKEN}` +
     `&filters=fixtureLeagues:${leagueId}` +
-    `&include=participants;state;scores` +
+    `&include=participants;state;scores;round` +
     `&per_page=50`;
 
   console.log('[results] Fetching:', url.replace(SPORTMONKS_TOKEN, 'TOKEN_REDACTED'));
@@ -71,6 +74,7 @@ exports.handler = async function (event) {
           leagueId: String(leagueId),
           state: f.state?.short || '',
           date: f.starting_at || null,
+          round: f.round?.name || null,
           home: { name: home.name || 'Home', short: home.short_code || home.name || 'Home', crest: home.image_path || null },
           away: { name: away.name || 'Away', short: away.short_code || away.name || 'Away', crest: away.image_path || null },
           score: {

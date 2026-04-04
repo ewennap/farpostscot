@@ -108,7 +108,8 @@
     .results-grid { display: grid; grid-template-columns: repeat(5,1fr); border-bottom: 1px solid #2a2b2d; }
     .result-card { padding: 0.875rem 1.25rem; border-right: 1px solid #2a2b2d; }
     .result-card:last-child { border-right: none; }
-    .result-competition { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #555; margin-bottom: 8px; }
+    .result-competition { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #555; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+    .result-final-badge { font-family: 'Barlow Condensed', sans-serif; font-size: 9px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: #e84040; border: 1px solid #e84040; padding: 1px 5px; border-radius: 2px; }
     .result-teams { display: flex; flex-direction: column; gap: 4px; }
     .result-team { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
     .result-team-name { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
@@ -389,14 +390,29 @@
     // ── SCORES ──
     const LEAGUE_IDS   = ['501','504','507','510','516'];
     const LEAGUE_NAMES = { '501':'Premiership','504':'Championship','507':'Scottish Cup','510':'League Cup','516':'League One' };
+    const CUPS = ['507','510'];
+
+    function competitionLabel(leagueId, round) {
+      const base = LEAGUE_NAMES[leagueId] || 'Scottish Football';
+      if (!CUPS.includes(leagueId) || !round) return { text: base, isFinal: false };
+      const r = round.trim();
+      const up = r.toUpperCase();
+      // Detect "Final" but not "Semi" or "Quarter"
+      const isFinal = /\bfinal\b/i.test(r) && !/semi|quarter/i.test(r);
+      // Show base name + round, e.g. "Scottish Cup Quarter Final"
+      const text = `${base} ${r}`;
+      return { text, isFinal };
+    }
 
     function resultCardHtml(f, leagueId) {
       const hw = parseInt(f.score.home) > parseInt(f.score.away);
       const aw = parseInt(f.score.away) > parseInt(f.score.home);
       const hCrest = f.home.crest ? `<img class="result-crest" src="${f.home.crest}" alt="" onerror="this.style.display='none'">` : '';
       const aCrest = f.away.crest ? `<img class="result-crest" src="${f.away.crest}" alt="" onerror="this.style.display='none'">` : '';
+      const { text: compText, isFinal } = competitionLabel(leagueId, f.round);
+      const badge = isFinal ? `<span class="result-final-badge">Final</span>` : '';
       return `<div class="result-card">
-        <div class="result-competition">${LEAGUE_NAMES[leagueId] || 'Scottish Football'}</div>
+        <div class="result-competition">${compText}${badge}</div>
         <div class="result-teams">
           <div class="result-team">
             <div class="result-team-name">${hCrest}<span class="result-name ${hw?'winner':''}">${f.home.name}</span></div>
@@ -423,7 +439,7 @@
         LEAGUE_IDS.forEach((id, i) => {
           const fixtures = responses[i]?.fixtures || [];
           if (!fixtures.length) {
-            rHtml += `<div class="result-card"><div class="result-competition">${LEAGUE_NAMES[id]}</div><div class="result-none">No recent results</div></div>`;
+            rHtml += `<div class="result-card"><div class="result-competition">${LEAGUE_NAMES[id]}</div><div class="result-none">No results yet</div></div>`;
             return;
           }
           // Most recent result for this league
