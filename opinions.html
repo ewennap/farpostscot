@@ -136,8 +136,6 @@
   <script>
     const SANITY_PROJECT_ID = 't11tx9if';
     const SANITY_DATASET = 'production';
-    const SANITY_TOKEN = 'skVvgExK1VnABKd7JxR8yI1WlsvrbWE9cffTvN3I0okHzn7XiYHSN1hJEgAr0dYTPdTgKdsPnMIth8l7DegjuF1FOoT2arqWnt5SGpMfOUoMCvker7W68zP1IyV2m9NR8S5qJFMPitco6Qt0UorzMynZ32I0EcoUdgv505fao2ey9c3wiIRs';
-    const SANITY_API = `https://${SANITY_PROJECT_ID}.api.sanity.io/v2023-05-03/data/query/${SANITY_DATASET}`;
 
     const fmt = d => new Date(d).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'});
     const initials = n => n ? n.split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2) : 'FP';
@@ -197,7 +195,7 @@
       const grid = document.getElementById('news-grid');
       try {
         const q = encodeURIComponent(`*[${filterQuery()}]|order(publishedAt desc)[0...${PAGE_SIZE}]{_id,title,category,excerpt,author,publishedAt,mainImage}`);
-        const res = await fetch(`${SANITY_API}?query=${q}`, {headers:{Authorization:`Bearer ${SANITY_TOKEN}`}});
+        const res = await fetch(`/.netlify/functions/sanity-fetch?query=${q}`);
         const posts = (await res.json()).result;
 
         if (!posts?.length) {
@@ -222,7 +220,7 @@
       btn.textContent = 'Loading...';
       try {
         const q = encodeURIComponent(`*[${filterQuery()}]|order(publishedAt desc)[${offset}...${offset+PAGE_SIZE}]{_id,title,category,excerpt,author,publishedAt,mainImage}`);
-        const res = await fetch(`${SANITY_API}?query=${q}`, {headers:{Authorization:`Bearer ${SANITY_TOKEN}`}});
+        const res = await fetch(`/.netlify/functions/sanity-fetch?query=${q}`);
         const posts = (await res.json()).result;
         if (!posts?.length) { document.getElementById('load-more').style.display='none'; return; }
         document.getElementById('news-grid').innerHTML += renderCards(posts);
