@@ -105,16 +105,19 @@
     .ticker-score { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; color: #e8e6e1; }
     .ticker-status { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; color: #555; }
     .ticker-live { color: #e84040; }
-    .results-grid { display: grid; grid-template-columns: repeat(4,1fr); border-bottom: 1px solid #2a2b2d; }
+    .results-grid { display: grid; grid-template-columns: repeat(5,1fr); border-bottom: 1px solid #2a2b2d; }
     .result-card { padding: 0.875rem 1.25rem; border-right: 1px solid #2a2b2d; }
     .result-card:last-child { border-right: none; }
     .result-competition { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #555; margin-bottom: 8px; }
     .result-teams { display: flex; flex-direction: column; gap: 4px; }
-    .result-team { display: flex; align-items: center; justify-content: space-between; }
-    .result-name { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600; color: #aaa; }
+    .result-team { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+    .result-team-name { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
+    .result-crest { width: 16px; height: 16px; object-fit: contain; flex-shrink: 0; }
+    .result-name { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .result-name.winner { color: #e8e6e1; }
-    .result-goals { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; color: #aaa; }
+    .result-goals { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; color: #aaa; flex-shrink: 0; }
     .result-goals.winner { color: #e84040; }
+    .result-none { font-size: 12px; color: #444; padding-top: 6px; }
 
     /* ── OPINIONS ── */
     .opinions-grid { display: grid; grid-template-columns: repeat(3,1fr); border-bottom: 1px solid #2a2b2d; }
@@ -170,7 +173,8 @@
       .pod-desc { display: none; }
       .results-grid { grid-template-columns: repeat(2,1fr); }
       .result-card:nth-child(2n) { border-right: none; }
-      .result-card:nth-child(n+3) { border-top: 1px solid #2a2b2d; }
+      .result-card { border-top: 1px solid #2a2b2d; }
+      .result-card:nth-child(-n+2) { border-top: none; }
       .footer { flex-direction: column; gap: 6px; text-align: center; }
     }
   </style>
@@ -383,38 +387,72 @@
     }
 
     // ── SCORES ──
+    const LEAGUE_IDS   = ['501','504','507','510','516'];
+    const LEAGUE_NAMES = { '501':'Premiership','504':'Championship','507':'Scottish Cup','510':'League Cup','516':'League One' };
+
+    function resultCardHtml(f, leagueId) {
+      const hw = parseInt(f.score.home) > parseInt(f.score.away);
+      const aw = parseInt(f.score.away) > parseInt(f.score.home);
+      const hCrest = f.home.crest ? `<img class="result-crest" src="${f.home.crest}" alt="" onerror="this.style.display='none'">` : '';
+      const aCrest = f.away.crest ? `<img class="result-crest" src="${f.away.crest}" alt="" onerror="this.style.display='none'">` : '';
+      return `<div class="result-card">
+        <div class="result-competition">${LEAGUE_NAMES[leagueId] || 'Scottish Football'}</div>
+        <div class="result-teams">
+          <div class="result-team">
+            <div class="result-team-name">${hCrest}<span class="result-name ${hw?'winner':''}">${f.home.name}</span></div>
+            <span class="result-goals ${hw?'winner':''}">${f.score.home}</span>
+          </div>
+          <div class="result-team">
+            <div class="result-team-name">${aCrest}<span class="result-name ${aw?'winner':''}">${f.away.name}</span></div>
+            <span class="result-goals ${aw?'winner':''}">${f.score.away}</span>
+          </div>
+        </div>
+      </div>`;
+    }
+
     async function loadScores() {
       try {
-        const res = await fetch('/.netlify/functions/results');
-        const data = await res.json();
-        const all = data.fixtures;
-        if (!all?.length) { fallbackScores(); return; }
-        // Show only the most recent matchday: fixtures within 48h of the latest result, max 6
-        const latestTime = new Date(all[0].date).getTime();
-        const fixtures = all.filter(f => new Date(f.date).getTime() >= latestTime - 48 * 60 * 60 * 1000).slice(0, 6);
-        let tHtml='', rHtml='';
-        fixtures.forEach(f => {
-          const live=['LIVE','1H','2H','HT'].includes(f.state);
-          const hw=parseInt(f.score.home)>parseInt(f.score.away);
-          const aw=parseInt(f.score.away)>parseInt(f.score.home);
-          tHtml+=`<div class="ticker-item"><span class="ticker-teams">${f.home.short}</span><span class="ticker-score">${f.score.home}–${f.score.away}</span><span class="ticker-teams">${f.away.short}</span>${live?'<span class="ticker-status ticker-live">Live</span>':'<span class="ticker-status">FT</span>'}</div>`;
-          rHtml+=`<div class="result-card"><div class="result-competition">Premiership</div><div class="result-teams"><div class="result-team"><span class="result-name ${hw?'winner':''}">${f.home.name}</span><span class="result-goals ${hw?'winner':''}">${f.score.home}</span></div><div class="result-team"><span class="result-name ${aw?'winner':''}">${f.away.name}</span><span class="result-goals ${aw?'winner':''}">${f.score.away}</span></div></div></div>`;
+        // Fetch all 5 leagues in parallel
+        const responses = await Promise.all(
+          LEAGUE_IDS.map(id => fetch(`/.netlify/functions/results?league=${id}`).then(r => r.json()).catch(() => null))
+        );
+
+        let tHtml = '', rHtml = '';
+        let tickerItems = [];
+
+        LEAGUE_IDS.forEach((id, i) => {
+          const fixtures = responses[i]?.fixtures || [];
+          if (!fixtures.length) {
+            rHtml += `<div class="result-card"><div class="result-competition">${LEAGUE_NAMES[id]}</div><div class="result-none">No recent results</div></div>`;
+            return;
+          }
+          // Most recent result for this league
+          const f = fixtures[0];
+          rHtml += resultCardHtml(f, id);
+          tickerItems.push(f);
         });
-        document.getElementById('ticker-items').innerHTML=tHtml;
-        document.getElementById('results-grid').innerHTML=rHtml;
+
+        // Ticker: show all collected recent results
+        tickerItems.forEach(f => {
+          const live = ['LIVE','1H','2H','HT'].includes(f.state);
+          tHtml += `<div class="ticker-item"><span class="ticker-teams">${f.home.short}</span><span class="ticker-score">${f.score.home}–${f.score.away}</span><span class="ticker-teams">${f.away.short}</span>${live?'<span class="ticker-status ticker-live">Live</span>':'<span class="ticker-status">FT</span>'}</div>`;
+        });
+
+        if (tHtml) document.getElementById('ticker-items').innerHTML = tHtml;
+        document.getElementById('results-grid').innerHTML = rHtml;
       } catch(e) { fallbackScores(); }
     }
 
     function fallbackScores() {
       document.getElementById('ticker-items').innerHTML=`
         <div class="ticker-item"><span class="ticker-teams">Hearts</span><span class="ticker-score">2–0</span><span class="ticker-teams">Aberdeen</span><span class="ticker-status">FT</span></div>
-        <div class="ticker-item"><span class="ticker-teams">Celtic</span><span class="ticker-score">3–1</span><span class="ticker-teams">Rangers</span><span class="ticker-status">FT</span></div>
-        <div class="ticker-item"><span class="ticker-teams">Scotland</span><span class="ticker-score">0–2</span><span class="ticker-teams">Japan</span><span class="ticker-status">FT</span></div>`;
+        <div class="ticker-item"><span class="ticker-teams">Celtic</span><span class="ticker-score">3–1</span><span class="ticker-teams">Rangers</span><span class="ticker-status">FT</span></div>`;
       document.getElementById('results-grid').innerHTML=`
-        <div class="result-card"><div class="result-competition">Premiership</div><div class="result-teams"><div class="result-team"><span class="result-name winner">Hearts</span><span class="result-goals winner">2</span></div><div class="result-team"><span class="result-name">Aberdeen</span><span class="result-goals">0</span></div></div></div>
-        <div class="result-card"><div class="result-competition">Premiership</div><div class="result-teams"><div class="result-team"><span class="result-name winner">Celtic</span><span class="result-goals winner">3</span></div><div class="result-team"><span class="result-name">Rangers</span><span class="result-goals">1</span></div></div></div>
-        <div class="result-card"><div class="result-competition">Friendly</div><div class="result-teams"><div class="result-team"><span class="result-name">Scotland</span><span class="result-goals">0</span></div><div class="result-team"><span class="result-name winner">Japan</span><span class="result-goals winner">2</span></div></div></div>
-        <div class="result-card"><div class="result-competition">Friendly</div><div class="result-teams"><div class="result-team"><span class="result-name">Scotland</span><span class="result-goals">1</span></div><div class="result-team"><span class="result-name winner">Ivory Coast</span><span class="result-goals winner">2</span></div></div></div>`;
+        <div class="result-card"><div class="result-competition">Premiership</div><div class="result-teams"><div class="result-team"><div class="result-team-name"><span class="result-name winner">Hearts</span></div><span class="result-goals winner">2</span></div><div class="result-team"><div class="result-team-name"><span class="result-name">Aberdeen</span></div><span class="result-goals">0</span></div></div></div>
+        <div class="result-card"><div class="result-competition">Premiership</div><div class="result-teams"><div class="result-team"><div class="result-team-name"><span class="result-name winner">Celtic</span></div><span class="result-goals winner">3</span></div><div class="result-team"><div class="result-team-name"><span class="result-name">Rangers</span></div><span class="result-goals">1</span></div></div></div>
+        <div class="result-card"><div class="result-competition">Championship</div><div class="result-none">No recent results</div></div>
+        <div class="result-card"><div class="result-competition">Scottish Cup</div><div class="result-none">No recent results</div></div>
+        <div class="result-card"><div class="result-competition">League Cup</div><div class="result-none">No recent results</div></div>`;
     }
 
     // ── PODCASTS ──
