@@ -179,18 +179,15 @@
     <div class="page-title">Results & <span>Fixtures</span></div>
     <div class="page-subtitle">Scottish football scores, upcoming games and league tables</div>
     <div class="tab-bar">
-      <button class="tab-btn active" onclick="showTab('results', this)">Results</button>
-      <button class="tab-btn" onclick="showTab('fixtures', this)">Fixtures</button>
-      <button class="tab-btn" onclick="showTab('tables', this)">Tables</button>
+      <button class="tab-btn active" data-tab="results" onclick="showTab('results', this)">Results</button>
+      <button class="tab-btn" data-tab="fixtures" onclick="showTab('fixtures', this)">Fixtures</button>
+      <button class="tab-btn" data-tab="tables" onclick="showTab('tables', this)">Table</button>
     </div>
   </div>
 
   <div class="filter-bar">
-    <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
-    <button class="filter-btn" onclick="setFilter('501', this)">Premiership</button>
-    <button class="filter-btn" onclick="setFilter('502', this)">Championship</button>
-    <button class="filter-btn" onclick="setFilter('503', this)">League One</button>
-    <button class="filter-btn" onclick="setFilter('504', this)">League Two</button>
+    <button class="filter-btn active" onclick="setCompetition('501', this)">Premiership</button>
+    <button class="filter-btn" onclick="setCompetition('507', this)">Scottish Cup</button>
   </div>
 
   <!-- RESULTS TAB -->
@@ -231,17 +228,46 @@
   <script>
     // ── STATE ──
     let currentTab = 'results';
-    let currentFilter = 'all';
+    let currentLeague = '501';
     let resultsData = null;
     let fixturesData = null;
 
-    // ── LEAGUE NAMES ──
     const LEAGUE_NAMES = {
       '501': 'Scottish Premiership',
-      '502': 'Scottish Championship',
-      '503': 'Scottish League One',
-      '504': 'Scottish League Two'
+      '507': 'Scottish Cup'
     };
+
+    // ── FORMAT HELPERS ──
+    function fmtDate(isoStr) {
+      if (!isoStr) return '';
+      return new Date(isoStr).toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short' });
+    }
+    function fmtTime(isoStr) {
+      if (!isoStr) return '';
+      return new Date(isoStr).toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+    }
+
+    // ── COMPETITION TOGGLE ──
+    function setCompetition(league, btn) {
+      currentLeague = league;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      // Reset cached data so next tab switch re-fetches for the new league
+      resultsData = null;
+      fixturesData = null;
+      // Hide Tables tab for Scottish Cup (knockout competition, no table)
+      const tablesBtn = document.querySelector('.tab-btn[data-tab="tables"]');
+      if (tablesBtn) tablesBtn.style.display = league === '507' ? 'none' : '';
+      // If currently on tables tab and switching to Cup, go to results
+      if (currentTab === 'tables' && league === '507') {
+        document.querySelector('.tab-btn[data-tab="results"]').click();
+        return;
+      }
+      // Reload current tab
+      if (currentTab === 'results') { document.getElementById('results-container').innerHTML = '<div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div></div>'; loadResults(); }
+      if (currentTab === 'fixtures') { document.getElementById('fixtures-container').innerHTML = '<div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div></div>'; loadFixtures(); }
+      if (currentTab === 'tables') loadTables();
+    }
 
     // ── TAB SWITCHING ──
     function showTab(tab, btn) {
@@ -257,81 +283,54 @@
       if (tab === 'tables') loadTables();
     }
 
-    // ── FILTER ──
-    function setFilter(filter, btn) {
-      currentFilter = filter;
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      if (currentTab === 'results' && resultsData) renderResults(resultsData);
-      if (currentTab === 'fixtures' && fixturesData) renderFixtures(fixturesData);
-    }
-
-    // ── FORMAT HELPERS ──
-    function fmtDate(dateStr) {
-      if (!dateStr) return '';
-      return new Date(dateStr).toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short' });
-    }
-    function fmtTime(dateStr) {
-      if (!dateStr) return '';
-      return new Date(dateStr).toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
-    }
-
     // ── LOAD RESULTS ──
     async function loadResults() {
       const container = document.getElementById('results-container');
       try {
-        const res = await fetch('/.netlify/functions/results');
+        const res = await fetch(`/.netlify/functions/results?league=${currentLeague}`);
         if (!res.ok) throw new Error('Failed to fetch results');
         const data = await res.json();
         resultsData = data.fixtures || [];
         renderResults(resultsData);
       } catch(e) {
-        // Fallback data
-        resultsData = [
-          { id:1, state:'FT', leagueId:'501', date:'2026-04-01', home:{name:'Hearts',short:'HEA'}, away:{name:'Aberdeen',short:'ABE'}, score:{home:2,away:0} },
-          { id:2, state:'FT', leagueId:'501', date:'2026-04-01', home:{name:'Celtic',short:'CEL'}, away:{name:'Rangers',short:'RAN'}, score:{home:3,away:1} },
-          { id:3, state:'FT', leagueId:'501', date:'2026-03-29', home:{name:'Hibs',short:'HIB'}, away:{name:'Motherwell',short:'MTH'}, score:{home:1,away:1} },
-          { id:4, state:'FT', leagueId:'501', date:'2026-03-29', home:{name:'St Mirren',short:'STM'}, away:{name:'Dundee',short:'DUN'}, score:{home:0,away:2} },
-        ];
-        renderResults(resultsData);
+        container.innerHTML = '<div class="empty-state">Could not load results. Please try again later.</div>';
       }
     }
 
     function renderResults(fixtures) {
       const container = document.getElementById('results-container');
-      const filtered = currentFilter === 'all' ? fixtures : fixtures.filter(f => f.leagueId === currentFilter);
-
-      if (!filtered.length) {
+      if (!fixtures.length) {
         container.innerHTML = '<div class="empty-state">No results available for this competition.</div>';
         return;
       }
 
-      // Group by league then date
+      // Group by date
       const groups = {};
-      filtered.forEach(f => {
-        const key = f.leagueId || '501';
-        const league = LEAGUE_NAMES[key] || 'Scottish Football';
-        const date = f.date ? fmtDate(f.date) : 'Recent';
-        const groupKey = `${key}__${date}`;
-        if (!groups[groupKey]) groups[groupKey] = { league, date, fixtures: [] };
-        groups[groupKey].fixtures.push(f);
+      fixtures.forEach(f => {
+        const dateKey = f.date ? fmtDate(f.date) : 'Recent';
+        if (!groups[dateKey]) groups[dateKey] = [];
+        groups[dateKey].push(f);
       });
 
+      const leagueName = LEAGUE_NAMES[currentLeague] || 'Scottish Football';
       let html = '';
-      Object.values(groups).forEach(group => {
+      Object.entries(groups).forEach(([date, matches]) => {
         html += `<div class="league-group">
           <div class="league-header">
             <div class="league-badge"></div>
-            <div class="league-name">${group.league}</div>
-            <div class="league-date">${group.date}</div>
+            <div class="league-name">${leagueName}</div>
+            <div class="league-date">${date}</div>
           </div>
           <div class="match-grid">`;
 
-        group.fixtures.forEach(f => {
+        matches.forEach(f => {
           const hw = parseInt(f.score.home) > parseInt(f.score.away);
           const aw = parseInt(f.score.away) > parseInt(f.score.home);
-          const live = ['LIVE','1H','2H','HT'].includes(f.state);
-          const statusLabel = live ? '<span class="match-status live">Live</span>' : '<span class="match-status">FT</span>';
+          const live = ['LIVE','1H','2H','HT','PEN'].includes(f.state);
+          const statusLabel = live
+            ? '<span class="match-status live">Live</span>'
+            : '<span class="match-status">FT</span>';
+          const timeStr = f.date ? fmtTime(f.date) : '';
 
           html += `<div class="match-card">
             <div class="match-teams">
@@ -344,7 +343,7 @@
                 <span class="team-score ${aw?'winner':''}">${f.score.away}</span>
               </div>
             </div>
-            <div class="match-meta">${statusLabel}${f.time?`<span class="match-time">${f.time}</span>`:''}</div>
+            <div class="match-meta">${statusLabel}${timeStr?`<span class="match-time">${timeStr}</span>`:''}</div>
           </div>`;
         });
 
@@ -358,55 +357,44 @@
     async function loadFixtures() {
       const container = document.getElementById('fixtures-container');
       try {
-        const res = await fetch('/.netlify/functions/fixtures');
+        const res = await fetch(`/.netlify/functions/fixtures?league=${currentLeague}`);
         if (!res.ok) throw new Error('Failed to fetch fixtures');
         const data = await res.json();
         fixturesData = data.fixtures || [];
-        if (!fixturesData.length) throw new Error('No fixtures');
         renderFixtures(fixturesData);
       } catch(e) {
-        // Fallback data
-        fixturesData = [
-          { id:1, leagueId:'501', date:'Sat 5 Apr', time:'15:00', home:{name:'Rangers',short:'RAN'}, away:{name:'Hearts',short:'HEA'} },
-          { id:2, leagueId:'501', date:'Sat 5 Apr', time:'15:00', home:{name:'Aberdeen',short:'ABE'}, away:{name:'Celtic',short:'CEL'} },
-          { id:3, leagueId:'501', date:'Sat 5 Apr', time:'15:00', home:{name:'Motherwell',short:'MTH'}, away:{name:'Hibs',short:'HIB'} },
-          { id:4, leagueId:'501', date:'Wed 9 Apr', time:'19:45', home:{name:'Dundee',short:'DUN'}, away:{name:'St Mirren',short:'STM'} },
-        ];
-        renderFixtures(fixturesData);
+        container.innerHTML = '<div class="empty-state">Could not load fixtures. Please try again later.</div>';
       }
     }
 
     function renderFixtures(fixtures) {
       const container = document.getElementById('fixtures-container');
-      const filtered = currentFilter === 'all' ? fixtures : fixtures.filter(f => f.leagueId === currentFilter);
-
-      if (!filtered.length) {
+      if (!fixtures.length) {
         container.innerHTML = '<div class="empty-state">No upcoming fixtures for this competition.</div>';
         return;
       }
 
       // Group by date
       const groups = {};
-      filtered.forEach(f => {
-        const key = f.date || 'TBC';
+      fixtures.forEach(f => {
+        const key = f.date ? fmtDate(f.date) : 'TBC';
         if (!groups[key]) groups[key] = [];
         groups[key].push(f);
       });
 
       let html = '';
-      Object.entries(groups).forEach(([date, fixtures]) => {
+      Object.entries(groups).forEach(([date, matches]) => {
         html += `<div class="date-group">
           <div class="date-header"><div class="date-label">${date}</div></div>`;
-        fixtures.forEach(f => {
-          const leagueName = LEAGUE_NAMES[f.leagueId] || 'Scottish Football';
+        matches.forEach(f => {
+          const timeStr = f.date ? fmtTime(f.date) : 'TBC';
           html += `<div class="fixture-row">
-            <div class="fixture-time">${f.time || 'TBC'}</div>
+            <div class="fixture-time">${timeStr}</div>
             <div class="fixture-teams">
               <div class="fixture-home">${f.home.name}</div>
               <div class="fixture-vs">vs</div>
               <div class="fixture-away">${f.away.name}</div>
             </div>
-            <div class="fixture-league">${leagueName}</div>
           </div>`;
         });
         html += `</div>`;
@@ -418,21 +406,23 @@
     // ── LOAD TABLES ──
     async function loadTables() {
       const container = document.getElementById('tables-container');
-      // Placeholder table — replace with real API call when standings endpoint is built
-      const standings = [
-        { pos:1, team:'Hearts', p:31, w:20, d:5, l:6, gd:28, pts:65, form:['w','w','d','w','w'], zone:'promotion' },
-        { pos:2, team:'Celtic', p:31, w:19, d:6, l:6, gd:35, pts:63, form:['w','w','w','l','w'], zone:'promotion' },
-        { pos:3, team:'Rangers', p:31, w:17, d:7, l:7, gd:22, pts:58, form:['d','w','w','w','d'], zone:'' },
-        { pos:4, team:'Aberdeen', p:31, w:14, d:8, l:9, gd:10, pts:50, form:['l','w','d','w','w'], zone:'' },
-        { pos:5, team:'Hibs', p:31, w:13, d:7, l:11, gd:5, pts:46, form:['w','l','w','d','l'], zone:'' },
-        { pos:6, team:'Motherwell', p:31, w:11, d:9, l:11, gd:-2, pts:42, form:['d','l','w','w','d'], zone:'' },
-        { pos:7, team:'St Mirren', p:31, w:10, d:8, l:13, gd:-8, pts:38, form:['l','l','d','w','l'], zone:'' },
-        { pos:8, team:'Dundee', p:31, w:9, d:8, l:14, gd:-12, pts:35, form:['l','d','l','w','l'], zone:'' },
-        { pos:9, team:'Kilmarnock', p:31, w:8, d:9, l:14, gd:-14, pts:33, form:['d','l','l','d','w'], zone:'' },
-        { pos:10, team:'Ross County', p:31, w:7, d:6, l:18, gd:-22, pts:27, form:['l','l','l','d','l'], zone:'' },
-        { pos:11, team:'St Johnstone', p:31, w:5, d:8, l:18, gd:-26, pts:23, form:['l','l','d','l','l'], zone:'relegation' },
-        { pos:12, team:'Livingston', p:31, w:4, d:7, l:20, gd:-16, pts:19, form:['l','l','l','l','d'], zone:'relegation' },
-      ];
+      container.innerHTML = '<div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div></div>';
+      try {
+        const res = await fetch('/.netlify/functions/standings?league=501');
+        if (!res.ok) throw new Error('Failed to fetch standings');
+        const data = await res.json();
+        renderTable(data.standings || []);
+      } catch(e) {
+        container.innerHTML = '<div class="empty-state">Could not load standings. Please try again later.</div>';
+      }
+    }
+
+    function renderTable(standings) {
+      const container = document.getElementById('tables-container');
+      if (!standings.length) {
+        container.innerHTML = '<div class="empty-state">Standings not available.</div>';
+        return;
+      }
 
       let html = `<div class="league-header" style="border-bottom:1px solid #2a2b2d;">
         <div class="league-badge"></div>
@@ -449,23 +439,22 @@
             <th class="num">L</th>
             <th class="num">GD</th>
             <th class="num">Pts</th>
-            <th>Form</th>
           </tr>
         </thead>
         <tbody>`;
 
-      standings.forEach(row => {
-        const formDots = row.form.map(r => `<div class="form-dot ${r}"></div>`).join('');
+      standings.forEach((row, i) => {
+        const zone = i < 2 ? 'zone-promotion' : i >= standings.length - 2 ? 'zone-relegation' : '';
+        const gd = row.gd >= 0 ? `+${row.gd}` : `${row.gd}`;
         html += `<tr>
-          <td class="pos num">${row.pos}</td>
-          <td class="team-cell ${row.zone === 'promotion' ? 'zone-promotion' : row.zone === 'relegation' ? 'zone-relegation' : ''}">${row.team}</td>
-          <td class="num">${row.p}</td>
-          <td class="num">${row.w}</td>
-          <td class="num">${row.d}</td>
-          <td class="num">${row.l}</td>
-          <td class="num">${row.gd > 0 ? '+' : ''}${row.gd}</td>
-          <td class="pts">${row.pts}</td>
-          <td><div class="form-dots">${formDots}</div></td>
+          <td class="pos num">${row.position}</td>
+          <td class="team-cell ${zone}">${row.team}</td>
+          <td class="num">${row.played}</td>
+          <td class="num">${row.won}</td>
+          <td class="num">${row.drawn}</td>
+          <td class="num">${row.lost}</td>
+          <td class="num">${gd}</td>
+          <td class="pts">${row.points}</td>
         </tr>`;
       });
 

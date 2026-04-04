@@ -119,15 +119,13 @@
 
   <div class="page-header">
     <div class="page-title">Upcoming <span>Fixtures</span></div>
-    <div class="page-subtitle">Scottish football — next 14 days</div>
+    <div class="page-subtitle">Premiership & Scottish Cup — next 30 days</div>
   </div>
 
   <div class="filter-bar">
     <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
     <button class="filter-btn" onclick="setFilter('501', this)">Premiership</button>
-    <button class="filter-btn" onclick="setFilter('502', this)">Championship</button>
-    <button class="filter-btn" onclick="setFilter('503', this)">League One</button>
-    <button class="filter-btn" onclick="setFilter('504', this)">League Two</button>
+    <button class="filter-btn" onclick="setFilter('507', this)">Scottish Cup</button>
   </div>
 
   <div class="section-header">
@@ -146,13 +144,20 @@
   <script>
     const LEAGUE_NAMES = {
       '501': 'Premiership',
-      '502': 'Championship',
-      '503': 'League One',
-      '504': 'League Two'
+      '507': 'Scottish Cup'
     };
 
     let allFixtures = [];
     let currentFilter = 'all';
+
+    function fmtDate(isoStr) {
+      if (!isoStr) return 'TBC';
+      return new Date(isoStr).toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short' });
+    }
+    function fmtTime(isoStr) {
+      if (!isoStr) return 'TBC';
+      return new Date(isoStr).toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+    }
 
     function setFilter(filter, btn) {
       currentFilter = filter;
@@ -173,25 +178,26 @@
       // Group by date
       const groups = {};
       filtered.forEach(f => {
-        const key = f.date || 'TBC';
+        const key = f.date ? fmtDate(f.date) : 'TBC';
         if (!groups[key]) groups[key] = [];
         groups[key].push(f);
       });
 
       let html = '';
-      Object.entries(groups).forEach(([date, fixtures]) => {
-        const count = fixtures.length;
+      Object.entries(groups).forEach(([date, matches]) => {
+        const count = matches.length;
         html += `<div class="date-group">
           <div class="date-header">
             <div class="date-label">${date}</div>
             <div class="date-count">${count} ${count === 1 ? 'match' : 'matches'}</div>
           </div>`;
 
-        fixtures.forEach(f => {
+        matches.forEach(f => {
           const leagueName = LEAGUE_NAMES[f.leagueId] || 'Scottish Football';
-          const timeClass = f.time === 'TBC' ? 'fixture-time tbc' : 'fixture-time';
+          const timeStr = f.date ? fmtTime(f.date) : 'TBC';
+          const timeClass = timeStr === 'TBC' ? 'fixture-time tbc' : 'fixture-time';
           html += `<div class="fixture-row">
-            <div class="${timeClass}">${f.time || 'TBC'}</div>
+            <div class="${timeClass}">${timeStr}</div>
             <div class="fixture-centre">
               <div class="fixture-home">${f.home.name}</div>
               <div class="fixture-vs">vs</div>
@@ -212,27 +218,15 @@
     async function loadFixtures() {
       const container = document.getElementById('fixtures-container');
       try {
-        const res = await fetch('/.netlify/functions/fixtures');
+        // Fetch both leagues (all) — filter client-side via the filter bar
+        const res = await fetch('/.netlify/functions/fixtures?league=all');
         if (!res.ok) throw new Error('Failed');
         const data = await res.json();
         allFixtures = data.fixtures || [];
         if (!allFixtures.length) throw new Error('No fixtures');
         renderFixtures(allFixtures);
       } catch(e) {
-        // Fallback — real fixtures resume Sat 5 Apr
-        allFixtures = [
-          { id:1, leagueId:'501', date:'Sat 5 Apr', time:'12:30', home:{name:'Rangers'}, away:{name:'Hearts'} },
-          { id:2, leagueId:'501', date:'Sat 5 Apr', time:'15:00', home:{name:'Aberdeen'}, away:{name:'Celtic'} },
-          { id:3, leagueId:'501', date:'Sat 5 Apr', time:'15:00', home:{name:'Motherwell'}, away:{name:'Hibs'} },
-          { id:4, leagueId:'501', date:'Sat 5 Apr', time:'15:00', home:{name:'Kilmarnock'}, away:{name:'St Mirren'} },
-          { id:5, leagueId:'501', date:'Sat 5 Apr', time:'15:00', home:{name:'Ross County'}, away:{name:'St Johnstone'} },
-          { id:6, leagueId:'501', date:'Sat 5 Apr', time:'15:00', home:{name:'Dundee'}, away:{name:'Livingston'} },
-          { id:7, leagueId:'501', date:'Wed 9 Apr', time:'19:45', home:{name:'Celtic'}, away:{name:'Rangers'} },
-          { id:8, leagueId:'501', date:'Wed 9 Apr', time:'19:45', home:{name:'Hearts'}, away:{name:'Aberdeen'} },
-          { id:9, leagueId:'501', date:'Sat 12 Apr', time:'15:00', home:{name:'Hibs'}, away:{name:'Dundee'} },
-          { id:10, leagueId:'501', date:'Sat 12 Apr', time:'15:00', home:{name:'St Mirren'}, away:{name:'Motherwell'} },
-        ];
-        renderFixtures(allFixtures);
+        container.innerHTML = '<div class="empty-state">Could not load fixtures. Please try again later.</div>';
       }
     }
 
