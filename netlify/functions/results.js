@@ -36,7 +36,7 @@ exports.handler = async function (event) {
     `https://api.sportmonks.com/v3/football/fixtures/between/${fromStr}/${toStr}` +
     `?api_token=${SPORTMONKS_TOKEN}` +
     `&filters=fixtureLeagues:${leagueId}` +
-    `&include=participants;state;scores;round` +
+    `&include=participants;state;scores${isCup ? '' : ';round'}` +
     `&per_page=100`;
 
   console.log('[results] Fetching:', url.replace(SPORTMONKS_TOKEN, 'TOKEN_REDACTED'));
