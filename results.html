@@ -92,8 +92,6 @@
     .fixture-home { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 600; color: #e8e6e1; text-align: right; flex: 1; }
     .fixture-vs { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; color: #444; padding: 0 12px; }
     .fixture-away { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 600; color: #e8e6e1; flex: 1; }
-    .fixture-league { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #444; min-width: 100px; text-align: right; }
-    .fixture-venue { font-size: 11px; color: #444; min-width: 80px; text-align: right; display: none; }
 
     /* ── TABLE ── */
     .table-container { border-bottom: 1px solid #2a2b2d; overflow-x: auto; }
@@ -107,11 +105,6 @@
     .league-table td.pos { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; color: #555; width: 32px; }
     .league-table td.team-cell { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 600; color: #e8e6e1; }
     .league-table td.pts { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; color: #e84040; text-align: center; }
-    .form-dots { display: flex; gap: 3px; }
-    .form-dot { width: 8px; height: 8px; border-radius: 50%; }
-    .form-dot.w { background: #4caf50; }
-    .form-dot.d { background: #888; }
-    .form-dot.l { background: #e84040; }
     .zone-promotion { border-left: 3px solid #4caf50; }
     .zone-relegation { border-left: 3px solid #e84040; }
 
@@ -139,7 +132,6 @@
       .match-grid { grid-template-columns: 1fr; }
       .match-card { border-right: none; }
       .match-card:nth-child(3n) { border-right: none; }
-      .fixture-league { display: none; }
       .tab-btn { padding: 0.75rem 1rem; font-size: 12px; }
       .footer { flex-direction: column; gap: 6px; text-align: center; }
     }
@@ -176,11 +168,11 @@
   </div>
 
   <div class="page-header">
-    <div class="page-title">Results & <span>Table</span></div>
-    <div class="page-subtitle">Scottish football scores and league tables</div>
+    <div class="page-title">Results & <span>Fixtures</span></div>
+    <div class="page-subtitle">Scottish football scores, upcoming games and league tables</div>
     <div class="tab-bar">
       <button class="tab-btn active" data-tab="results" onclick="showTab('results', this)">Results</button>
-      <button class="tab-btn" data-tab="tables" onclick="showTab('tables', this)">Table</button>
+      <button class="tab-btn" data-tab="fixtures" onclick="showTab('fixtures', this)">Fixtures</button>
     </div>
   </div>
 
@@ -192,7 +184,7 @@
     <button class="filter-btn" onclick="setCompetition('516', this)">League One</button>
   </div>
 
-  <!-- RESULTS TAB -->
+  <!-- RESULTS -->
   <div id="tab-results">
     <div class="section-header">
       <div class="section-title"><span>//</span>Latest results</div>
@@ -202,10 +194,20 @@
     </div>
   </div>
 
-  <!-- TABLES TAB -->
-  <div id="tab-tables" style="display:none;">
+  <!-- FIXTURES -->
+  <div id="tab-fixtures" style="display:none;">
     <div class="section-header">
-      <div class="section-title"><span>//</span>League tables</div>
+      <div class="section-title"><span>//</span>Upcoming fixtures</div>
+    </div>
+    <div class="fixtures-container" id="fixtures-container">
+      <div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div></div>
+    </div>
+  </div>
+
+  <!-- LEAGUE TABLE — always visible, hidden for knockout competitions -->
+  <div id="table-section">
+    <div class="section-header">
+      <div class="section-title"><span>//</span>League table</div>
     </div>
     <div class="table-container" id="tables-container">
       <div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div></div>
@@ -223,6 +225,9 @@
     let currentLeague = '501';
     let resultsData = null;
     let fixturesData = null;
+
+    // Knockout competitions have no league table
+    const KNOCKOUTS = ['507', '510'];
 
     const LEAGUE_NAMES = {
       '501': 'Scottish Premiership',
@@ -247,43 +252,42 @@
       currentLeague = league;
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      // Reset cached data so next tab switch re-fetches for the new league
       resultsData = null;
       fixturesData = null;
-      // Hide Tables tab for knockout competitions (no league table)
-      const knockouts = ['507', '510'];
-      const tablesBtn = document.querySelector('.tab-btn[data-tab="tables"]');
-      if (tablesBtn) tablesBtn.style.display = knockouts.includes(league) ? 'none' : '';
-      // If currently on tables tab and switching to a knockout, go to results
-      if (currentTab === 'tables' && knockouts.includes(league)) {
-        document.querySelector('.tab-btn[data-tab="results"]').click();
-        return;
+
+      // Show or hide the table section depending on competition type
+      const tableSection = document.getElementById('table-section');
+      if (KNOCKOUTS.includes(league)) {
+        tableSection.style.display = 'none';
+      } else {
+        tableSection.style.display = '';
+        loadTables();
       }
-      // Reload current tab
-      if (currentTab === 'results') { document.getElementById('results-container').innerHTML = '<div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div></div>'; loadResults(); }
-      if (currentTab === 'fixtures') { document.getElementById('fixtures-container').innerHTML = '<div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div></div>'; loadFixtures(); }
-      if (currentTab === 'tables') loadTables();
+
+      // Reload whichever content tab is active
+      if (currentTab === 'results') {
+        document.getElementById('results-container').innerHTML = '<div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div></div>';
+        loadResults();
+      } else {
+        document.getElementById('fixtures-container').innerHTML = '<div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div></div>';
+        loadFixtures();
+      }
     }
 
     // ── TAB SWITCHING ──
     function showTab(tab, btn) {
       currentTab = tab;
-      // Show/hide content panels — never touches the filter bar
-      ['results','fixtures','tables'].forEach(t => {
-        document.getElementById(`tab-${t}`).style.display = t === tab ? 'block' : 'none';
-      });
+      document.getElementById('tab-results').style.display = tab === 'results' ? 'block' : 'none';
+      document.getElementById('tab-fixtures').style.display = tab === 'fixtures' ? 'block' : 'none';
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
 
-      // Always re-render from cache if available; fetch fresh otherwise
       if (tab === 'results') {
         if (resultsData) renderResults(resultsData);
         else loadResults();
-      } else if (tab === 'fixtures') {
+      } else {
         if (fixturesData) renderFixtures(fixturesData);
         else loadFixtures();
-      } else if (tab === 'tables') {
-        loadTables();
       }
     }
 
@@ -308,7 +312,6 @@
         return;
       }
 
-      // Group by date
       const groups = {};
       fixtures.forEach(f => {
         const dateKey = f.date ? fmtDate(f.date) : 'Recent';
@@ -378,7 +381,6 @@
         return;
       }
 
-      // Group by date
       const groups = {};
       fixtures.forEach(f => {
         const key = f.date ? fmtDate(f.date) : 'TBC';
@@ -407,7 +409,7 @@
       container.innerHTML = html;
     }
 
-    // ── LOAD TABLES ──
+    // ── LOAD TABLE ──
     async function loadTables() {
       const container = document.getElementById('tables-container');
       container.innerHTML = '<div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div></div>';
@@ -479,6 +481,7 @@
 
     // ── INIT ──
     loadResults();
+    loadTables();
   </script>
 </body>
 </html>
