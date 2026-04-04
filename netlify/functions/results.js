@@ -18,9 +18,9 @@ exports.handler = async function (event) {
 
   const leagueId = (event.queryStringParameters && event.queryStringParameters.league) || '501';
 
-  // Cups may have their last game weeks or months ago — look back 180 days
+  // Cups may have their last game months ago — look back a full season
   const CUPS = ['507', '510'];
-  const lookbackDays = CUPS.includes(String(leagueId)) ? 180 : 30;
+  const lookbackDays = CUPS.includes(String(leagueId)) ? 365 : 30;
 
   const today = new Date();
   const from = new Date(today);
