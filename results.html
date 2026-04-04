@@ -268,15 +268,23 @@
     // ── TAB SWITCHING ──
     function showTab(tab, btn) {
       currentTab = tab;
+      // Show/hide content panels — never touches the filter bar
       ['results','fixtures','tables'].forEach(t => {
         document.getElementById(`tab-${t}`).style.display = t === tab ? 'block' : 'none';
       });
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
 
-      if (tab === 'results' && !resultsData) loadResults();
-      if (tab === 'fixtures' && !fixturesData) loadFixtures();
-      if (tab === 'tables') loadTables();
+      // Always re-render from cache if available; fetch fresh otherwise
+      if (tab === 'results') {
+        if (resultsData) renderResults(resultsData);
+        else loadResults();
+      } else if (tab === 'fixtures') {
+        if (fixturesData) renderFixtures(fixturesData);
+        else loadFixtures();
+      } else if (tab === 'tables') {
+        loadTables();
+      }
     }
 
     // ── LOAD RESULTS ──
