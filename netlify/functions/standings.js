@@ -96,15 +96,14 @@ exports.handler = async function (event) {
           console.log('[standings] Row 1 full details array:', JSON.stringify(details));
         }
 
-        // Sportmonks V3 type_ids — trying two common sets; logs above will confirm correct ones
-        // Set A: 78=played, 84=won, 85=drawn, 86=lost, 87=gf, 88=ga
-        // Set B: 129=won, 130=drawn, 131=lost, 132=gf, 133=ga
-        const played = detailVal(details, 78, 34)         ?? row.played  ?? row.games_played ?? 0;
-        const won    = detailVal(details, 84, 129)         ?? row.won    ?? 0;
-        const drawn  = detailVal(details, 85, 130)         ?? row.draw   ?? row.drawn ?? 0;
-        const lost   = detailVal(details, 86, 131)         ?? row.lost   ?? 0;
-        const gf     = detailVal(details, 87, 132)         ?? row.goals_scored ?? row.goals_for ?? 0;
-        const ga     = detailVal(details, 88, 133)         ?? row.goals_against ?? 0;
+        // Sportmonks V3 standard type_ids:
+        // 129=played, 130=won, 131=draw, 132=lost, 133=goals_for, 134=goals_against, 179=points
+        const played = detailVal(details, 129) ?? row.played  ?? row.games_played ?? 0;
+        const won    = detailVal(details, 130) ?? row.won    ?? 0;
+        const drawn  = detailVal(details, 131) ?? row.draw   ?? row.drawn ?? 0;
+        const lost   = detailVal(details, 132) ?? row.lost   ?? 0;
+        const gf     = detailVal(details, 133) ?? row.goals_scored ?? row.goals_for ?? 0;
+        const ga     = detailVal(details, 134) ?? row.goals_against ?? 0;
         const gd     = row.goal_difference ?? (gf - ga);
 
         return {
