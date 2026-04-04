@@ -62,18 +62,20 @@ exports.handler = async function (event) {
         const parts = f.participants || [];
         const home = parts.find(p => p.meta?.location === 'home') || parts[0] || {};
         const away = parts.find(p => p.meta?.location === 'away') || parts[1] || {};
-        const ftScore = (f.scores || []).find(s => s.description === 'CURRENT' || s.description === 'FT');
+        const ftScores = (f.scores || []).filter(s => s.description === 'CURRENT' || s.description === 'FT');
+        const homeScore = ftScores.find(s => s.score?.participant === 'home');
+        const awayScore = ftScores.find(s => s.score?.participant === 'away');
 
         return {
           id: f.id,
           leagueId: String(leagueId),
           state: f.state?.short || '',
           date: f.starting_at || null,
-          home: { name: home.name || 'Home', short: home.short_code || home.name || 'Home' },
-          away: { name: away.name || 'Away', short: away.short_code || away.name || 'Away' },
+          home: { name: home.name || 'Home', short: home.short_code || home.name || 'Home', crest: home.image_path || null },
+          away: { name: away.name || 'Away', short: away.short_code || away.name || 'Away', crest: away.image_path || null },
           score: {
-            home: ftScore?.score?.home ?? '-',
-            away: ftScore?.score?.away ?? '-'
+            home: homeScore?.score?.goals ?? '-',
+            away: awayScore?.score?.goals ?? '-'
           }
         };
       });
