@@ -90,18 +90,21 @@
 
     /* League table */
     .table-container { border-bottom: 1px solid #2a2b2d; overflow-x: auto; }
-    .standings-table { width: 100%; border-collapse: collapse; }
-    .standings-table th { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #555; padding: 0.5rem 1.25rem; text-align: left; background: #0d0e0f; border-bottom: 1px solid #2a2b2d; white-space: nowrap; }
+    .standings-table { width: 100%; border-collapse: collapse; min-width: 480px; }
+    .standings-table th { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #555; padding: 0.6rem 1rem; text-align: left; background: #0d0e0f; border-bottom: 2px solid #2a2b2d; white-space: nowrap; }
     .standings-table th.num { text-align: center; }
-    .standings-table td { padding: 0.625rem 1.25rem; border-bottom: 1px solid #1a1b1d; font-size: 14px; color: #aaa; }
+    .standings-table td { padding: 0.6rem 1rem; border-bottom: 1px solid #1a1b1d; font-size: 14px; color: #aaa; vertical-align: middle; }
     .standings-table tr:last-child td { border-bottom: none; }
     .standings-table tr:hover td { background: #161718; color: #e8e6e1; }
     .standings-table td.num { text-align: center; font-family: 'Barlow Condensed', sans-serif; font-size: 15px; }
-    .standings-table td.pos { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; color: #555; width: 32px; }
+    .standings-table td.pos { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; color: #555; width: 28px; text-align: center; padding-left: 1.25rem; }
     .standings-table td.team-cell { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 600; color: #e8e6e1; }
-    .standings-table td.pts { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; color: #e84040; text-align: center; }
-    .zone-promotion { border-left: 3px solid #4caf50; }
-    .zone-relegation { border-left: 3px solid #e84040; }
+    .standings-table td.pts { font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 800; color: #e8e6e1; text-align: center; background: #161718; }
+    .standings-table tr:hover td.pts { background: #1e1f20; }
+    .team-crest { width: 20px; height: 20px; object-fit: contain; margin-right: 10px; vertical-align: middle; border-radius: 2px; }
+    .split-row td { border-top: 2px solid #333 !important; }
+    .zone-europe td.pos { border-left: 3px solid #4caf50; }
+    .zone-relegation td.pos { border-left: 3px solid #e84040; }
 
     .empty-state { padding: 3rem 1.25rem; text-align: center; color: #555; font-size: 14px; }
     .loading-state { padding: 2rem 1.25rem; text-align: center; }
@@ -455,32 +458,46 @@
         return;
       }
       var name = LEAGUE_NAMES[league] || 'League Table';
-      var html = '<div class="league-header" style="border-bottom:1px solid #2a2b2d"><div class="league-badge"></div><div class="league-name">' + name + ' 2025/26</div></div>'
+      // Premiership splits top 6 / bottom 6 after 33 games
+      var splitAfter = league === '501' ? 6 : 0;
+
+      var html = '<div class="league-header" style="border-bottom:1px solid #2a2b2d">'
+        + '<div class="league-badge"></div>'
+        + '<div class="league-name">' + name + ' 2025/26</div>'
+        + '</div>'
         + '<table class="standings-table"><thead><tr>'
-        + '<th style="width:32px">#</th><th>Team</th>'
-        + '<th class="num">P</th><th class="num">W</th><th class="num">D</th><th class="num">L</th>'
-        + '<th class="num">GF</th><th class="num">GA</th><th class="num">GD</th><th class="num">Pts</th>'
+        + '<th class="pos">#</th><th>Club</th>'
+        + '<th class="num">PL</th><th class="num">W</th><th class="num">D</th><th class="num">L</th>'
+        + '<th class="num">GD</th><th class="num">PTS</th>'
         + '</tr></thead><tbody>';
+
       standings.forEach(function(row, i) {
-        var zone = i < 2 ? 'zone-promotion' : (i >= standings.length - 2 ? 'zone-relegation' : '');
-        var gd   = row.gd >= 0 ? '+' + row.gd : '' + row.gd;
-        html += '<tr>'
-          + '<td class="pos num">' + row.position + '</td>'
-          + '<td class="team-cell ' + zone + '">' + row.team + '</td>'
+        var pos    = row.position;
+        // European spots: top 3 for Premiership; relegation: bottom 2
+        var zone   = (league === '501' && pos <= 3) ? 'zone-europe'
+                   : (pos > standings.length - 2) ? 'zone-relegation'
+                   : '';
+        var split  = (splitAfter && pos === splitAfter + 1) ? 'split-row' : '';
+        var gd     = row.gd > 0 ? '+' + row.gd : '' + row.gd;
+        var crest  = row.crest
+          ? '<img class="team-crest" src="' + row.crest + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">'
+          : '';
+        html += '<tr class="' + zone + ' ' + split + '">'
+          + '<td class="pos">' + pos + '</td>'
+          + '<td class="team-cell">' + crest + row.team + '</td>'
           + '<td class="num">' + row.played + '</td>'
           + '<td class="num">' + row.won + '</td>'
           + '<td class="num">' + row.drawn + '</td>'
           + '<td class="num">' + row.lost + '</td>'
-          + '<td class="num">' + row.gf + '</td>'
-          + '<td class="num">' + row.ga + '</td>'
           + '<td class="num">' + gd + '</td>'
           + '<td class="pts">' + row.points + '</td>'
           + '</tr>';
       });
+
       html += '</tbody></table>'
-        + '<div style="padding:0.75rem 1.25rem;font-size:11px;color:#444;border-top:1px solid #2a2b2d">'
-        + '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#4caf50;margin-right:4px"></span>Promotion &nbsp;&nbsp;'
-        + '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#e84040;margin-right:4px"></span>Relegation'
+        + '<div style="padding:0.6rem 1.25rem;font-size:11px;color:#444;border-top:1px solid #2a2b2d;display:flex;gap:16px;">'
+        + '<span><span style="display:inline-block;width:3px;height:12px;background:#4caf50;margin-right:5px;border-radius:1px;vertical-align:middle"></span>European</span>'
+        + '<span><span style="display:inline-block;width:3px;height:12px;background:#e84040;margin-right:5px;border-radius:1px;vertical-align:middle"></span>Relegation</span>'
         + '</div>';
       el.innerHTML = html;
     }
