@@ -119,13 +119,16 @@
 
   <div class="page-header">
     <div class="page-title">Upcoming <span>Fixtures</span></div>
-    <div class="page-subtitle">Premiership & Scottish Cup — next 30 days</div>
+    <div class="page-subtitle">Scottish football — next 30 days</div>
   </div>
 
   <div class="filter-bar">
     <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
     <button class="filter-btn" onclick="setFilter('501', this)">Premiership</button>
+    <button class="filter-btn" onclick="setFilter('504', this)">Championship</button>
     <button class="filter-btn" onclick="setFilter('507', this)">Scottish Cup</button>
+    <button class="filter-btn" onclick="setFilter('510', this)">League Cup</button>
+    <button class="filter-btn" onclick="setFilter('516', this)">League One</button>
   </div>
 
   <div class="section-header">
@@ -144,7 +147,10 @@
   <script>
     const LEAGUE_NAMES = {
       '501': 'Premiership',
-      '507': 'Scottish Cup'
+      '504': 'Championship',
+      '507': 'Scottish Cup',
+      '510': 'League Cup',
+      '516': 'League One'
     };
 
     let allFixtures = [];

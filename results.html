@@ -186,7 +186,10 @@
 
   <div class="filter-bar">
     <button class="filter-btn active" onclick="setCompetition('501', this)">Premiership</button>
+    <button class="filter-btn" onclick="setCompetition('504', this)">Championship</button>
     <button class="filter-btn" onclick="setCompetition('507', this)">Scottish Cup</button>
+    <button class="filter-btn" onclick="setCompetition('510', this)">League Cup</button>
+    <button class="filter-btn" onclick="setCompetition('516', this)">League One</button>
   </div>
 
   <!-- RESULTS TAB -->
@@ -223,7 +226,10 @@
 
     const LEAGUE_NAMES = {
       '501': 'Scottish Premiership',
-      '507': 'Scottish Cup'
+      '504': 'Championship',
+      '507': 'Scottish Cup',
+      '510': 'League Cup',
+      '516': 'League One'
     };
 
     // ── FORMAT HELPERS ──
@@ -244,11 +250,12 @@
       // Reset cached data so next tab switch re-fetches for the new league
       resultsData = null;
       fixturesData = null;
-      // Hide Tables tab for Scottish Cup (knockout competition, no table)
+      // Hide Tables tab for knockout competitions (no league table)
+      const knockouts = ['507', '510'];
       const tablesBtn = document.querySelector('.tab-btn[data-tab="tables"]');
-      if (tablesBtn) tablesBtn.style.display = league === '507' ? 'none' : '';
-      // If currently on tables tab and switching to Cup, go to results
-      if (currentTab === 'tables' && league === '507') {
+      if (tablesBtn) tablesBtn.style.display = knockouts.includes(league) ? 'none' : '';
+      // If currently on tables tab and switching to a knockout, go to results
+      if (currentTab === 'tables' && knockouts.includes(league)) {
         document.querySelector('.tab-btn[data-tab="results"]').click();
         return;
       }

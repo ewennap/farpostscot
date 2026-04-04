@@ -387,8 +387,11 @@
       try {
         const res = await fetch('/.netlify/functions/results');
         const data = await res.json();
-        const fixtures = data.fixtures;
-        if (!fixtures?.length) { fallbackScores(); return; }
+        const all = data.fixtures;
+        if (!all?.length) { fallbackScores(); return; }
+        // Show only the most recent matchday: fixtures within 48h of the latest result, max 6
+        const latestTime = new Date(all[0].date).getTime();
+        const fixtures = all.filter(f => new Date(f.date).getTime() >= latestTime - 48 * 60 * 60 * 1000).slice(0, 6);
         let tHtml='', rHtml='';
         fixtures.forEach(f => {
           const live=['LIVE','1H','2H','HT'].includes(f.state);

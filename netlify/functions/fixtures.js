@@ -54,11 +54,14 @@ exports.handler = async function (event) {
     let raw = [];
 
     if (leagueParam === 'all') {
-      const [r501, r507] = await Promise.all([
+      const [r501, r504, r507, r510, r516] = await Promise.all([
         fetchFixturesForLeague('501', fromStr, toStr),
-        fetchFixturesForLeague('507', fromStr, toStr)
+        fetchFixturesForLeague('504', fromStr, toStr),
+        fetchFixturesForLeague('507', fromStr, toStr),
+        fetchFixturesForLeague('510', fromStr, toStr),
+        fetchFixturesForLeague('516', fromStr, toStr)
       ]);
-      raw = [...r501, ...r507];
+      raw = [...r501, ...r504, ...r507, ...r510, ...r516];
     } else {
       raw = await fetchFixturesForLeague(leagueParam, fromStr, toStr);
     }
