@@ -431,9 +431,11 @@
         let tickerItems = [];
 
         LEAGUE_IDS.forEach((id, i) => {
-          const fixtures = responses[i]?.fixtures || [];
+          const resp = responses[i];
+          // null means the fetch itself threw; no fixtures array means API returned empty
+          const fixtures = resp?.fixtures || [];
           if (!fixtures.length) {
-            rHtml += `<div class="result-card"><div class="result-competition">${LEAGUE_NAMES[id]}</div><div class="result-none">No results yet</div></div>`;
+            rHtml += `<div class="result-card"><div class="result-competition">${LEAGUE_NAMES[id]}</div><div class="result-none">No results available</div></div>`;
             return;
           }
           // Most recent result for this league

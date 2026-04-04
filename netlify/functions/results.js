@@ -1,86 +1,83 @@
 // netlify/functions/results.js
 // Sportmonks V3 API — recent results
 //
-// API call:
-// GET https://api.sportmonks.com/v3/football/fixtures/between/{from}/{to}?api_token={TOKEN}&filters=fixtureLeagues:{ID}&include=participants;state;scores&per_page=50
+// Leagues (501, 504, 516): /between/{from}/{to}?filters=fixtureLeagues:{id}&include=...;round
+// Cups (507, 510):         /fixtures?filters=fixtureLeagues:{id}&include=...
+//   (cups reject the /between/ endpoint with 422, and don't support the round include)
 
 const SPORTMONKS_TOKEN = process.env.SPORTMONKS_TOKEN;
+const CUPS = ['507', '510'];
 
 exports.handler = async function (event) {
-  console.log('[results] SPORTMONKS_TOKEN set:', !!SPORTMONKS_TOKEN);
-
   if (!SPORTMONKS_TOKEN) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: 'SPORTMONKS_TOKEN environment variable not set' })
-    };
+    return { statusCode: 500, body: JSON.stringify({ error: 'SPORTMONKS_TOKEN not set' }) };
   }
 
-  const leagueId = (event.queryStringParameters && event.queryStringParameters.league) || '501';
+  const leagueId = String((event.queryStringParameters && event.queryStringParameters.league) || '501');
+  const isCup = CUPS.includes(leagueId);
 
-  // Cups: use fixed season start so we always capture the full season's results
-  // League Cup Final 2025 was 14 Dec 2025; Scottish Cup runs Aug–May
-  const CUPS = ['507', '510'];
-  const isCup = CUPS.includes(String(leagueId));
+  // Cups use the general fixtures endpoint (no date range — /between/ returns 422)
+  // Leagues use /between/ with a 30-day window + round include
+  let url;
+  if (isCup) {
+    url =
+      `https://api.sportmonks.com/v3/football/fixtures` +
+      `?api_token=${SPORTMONKS_TOKEN}` +
+      `&filters=fixtureLeagues:${leagueId}` +
+      `&include=participants;state;scores` +
+      `&per_page=100`;
+  } else {
+    const today = new Date();
+    const from  = new Date(today);
+    from.setDate(from.getDate() - 30);
+    const fromStr = from.toISOString().split('T')[0];
+    const toStr   = today.toISOString().split('T')[0];
+    url =
+      `https://api.sportmonks.com/v3/football/fixtures/between/${fromStr}/${toStr}` +
+      `?api_token=${SPORTMONKS_TOKEN}` +
+      `&filters=fixtureLeagues:${leagueId}` +
+      `&include=participants;state;scores;round` +
+      `&per_page=100`;
+  }
 
-  const today = new Date();
-  const toStr = today.toISOString().split('T')[0];
-  // Cups: go back to 1 Aug 2025 (season start); leagues: 30 days
-  const fromStr = isCup ? '2025-08-01' : (() => {
-    const d = new Date(today); d.setDate(d.getDate() - 30); return d.toISOString().split('T')[0];
-  })();
-
-  console.log(`[results] league=${leagueId} isCup=${isCup} from=${fromStr} to=${toStr}`);
-
-  const url =
-    `https://api.sportmonks.com/v3/football/fixtures/between/${fromStr}/${toStr}` +
-    `?api_token=${SPORTMONKS_TOKEN}` +
-    `&filters=fixtureLeagues:${leagueId}` +
-    `&include=participants;state;scores${isCup ? '' : ';round'}` +
-    `&per_page=100`;
-
-  console.log('[results] Fetching:', url.replace(SPORTMONKS_TOKEN, 'TOKEN_REDACTED'));
+  console.log(`[results] league=${leagueId} isCup=${isCup}`);
+  console.log('[results] URL:', url.replace(SPORTMONKS_TOKEN, 'TOKEN'));
 
   try {
     const response = await fetch(url);
-    console.log('[results] Response status:', response.status);
+    const data     = await response.json();
 
-    const data = await response.json();
-    const rawCount = (data.data || []).length;
-    console.log(`[results] league=${leagueId} raw fixture count: ${rawCount}`);
-    if (data.message) console.log('[results] API message:', data.message);
-    if (data.pagination) console.log('[results] pagination:', JSON.stringify(data.pagination));
-
+    console.log(`[results] status=${response.status} count=${(data.data || []).length}`);
     if (!response.ok) {
-      return {
-        statusCode: 502,
-        body: JSON.stringify({ error: `Sportmonks error: ${response.status}`, detail: data.message || '' })
-      };
+      console.error('[results] Error body:', JSON.stringify(data));
+      return { statusCode: 502, body: JSON.stringify({ error: data.message || 'Sportmonks error' }) };
     }
 
-    // Log first fixture in full to inspect the real data structure
-    if (data.data && data.data[0]) {
-      console.log('[results] First fixture raw:', JSON.stringify(data.data[0], null, 2));
+    if (data.data?.[0]) {
+      console.log('[results] First fixture date:', data.data[0].starting_at, 'state:', data.data[0].state?.short);
     }
 
-    // No state filtering — return all fixtures so we can inspect the raw structure
     const fixtures = (data.data || [])
       .sort((a, b) => new Date(b.starting_at) - new Date(a.starting_at))
       .slice(0, 30)
       .map(f => {
-        const parts = f.participants || [];
-        const home = parts.find(p => p.meta?.location === 'home') || parts[0] || {};
-        const away = parts.find(p => p.meta?.location === 'away') || parts[1] || {};
+        const parts    = f.participants || [];
+        const home     = parts.find(p => p.meta?.location === 'home') || parts[0] || {};
+        const away     = parts.find(p => p.meta?.location === 'away') || parts[1] || {};
         const ftScores = (f.scores || []).filter(s => s.description === 'CURRENT' || s.description === 'FT');
         const homeScore = ftScores.find(s => s.score?.participant === 'home');
         const awayScore = ftScores.find(s => s.score?.participant === 'away');
 
+        // Only expose round name for non-cup leagues (cups don't include it;
+        // leagues get matchday numbers which we suppress in the UI)
+        const round = (!isCup && f.round?.name) ? f.round.name : null;
+
         return {
-          id: f.id,
-          leagueId: String(leagueId),
-          state: f.state?.short || '',
-          date: f.starting_at || null,
-          round: f.round?.name || null,
+          id:      f.id,
+          leagueId,
+          state:   f.state?.short || '',
+          date:    f.starting_at || null,
+          round,
           home: { name: home.name || 'Home', short: home.short_code || home.name || 'Home', crest: home.image_path || null },
           away: { name: away.name || 'Away', short: away.short_code || away.name || 'Away', crest: away.image_path || null },
           score: {
@@ -90,18 +87,15 @@ exports.handler = async function (event) {
         };
       });
 
-    console.log('[results] Returning fixtures:', fixtures.length);
+    console.log('[results] Returning:', fixtures.length, 'fixtures');
 
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json', 'Cache-Control': isCup ? 'no-store' : 'public, max-age=60' },
       body: JSON.stringify({ fixtures })
     };
-  } catch (error) {
-    console.error('[results] Error:', error.message);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: error.message })
-    };
+  } catch (err) {
+    console.error('[results] Unexpected error:', err.message);
+    return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
   }
 };
