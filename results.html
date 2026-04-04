@@ -257,8 +257,8 @@
     function showContentTab(name) {
       activeContentTab = name;
 
-      // Update top-tab button active class
-      ['results','fixtures','table'].forEach(function(t) {
+      // Update top-tab button active class (only results and table exist)
+      ['results','table'].forEach(function(t) {
         document.getElementById('toptab-' + t).classList.toggle('active', t === name);
       });
 
