@@ -18,22 +18,26 @@ exports.handler = async function (event) {
 
   const leagueId = (event.queryStringParameters && event.queryStringParameters.league) || '501';
 
-  // Cups may have their last game months ago — look back a full season
+  // Cups: use fixed season start so we always capture the full season's results
+  // League Cup Final 2025 was 14 Dec 2025; Scottish Cup runs Aug–May
   const CUPS = ['507', '510'];
-  const lookbackDays = CUPS.includes(String(leagueId)) ? 365 : 30;
+  const isCup = CUPS.includes(String(leagueId));
 
   const today = new Date();
-  const from = new Date(today);
-  from.setDate(from.getDate() - lookbackDays);
-  const fromStr = from.toISOString().split('T')[0];
   const toStr = today.toISOString().split('T')[0];
+  // Cups: go back to 1 Aug 2025 (season start); leagues: 30 days
+  const fromStr = isCup ? '2025-08-01' : (() => {
+    const d = new Date(today); d.setDate(d.getDate() - 30); return d.toISOString().split('T')[0];
+  })();
+
+  console.log(`[results] league=${leagueId} isCup=${isCup} from=${fromStr} to=${toStr}`);
 
   const url =
     `https://api.sportmonks.com/v3/football/fixtures/between/${fromStr}/${toStr}` +
     `?api_token=${SPORTMONKS_TOKEN}` +
     `&filters=fixtureLeagues:${leagueId}` +
     `&include=participants;state;scores;round` +
-    `&per_page=50`;
+    `&per_page=100`;
 
   console.log('[results] Fetching:', url.replace(SPORTMONKS_TOKEN, 'TOKEN_REDACTED'));
 
