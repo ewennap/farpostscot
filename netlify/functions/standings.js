@@ -70,10 +70,6 @@ exports.handler = async function (event) {
     }
 
     // Build a helper: extract a value from the details array by type_id
-    // Sportmonks V3 standing detail type_ids (common values):
-    //   129 = wins total, 130 = draws total, 131 = losses total
-    //   132 = goals for, 133 = goals against
-    //   34  = games played (alternative)
     function detailVal(details, ...typeIds) {
       if (!Array.isArray(details)) return null;
       for (const tid of typeIds) {
@@ -88,19 +84,28 @@ exports.handler = async function (event) {
       .map(row => {
         const details = row.details || [];
 
-        // Try details array first, fall back to direct fields
-        const played = detailVal(details, 34, 129)       ?? row.played  ?? row.games_played ?? 0;
-        const won    = detailVal(details, 129)            ?? row.won    ?? 0;
-        const drawn  = detailVal(details, 130)            ?? row.draw   ?? row.drawn ?? 0;
-        const lost   = detailVal(details, 131)            ?? row.lost   ?? 0;
-        const gf     = detailVal(details, 132)            ?? row.goals_scored ?? row.goals_for ?? 0;
-        const ga     = detailVal(details, 133)            ?? row.goals_against ?? 0;
-        const gd     = row.goal_difference ?? (gf - ga);
-
-        // Log type_ids seen on first row so we can correct the mapping if wrong
-        if (row.position === 1 && details.length) {
-          console.log('[standings] Detail type_ids on row 1:', details.map(d => ({ type_id: d.type_id, value: d.value, total: d.total })));
+        // Log the full details array for the first row so we can map type_ids correctly
+        if (row.position === 1) {
+          console.log('[standings] Row 1 direct fields:', JSON.stringify({
+            played: row.played, games_played: row.games_played,
+            won: row.won, draw: row.draw, drawn: row.drawn, lost: row.lost,
+            goals_scored: row.goals_scored, goals_for: row.goals_for,
+            goals_against: row.goals_against, goal_difference: row.goal_difference,
+            points: row.points
+          }));
+          console.log('[standings] Row 1 full details array:', JSON.stringify(details));
         }
+
+        // Sportmonks V3 type_ids — trying two common sets; logs above will confirm correct ones
+        // Set A: 78=played, 84=won, 85=drawn, 86=lost, 87=gf, 88=ga
+        // Set B: 129=won, 130=drawn, 131=lost, 132=gf, 133=ga
+        const played = detailVal(details, 78, 34)         ?? row.played  ?? row.games_played ?? 0;
+        const won    = detailVal(details, 84, 129)         ?? row.won    ?? 0;
+        const drawn  = detailVal(details, 85, 130)         ?? row.draw   ?? row.drawn ?? 0;
+        const lost   = detailVal(details, 86, 131)         ?? row.lost   ?? 0;
+        const gf     = detailVal(details, 87, 132)         ?? row.goals_scored ?? row.goals_for ?? 0;
+        const ga     = detailVal(details, 88, 133)         ?? row.goals_against ?? 0;
+        const gd     = row.goal_difference ?? (gf - ga);
 
         return {
           position: row.position,
