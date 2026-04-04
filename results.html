@@ -16,7 +16,7 @@
     body { background: #111213; color: #e8e6e1; font-family: 'Barlow', sans-serif; min-height: 100vh; }
 
     /* ── NAV ── */
-    .nav { display: flex; align-items: center; justify-content: space-between; padding: 0 1.25rem; height: 52px; border-bottom: 1px solid #2a2b2d; background: #0d0e0f; }
+    .nav { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 1.25rem; height: 52px; border-bottom: 1px solid #2a2b2d; background: rgba(13,14,15,0.96); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
     .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: 0.12em; color: #e8e6e1; text-decoration: none; white-space: nowrap; }
     .logo-dot { color: #e84040; }
     .nav-links { display: flex; gap: 20px; }
@@ -415,7 +415,7 @@
       const container = document.getElementById('tables-container');
       container.innerHTML = '<div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div></div>';
       try {
-        const res = await fetch('/.netlify/functions/standings?league=501');
+        const res = await fetch(`/.netlify/functions/standings?league=${currentLeague}`);
         if (!res.ok) throw new Error('Failed to fetch standings');
         const data = await res.json();
         renderTable(data.standings || []);
@@ -431,9 +431,11 @@
         return;
       }
 
+      const leagueName = LEAGUE_NAMES[currentLeague] || 'League Table';
+
       let html = `<div class="league-header" style="border-bottom:1px solid #2a2b2d;">
         <div class="league-badge"></div>
-        <div class="league-name">Scottish Premiership 2025/26</div>
+        <div class="league-name">${leagueName} 2025/26</div>
       </div>
       <table class="league-table">
         <thead>
@@ -444,6 +446,8 @@
             <th class="num">W</th>
             <th class="num">D</th>
             <th class="num">L</th>
+            <th class="num">GF</th>
+            <th class="num">GA</th>
             <th class="num">GD</th>
             <th class="num">Pts</th>
           </tr>
@@ -460,6 +464,8 @@
           <td class="num">${row.won}</td>
           <td class="num">${row.drawn}</td>
           <td class="num">${row.lost}</td>
+          <td class="num">${row.gf}</td>
+          <td class="num">${row.ga}</td>
           <td class="num">${gd}</td>
           <td class="pts">${row.points}</td>
         </tr>`;
