@@ -33,8 +33,8 @@ exports.handler = async function (event) {
       return { statusCode: 502, body: JSON.stringify({ error: leagueData.message || 'League fetch failed' }) };
     }
 
-    const seasonId = leagueData.data?.currentSeason?.id;
-    const seasonName = leagueData.data?.currentSeason?.name;
+    const seasonId = leagueData.data?.currentseason?.id;
+    const seasonName = leagueData.data?.currentseason?.name;
 
     if (!seasonId) {
       console.log('[standings] No currentSeason found. League data:', JSON.stringify(leagueData.data));
