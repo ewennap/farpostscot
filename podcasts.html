@@ -3,11 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-  <link rel="manifest" href="/site.webmanifest">
   <title>Podcasts — Far Post</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
@@ -54,6 +49,7 @@
     .episode-row:hover .ep-play { border-color: #e84040; background: #e84040; }
     .ep-play svg { width: 12px; height: 12px; fill: #888; margin-left: 2px; }
     .episode-row:hover .ep-play svg { fill: #fff; }
+    .ep-thumb { width: 80px; height: 80px; object-fit: cover; flex-shrink: 0; border-radius: 2px; background: #1a1b1c; }
     .ep-info { flex: 1; min-width: 0; }
     .ep-tag { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #e84040; margin-bottom: 4px; }
     .ep-title { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; line-height: 1.1; color: #e8e6e1; margin-bottom: 6px; }
@@ -159,6 +155,17 @@
       return h > 0 ? `${h}h ${m}m` : `${m} min`;
     }
 
+    const ITUNES_NS = 'http://www.itunes.com/dtds/podcast-1.0.dtd';
+
+    function getItunesImage(el) {
+      for (const child of el.children) {
+        if (child.localName === 'image' && child.namespaceURI === ITUNES_NS) {
+          return child.getAttribute('href') || '';
+        }
+      }
+      return '';
+    }
+
     async function loadEpisodes() {
       const list = document.getElementById('episodes-list');
       try {
@@ -166,6 +173,8 @@
         const xml = new DOMParser().parseFromString(await r.text(), 'text/xml');
         const items = xml.querySelectorAll('item');
         if (!items.length) throw new Error();
+
+        const showThumb = getItunesImage(xml.querySelector('channel'));
 
         let html = '';
         items.forEach((item, i) => {
@@ -178,12 +187,14 @@
           const epNum = items.length - i;
           const dateStr = formatDate(pubDate);
           const dur = formatDuration(duration);
+          const thumb = getItunesImage(item) || showThumb;
 
           html += `<a class="episode-row" href="${link}" target="_blank">
             <div class="ep-number">${epNum}</div>
             <div class="ep-play">
               <svg viewBox="0 0 12 12"><polygon points="2,1 10,6 2,11"/></svg>
             </div>
+            ${thumb ? `<img class="ep-thumb" src="${thumb}" alt="" loading="lazy">` : ''}
             <div class="ep-info">
               <div class="ep-tag">Across the Tiers · Ep. ${epNum}</div>
               <div class="ep-title">${title}</div>
@@ -195,10 +206,12 @@
 
         list.innerHTML = html;
       } catch(e) {
+        const fallbackThumb = 'https://assets.pippa.io/shows/cover/1759559622151-fab6ea24-0d2f-446d-be17-be400d570ee5.jpeg';
         list.innerHTML = `
           <a class="episode-row" href="https://feeds.acast.com/public/shows/across-the-tiers" target="_blank">
             <div class="ep-number">6</div>
             <div class="ep-play"><svg viewBox="0 0 12 12"><polygon points="2,1 10,6 2,11"/></svg></div>
+            <img class="ep-thumb" src="${fallbackThumb}" alt="" loading="lazy">
             <div class="ep-info">
               <div class="ep-tag">Across the Tiers · Ep. 6</div>
               <div class="ep-title">Old Firm | League Two Title Race | Scotland Friendlies</div>
@@ -208,6 +221,7 @@
           <a class="episode-row" href="https://feeds.acast.com/public/shows/across-the-tiers" target="_blank">
             <div class="ep-number">5</div>
             <div class="ep-play"><svg viewBox="0 0 12 12"><polygon points="2,1 10,6 2,11"/></svg></div>
+            <img class="ep-thumb" src="${fallbackThumb}" alt="" loading="lazy">
             <div class="ep-info">
               <div class="ep-tag">Across the Tiers · Ep. 5</div>
               <div class="ep-title">SPFL Transfer Window Roundup | Scottish Cup | Interview With Joelle Murray</div>
