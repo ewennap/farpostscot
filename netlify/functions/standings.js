@@ -61,8 +61,7 @@ exports.handler = async function (event) {
     const rows = standingsData.data || [];
     console.log('[standings] Rows returned:', rows.length);
     if (rows.length) {
-      // Log the full first row so we can see all field names and details structure
-      console.log('[standings] First row FULL:', JSON.stringify(rows[0]));
+      console.log('[standings] First row details:', JSON.stringify(rows[0].details));
     }
 
     if (!rows.length) {
