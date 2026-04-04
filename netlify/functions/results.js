@@ -46,8 +46,10 @@ exports.handler = async function (event) {
     console.log('[results] Response status:', response.status);
 
     const data = await response.json();
-    console.log('[results] data.data length:', (data.data || []).length);
+    const rawCount = (data.data || []).length;
+    console.log(`[results] league=${leagueId} raw fixture count: ${rawCount}`);
     if (data.message) console.log('[results] API message:', data.message);
+    if (data.pagination) console.log('[results] pagination:', JSON.stringify(data.pagination));
 
     if (!response.ok) {
       return {
@@ -92,7 +94,7 @@ exports.handler = async function (event) {
 
     return {
       statusCode: 200,
-      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=60' },
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': isCup ? 'no-store' : 'public, max-age=60' },
       body: JSON.stringify({ fixtures })
     };
   } catch (error) {
