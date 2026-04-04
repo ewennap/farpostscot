@@ -22,7 +22,7 @@ exports.handler = async function(event) {
   }
 
   try {
-    const url = `https://${SANITY_PROJECT_ID}.api.sanity.io/v2023-05-03/data/query/${SANITY_DATASET}?query=${query}`;
+    const url = `https://${SANITY_PROJECT_ID}.api.sanity.io/v2023-05-03/data/query/${SANITY_DATASET}?query=${encodeURIComponent(query)}`;
     const response = await fetch(url, {
       headers: { Authorization: `Bearer ${SANITY_TOKEN}` }
     });
