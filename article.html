@@ -14,15 +14,17 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #111213; color: #e8e6e1; font-family: 'Barlow', sans-serif; min-height: 100vh; }
-    .nav { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 1.25rem; height: 52px; border-bottom: 1px solid #2a2b2d; background: rgba(13,14,15,0.96); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
-    .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: 0.12em; color: #e8e6e1; text-decoration: none; white-space: nowrap; }
+    .nav { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 1.25rem; height: 52px; border-bottom: 1px solid #2a2b2d; background: rgba(13,14,15,0.96); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: height 0.2s ease, box-shadow 0.2s ease; }
+    .nav.scrolled { height: 44px; box-shadow: 0 2px 24px rgba(0,0,0,0.5); border-bottom-color: #1a1b1d; }
+    .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: 0.12em; color: #e8e6e1; text-decoration: none; white-space: nowrap; transition: font-size 0.2s; }
+    .nav.scrolled .logo { font-size: 22px; }
     .logo-dot { color: #e84040; }
     .nav-links { display: flex; gap: 20px; }
     .nav-links a { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-decoration: none; color: #888; text-transform: uppercase; }
     .nav-links a:hover { color: #e8e6e1; }
     .nav-hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; background: none; border: none; flex-shrink: 0; }
     .nav-hamburger span { display: block; width: 22px; height: 2px; background: #888; }
-    .mobile-menu { display: none; flex-direction: column; background: #0d0e0f; border-bottom: 1px solid #2a2b2d; }
+    .mobile-menu { display: none; flex-direction: column; background: rgba(13,14,15,0.98); border-bottom: 1px solid #2a2b2d; position: sticky; top: 52px; z-index: 99; }
     .mobile-menu.open { display: flex; }
     .mobile-menu a { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #888; text-decoration: none; padding: 0.875rem 1.25rem; border-bottom: 1px solid #1a1b1d; }
     .mobile-menu a:last-child { border-bottom: none; }
@@ -90,11 +92,11 @@
   <nav class="nav">
     <a href="index.html" class="logo">FAR POST<span class="logo-dot">.</span></a>
     <div class="nav-links">
-      <a href="index.html">News</a>
-      <a href="index.html">Opinions</a>
-      <a href="index.html">Podcasts</a>
-      <a href="index.html">Results</a>
-      <a href="index.html">Fixtures</a>
+      <a href="news.html">News</a>
+      <a href="opinions.html">Opinions</a>
+      <a href="podcasts.html">Podcasts</a>
+      <a href="results.html">Results</a>
+      <a href="fixtures.html">Fixtures</a>
     </div>
     <button class="nav-hamburger" onclick="document.getElementById('mobile-menu').classList.toggle('open')" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -102,11 +104,11 @@
   </nav>
 
   <div class="mobile-menu" id="mobile-menu">
-    <a href="index.html">News</a>
-    <a href="index.html">Opinions</a>
-    <a href="index.html">Podcasts</a>
-    <a href="index.html">Results</a>
-    <a href="index.html">Fixtures</a>
+    <a href="news.html">News</a>
+    <a href="opinions.html">Opinions</a>
+    <a href="podcasts.html">Podcasts</a>
+    <a href="results.html">Results</a>
+    <a href="fixtures.html">Fixtures</a>
   </div>
 
   <div id="article-hero"></div>
@@ -216,6 +218,14 @@
         }).join('');
       } catch(e) { section.style.display='none'; }
     }
+
+    (function() {
+      var nav = document.querySelector('.nav');
+      if (!nav) return;
+      window.addEventListener('scroll', function() {
+        nav.classList.toggle('scrolled', window.scrollY > 24);
+      }, { passive: true });
+    })();
 
     loadArticle();
 

@@ -15,8 +15,10 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #111213; color: #e8e6e1; font-family: 'Barlow', sans-serif; min-height: 100vh; }
 
-    .nav { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 1.25rem; height: 52px; border-bottom: 1px solid #2a2b2d; background: rgba(13,14,15,0.96); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
-    .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: 0.12em; color: #e8e6e1; text-decoration: none; white-space: nowrap; }
+    .nav { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 1.25rem; height: 52px; border-bottom: 1px solid #2a2b2d; background: rgba(13,14,15,0.96); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: height 0.2s ease, box-shadow 0.2s ease; }
+    .nav.scrolled { height: 44px; box-shadow: 0 2px 24px rgba(0,0,0,0.5); border-bottom-color: #1a1b1d; }
+    .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: 0.12em; color: #e8e6e1; text-decoration: none; white-space: nowrap; transition: font-size 0.2s; }
+    .nav.scrolled .logo { font-size: 22px; }
     .logo-dot { color: #e84040; }
     .nav-links { display: flex; gap: 20px; }
     .nav-links a { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-decoration: none; color: #888; text-transform: uppercase; }
@@ -24,7 +26,7 @@
     .nav-links a.active { color: #e8e6e1; border-bottom: 2px solid #e84040; padding-bottom: 2px; }
     .nav-hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; background: none; border: none; flex-shrink: 0; }
     .nav-hamburger span { display: block; width: 22px; height: 2px; background: #888; }
-    .mobile-menu { display: none; flex-direction: column; background: #0d0e0f; border-bottom: 1px solid #2a2b2d; }
+    .mobile-menu { display: none; flex-direction: column; background: rgba(13,14,15,0.98); border-bottom: 1px solid #2a2b2d; position: sticky; top: 52px; z-index: 99; }
     .mobile-menu.open { display: flex; }
     .mobile-menu a { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #888; text-decoration: none; padding: 0.875rem 1.25rem; border-bottom: 1px solid #1a1b1d; }
     .mobile-menu a:last-child { border-bottom: none; }
@@ -99,7 +101,7 @@
     .form-col { padding: 1rem 1.25rem; }
     .form-col:first-child { border-right: 1px solid #2a2b2d; }
     .form-team-label { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; color: #e8e6e1; padding-bottom: 0.625rem; border-bottom: 1px solid #2a2b2d; margin-bottom: 0.75rem; }
-    .form-strip { display: flex; gap: 6px; }
+    .form-strip { display: flex; gap: 6px; flex-wrap: nowrap; }
     .form-item { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; padding: 0.5rem 0.25rem; border: 1px solid #2a2b2d; border-radius: 3px; min-width: 0; background: #0d0e0f; }
     .form-crest { width: 28px; height: 28px; object-fit: contain; }
     .form-crest-blank { width: 28px; height: 28px; }
@@ -110,11 +112,27 @@
     .form-badge.L { background: #3d1a1a; color: #e84040; }
     .form-date { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; color: #555; white-space: nowrap; }
 
+    @media (max-width: 768px) {
+      .match-hero { padding: 3rem 1rem 2.5rem; }
+      .match-teams-header { gap: 1rem; max-width: 100%; }
+      .team-side { min-width: 0; }
+      .team-crest-hero { width: 84px; height: 84px; }
+      .team-name-hero { font-size: 18px; }
+      .score-center { min-width: 0; }
+      .score-line { gap: 0.5rem; }
+      .score-num { font-size: 74px; min-width: 56px; }
+      .score-sep { font-size: 42px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-col:first-child { border-right: none; border-bottom: 1px solid #2a2b2d; }
+      .form-strip { flex-wrap: wrap; }
+      .form-item { flex: 0 0 calc(20% - 5px); min-width: 64px; }
+    }
+
     @media (max-width: 680px) {
       .nav-links { display: none; }
       .nav-hamburger { display: flex; }
       .match-hero { padding: 2.5rem 1rem 2.25rem; }
-      .match-teams-header { gap: 0.75rem; }
+      .match-teams-header { gap: 0.75rem; align-items: flex-start; }
       .score-center { min-width: 0; }
       .score-num { font-size: 68px; min-width: 52px; }
       .score-sep { font-size: 40px; }
@@ -124,6 +142,25 @@
       .lineup-col { padding: 0.75rem 0.75rem; }
       .lineup-name { font-size: 13px; }
       .footer { flex-direction: column; gap: 6px; text-align: center; }
+    }
+
+    @media (max-width: 480px) {
+      .match-hero { padding: 2rem 0.75rem 2rem; }
+      .match-teams-header { gap: 0.35rem; }
+      .team-side { gap: 0.65rem; }
+      .team-crest-hero { width: 56px; height: 56px; }
+      .team-name-hero { font-size: 13px; }
+      .score-line { gap: 0.25rem; }
+      .score-num { font-size: 52px; min-width: 40px; }
+      .score-sep { font-size: 30px; }
+      .match-status-badge { font-size: 10px; letter-spacing: 0.1em; }
+      .timeline-teams-header, .tl-row { grid-template-columns: minmax(0, 1fr) 40px minmax(0, 1fr); padding-left: 0.75rem; padding-right: 0.75rem; }
+      .tl-home, .tl-away { min-width: 0; }
+      .tl-player { font-size: 13px; }
+      .lineups-grid { grid-template-columns: 1fr; }
+      .lineup-col:first-child { border-right: none; border-bottom: 1px solid #2a2b2d; }
+      .form-col { padding: 0.85rem 0.75rem; }
+      .form-item { flex: 0 0 calc(33.333% - 4px); min-width: 0; }
     }
   </style>
 </head>
@@ -469,6 +506,14 @@
         + '<div class="form-col">' + buildCol(awayResults, away) + '</div>'
         + '</div>';
     }
+
+    (function() {
+      var nav = document.querySelector('.nav');
+      if (!nav) return;
+      window.addEventListener('scroll', function() {
+        nav.classList.toggle('scrolled', window.scrollY > 24);
+      }, { passive: true });
+    })();
 
     loadMatch();
   </script>
