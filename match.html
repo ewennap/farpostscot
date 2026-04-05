@@ -72,10 +72,11 @@
     .lineups-grid { display: grid; grid-template-columns: 1fr 1fr; }
     .lineup-col { padding: 1rem 1.25rem; }
     .lineup-col:first-child { border-right: 1px solid #2a2b2d; }
-    .lineup-switcher { display: flex; gap: 0; border-bottom: 1px solid #2a2b2d; background: #0d0e0f; overflow-x: auto; }
-    .lineup-switch-btn { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #555; background: none; border: none; border-right: 1px solid #2a2b2d; padding: 0.7rem 1.25rem; cursor: pointer; white-space: nowrap; transition: color 0.15s, background 0.15s; }
+    .lineup-switcher { display: flex; gap: 0; border-bottom: 1px solid #2a2b2d; background: #0d0e0f; overflow: hidden; width: 100%; }
+    .lineup-switch-btn { flex: 1 1 50%; min-width: 0; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #555; background: none; border: none; border-right: 1px solid #2a2b2d; padding: 0.85rem 1rem; cursor: pointer; white-space: nowrap; text-align: center; transition: color 0.15s, background 0.15s; }
+    .lineup-switch-btn:last-child { border-right: none; }
     .lineup-switch-btn:hover { color: #e8e6e1; background: #161718; }
-    .lineup-switch-btn.active { color: #e84040; background: #161718; }
+    .lineup-switch-btn.active { color: #e84040; background: #161718; box-shadow: inset 0 -2px 0 #e84040; }
     .lineup-team-name { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; color: #e8e6e1; padding-bottom: 0.625rem; border-bottom: 1px solid #2a2b2d; margin-bottom: 0.625rem; }
     .lineup-group-title { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #444; margin: 0.75rem 0 0.4rem; }
     .lineup-player { display: flex; align-items: center; gap: 8px; padding: 0.3rem 0; border-bottom: 1px solid #1a1b1d; }
@@ -130,6 +131,8 @@
       .form-col:first-child { border-right: none; border-bottom: 1px solid #2a2b2d; }
       .form-strip { flex-wrap: wrap; }
       .form-item { flex: 0 0 calc(20% - 5px); min-width: 64px; }
+      .lineup-switcher { width: 100%; }
+      .lineup-switch-btn { flex-basis: 50%; padding: 0.9rem 0.75rem; font-size: 12px; }
     }
 
     @media (max-width: 680px) {
@@ -163,7 +166,7 @@
       .tl-player { font-size: 13px; }
       .lineups-grid { grid-template-columns: 1fr; }
       .lineup-col:first-child { border-right: none; border-bottom: 1px solid #2a2b2d; }
-      .lineup-switch-btn { padding: 0.65rem 0.85rem; font-size: 10px; }
+      .lineup-switch-btn { padding: 0.85rem 0.5rem; font-size: 11px; letter-spacing: 0.08em; }
       .form-col { padding: 0.85rem 0.75rem; }
       .form-item { flex: 0 0 calc(33.333% - 4px); min-width: 0; }
     }
