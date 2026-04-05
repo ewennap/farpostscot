@@ -81,8 +81,8 @@ exports.handler = async function (event) {
           id: f.id,
           leagueId: f._leagueId || String(leagueParam),
           date: f.starting_at || null,
-          home: { name: home.name || 'Home', short: home.short_code || home.name || 'Home', crest: home.image_path || null },
-          away: { name: away.name || 'Away', short: away.short_code || away.name || 'Away', crest: away.image_path || null }
+          home: { id: home.id || null, name: home.name || 'Home', short: home.short_code || home.name || 'Home', crest: home.image_path || null },
+          away: { id: away.id || null, name: away.name || 'Away', short: away.short_code || away.name || 'Away', crest: away.image_path || null }
         };
       });
 
