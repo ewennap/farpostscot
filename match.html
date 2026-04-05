@@ -90,6 +90,22 @@
     .footer-logo span { color: #e84040; }
     .footer-copy { font-size: 12px; color: #444; }
 
+    /* ── FORM GUIDE ── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid #2a2b2d; }
+    .form-col { padding: 1rem 1.25rem; }
+    .form-col:first-child { border-right: 1px solid #2a2b2d; }
+    .form-team-label { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; color: #e8e6e1; padding-bottom: 0.625rem; border-bottom: 1px solid #2a2b2d; margin-bottom: 0.75rem; }
+    .form-strip { display: flex; gap: 6px; }
+    .form-item { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; padding: 0.5rem 0.25rem; border: 1px solid #2a2b2d; border-radius: 3px; min-width: 0; background: #0d0e0f; }
+    .form-crest { width: 28px; height: 28px; object-fit: contain; }
+    .form-crest-blank { width: 28px; height: 28px; }
+    .form-score { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; color: #e8e6e1; }
+    .form-badge { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 800; letter-spacing: 0.06em; padding: 1px 5px; border-radius: 2px; }
+    .form-badge.W { background: #1a3320; color: #4caf50; }
+    .form-badge.D { background: #2a2b2d; color: #888; }
+    .form-badge.L { background: #3d1a1a; color: #e84040; }
+    .form-date { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; color: #555; white-space: nowrap; }
+
     @media (max-width: 680px) {
       .nav-links { display: none; }
       .nav-hamburger { display: flex; }
@@ -154,6 +170,16 @@
     </div>
   </div>
 
+  <!-- FORM GUIDE -->
+  <div id="section-form">
+    <div class="section-header">
+      <div class="section-title"><span>//</span>Form guide</div>
+    </div>
+    <div id="form-container">
+      <div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div></div>
+    </div>
+  </div>
+
   <footer class="footer">
     <div class="footer-logo">FAR POST<span>.</span></div>
     <div class="footer-copy">Scottish football. No filter.</div>
@@ -172,6 +198,7 @@
         document.getElementById('match-hero').innerHTML = '<div class="empty-state">No match ID specified.</div>';
         document.getElementById('timeline-container').innerHTML = '';
         document.getElementById('lineups-container').innerHTML = '';
+        document.getElementById('form-container').innerHTML = '';
         return;
       }
 
@@ -184,10 +211,17 @@
         renderHero(fixture);
         renderTimeline(fixture);
         renderLineups(fixture);
+
+        var participants = fixture.participants || [];
+        var home = participants.find(function(p) { return p.meta && p.meta.location === 'home'; }) || participants[0] || {};
+        var away = participants.find(function(p) { return p.meta && p.meta.location === 'away'; }) || participants[1] || {};
+        if (home.id && away.id) loadForm(home, away);
+        else document.getElementById('form-container').innerHTML = '';
       } catch (e) {
         document.getElementById('match-hero').innerHTML = '<div class="empty-state">Could not load match data. Please try again later.</div>';
         document.getElementById('timeline-container').innerHTML = '';
         document.getElementById('lineups-container').innerHTML = '';
+        document.getElementById('form-container').innerHTML = '';
       }
     }
 
@@ -344,6 +378,60 @@
       el.innerHTML = '<div class="lineups-grid">'
         + '<div class="lineup-col">' + buildCol(home.id, home.name || 'Home') + '</div>'
         + '<div class="lineup-col">' + buildCol(away.id, away.name || 'Away') + '</div>'
+        + '</div>';
+    }
+
+    async function loadForm(home, away) {
+      var el = document.getElementById('form-container');
+      try {
+        var responses = await Promise.all([
+          fetch('/.netlify/functions/team-form?teamId=' + home.id),
+          fetch('/.netlify/functions/team-form?teamId=' + away.id)
+        ]);
+        var homeData = await responses[0].json();
+        var awayData = await responses[1].json();
+        renderForm(homeData.results || [], home, awayData.results || [], away);
+      } catch (e) {
+        el.innerHTML = '<div class="empty-state">Form guide not available.</div>';
+      }
+    }
+
+    function renderForm(homeResults, home, awayResults, away) {
+      var el = document.getElementById('form-container');
+
+      function buildCol(results, team) {
+        var html = '<div class="form-team-label">' + (team.name || '') + '</div><div class="form-strip">';
+        if (!results.length) {
+          html += '<span style="font-size:13px;color:#555">No recent results</span>';
+        } else {
+          results.forEach(function(r) {
+            var isHome    = r.home.id === team.id;
+            var teamGoals = parseInt(isHome ? r.score.home : r.score.away);
+            var oppGoals  = parseInt(isHome ? r.score.away : r.score.home);
+            var scoreStr  = (isNaN(teamGoals) ? '-' : teamGoals) + '-' + (isNaN(oppGoals) ? '-' : oppGoals);
+            var result    = isNaN(teamGoals) || isNaN(oppGoals) ? 'D'
+                          : teamGoals > oppGoals ? 'W'
+                          : teamGoals < oppGoals ? 'L' : 'D';
+            var opponent  = isHome ? r.away : r.home;
+            var dateStr   = r.date ? new Date(r.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '';
+            var crest     = opponent.crest
+              ? '<img class="form-crest" src="' + opponent.crest + '" alt="" onerror="this.style.display=\'none\'">'
+              : '<div class="form-crest-blank"></div>';
+            html += '<div class="form-item">'
+              + crest
+              + '<span class="form-score">' + scoreStr + '</span>'
+              + '<span class="form-badge ' + result + '">' + result + '</span>'
+              + '<span class="form-date">' + dateStr + '</span>'
+              + '</div>';
+          });
+        }
+        html += '</div>';
+        return html;
+      }
+
+      el.innerHTML = '<div class="form-grid">'
+        + '<div class="form-col">' + buildCol(homeResults, home) + '</div>'
+        + '<div class="form-col">' + buildCol(awayResults, away) + '</div>'
         + '</div>';
     }
 
