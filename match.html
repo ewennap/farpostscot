@@ -30,15 +30,15 @@
     .mobile-menu a:last-child { border-bottom: none; }
 
     /* ── MATCH HERO ── */
-    .match-hero { background: #0d0e0f; padding: 2.5rem 1.5rem 2rem; border-bottom: 1px solid #2a2b2d; }
-    .match-teams-header { display: flex; align-items: center; justify-content: center; gap: 1rem; max-width: 640px; margin: 0 auto; }
-    .team-side { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.625rem; }
-    .team-crest-hero { width: 64px; height: 64px; object-fit: contain; }
-    .team-name-hero { font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 700; color: #e8e6e1; text-align: center; line-height: 1.2; }
-    .score-center { display: flex; flex-direction: column; align-items: center; gap: 0.375rem; flex-shrink: 0; }
-    .score-line { display: flex; align-items: center; gap: 0.5rem; }
-    .score-num { font-family: 'Barlow Condensed', sans-serif; font-size: 64px; font-weight: 800; color: #e8e6e1; line-height: 1; min-width: 52px; text-align: center; }
-    .score-sep { font-family: 'Barlow Condensed', sans-serif; font-size: 40px; font-weight: 300; color: #333; }
+    .match-hero { background: #0d0e0f; padding: 4.5rem 1.5rem 3.75rem; border-bottom: 1px solid #2a2b2d; }
+    .match-teams-header { display: flex; align-items: center; justify-content: center; gap: 1.5rem; max-width: 980px; margin: 0 auto; }
+    .team-side { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+    .team-crest-hero { width: 112px; height: 112px; object-fit: contain; }
+    .team-name-hero { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700; color: #e8e6e1; text-align: center; line-height: 1.1; }
+    .score-center { display: flex; flex-direction: column; align-items: center; gap: 0.625rem; flex-shrink: 0; min-width: 280px; }
+    .score-line { display: flex; align-items: center; gap: 0.875rem; }
+    .score-num { font-family: 'Barlow Condensed', sans-serif; font-size: 96px; font-weight: 800; color: #e8e6e1; line-height: 0.9; min-width: 82px; text-align: center; }
+    .score-sep { font-family: 'Barlow Condensed', sans-serif; font-size: 56px; font-weight: 300; color: #333; }
     .match-status-badge { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #555; }
     .match-status-badge.live { color: #e84040; }
 
@@ -58,7 +58,8 @@
     .tl-home { display: flex; align-items: center; justify-content: flex-end; gap: 6px; padding-right: 10px; }
     .tl-away { display: flex; align-items: center; gap: 6px; padding-left: 10px; }
     .tl-mid { display: flex; align-items: center; justify-content: center; }
-    .tl-dot { width: 30px; height: 30px; border-radius: 50%; background: #161718; border: 1px solid #2a2b2d; display: flex; align-items: center; justify-content: center; font-size: 14px; position: relative; z-index: 1; }
+    .tl-dot { width: 34px; height: 34px; border-radius: 50%; background: #161718; border: 1px solid #2a2b2d; display: flex; align-items: center; justify-content: center; position: relative; z-index: 1; }
+    .tl-dot svg { width: 18px; height: 18px; display: block; }
     .tl-content { display: flex; flex-direction: column; }
     .tl-player { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600; color: #e8e6e1; }
     .tl-sub-extra { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; color: #555; }
@@ -75,6 +76,9 @@
     .lineup-player:last-child { border-bottom: none; }
     .lineup-jersey { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; color: #555; min-width: 22px; text-align: center; }
     .lineup-name { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; color: #e8e6e1; }
+    .lineup-sub-group { margin-top: 0.9rem; padding: 0.7rem 0.8rem 0.2rem; background: #202123; border-top: 1px solid #2d2e31; border-radius: 4px; }
+    .lineup-sub-group .lineup-group-title { margin-top: 0; color: #7f8186; }
+    .lineup-sub-group .lineup-player { border-bottom-color: #2a2b2d; }
 
     /* ── SHARED STATES ── */
     .empty-state { padding: 2.5rem 1.25rem; text-align: center; color: #555; font-size: 14px; }
@@ -109,11 +113,13 @@
     @media (max-width: 680px) {
       .nav-links { display: none; }
       .nav-hamburger { display: flex; }
-      .match-hero { padding: 1.75rem 1rem 1.5rem; }
-      .score-num { font-size: 48px; min-width: 40px; }
-      .score-sep { font-size: 32px; }
-      .team-crest-hero { width: 48px; height: 48px; }
-      .team-name-hero { font-size: 14px; }
+      .match-hero { padding: 2.5rem 1rem 2.25rem; }
+      .match-teams-header { gap: 0.75rem; }
+      .score-center { min-width: 0; }
+      .score-num { font-size: 68px; min-width: 52px; }
+      .score-sep { font-size: 40px; }
+      .team-crest-hero { width: 72px; height: 72px; }
+      .team-name-hero { font-size: 16px; }
       .lineups-grid { grid-template-columns: 1fr 1fr; }
       .lineup-col { padding: 0.75rem 0.75rem; }
       .lineup-name { font-size: 13px; }
@@ -186,9 +192,27 @@
   </footer>
 
   <script>
-    var EVENT_ICONS = { 14: '⚽', 19: '🟨', 20: '🟥', 18: '🔄' };
-    var RELEVANT_TYPES = [14, 18, 19, 20];
+    var RELEVANT_TYPES = [14, 15, 18, 19, 20];
     var LIVE_STATES = ['LIVE', '1H', '2H', 'HT', 'PEN'];
+
+    function getEventIcon(typeId) {
+      if (typeId === 14) {
+        return '<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="none" stroke="#e8e6e1" stroke-width="1.6"/><path d="M10 4.9 12.8 6.8 11.7 10.1 8.3 10.1 7.2 6.8Z" fill="#e8e6e1"/><path d="M7.2 6.8 4.8 8.2 5.4 11.3 8.3 10.1M12.8 6.8 15.2 8.2 14.6 11.3 11.7 10.1M5.4 11.3 7.5 14.5 10 12.9 12.5 14.5 14.6 11.3" fill="none" stroke="#e8e6e1" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      }
+      if (typeId === 15) {
+        return '<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="none" stroke="#CC0000" stroke-width="1.6"/><path d="M10 4.9 12.8 6.8 11.7 10.1 8.3 10.1 7.2 6.8Z" fill="#CC0000"/><path d="M7.2 6.8 4.8 8.2 5.4 11.3 8.3 10.1M12.8 6.8 15.2 8.2 14.6 11.3 11.7 10.1M5.4 11.3 7.5 14.5 10 12.9 12.5 14.5 14.6 11.3" fill="none" stroke="#CC0000" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      }
+      if (typeId === 19) {
+        return '<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="5" y="3.5" width="10" height="13" rx="1.7" fill="#f5c842"/></svg>';
+      }
+      if (typeId === 20) {
+        return '<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="5" y="3.5" width="10" height="13" rx="1.7" fill="#CC0000"/></svg>';
+      }
+      if (typeId === 18) {
+        return '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 4.5h5.5l-1.9-1.9 1.2-1.1 4 4-4 4-1.2-1.1 1.9-1.9H6z" fill="#e8e6e1"/><path d="M14 15.5H8.5l1.9 1.9-1.2 1.1-4-4 4-4 1.2 1.1-1.9 1.9H14z" fill="#CC0000"/></svg>';
+      }
+      return '<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="3" fill="#666"/></svg>';
+    }
 
     async function loadMatch() {
       var params = new URLSearchParams(window.location.search);
@@ -301,7 +325,7 @@
 
       events.forEach(function(e) {
         var isHome  = e.participant_id === homeId;
-        var icon    = EVENT_ICONS[e.type_id] || '•';
+        var icon    = getEventIcon(e.type_id);
         var minStr  = (e.minute || 0) + (e.minute_extra ? '+' + e.minute_extra : '') + '\'';
         var player  = e.player_name || '';
         var related = e.related_player_name || '';
@@ -359,13 +383,14 @@
         }
 
         if (subs.length) {
-          html += '<div class="lineup-group-title">Substitutes</div>';
+          html += '<div class="lineup-sub-group"><div class="lineup-group-title">Substitutes</div>';
           subs.forEach(function(p) {
             html += '<div class="lineup-player">'
               + '<span class="lineup-jersey">' + (p.jersey_number || '') + '</span>'
               + '<span class="lineup-name">' + (p.player_name || '') + '</span>'
               + '</div>';
           });
+          html += '</div>';
         }
 
         if (!starters.length && !subs.length) {
