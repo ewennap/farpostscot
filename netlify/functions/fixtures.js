@@ -3,7 +3,7 @@
 // Accepts optional `league` query param: '501', '507', or 'all' (default 'all')
 //
 // API call:
-// GET https://api.sportmonks.com/v3/football/fixtures/between/{from}/{to}?api_token={TOKEN}&filters=fixtureLeagues:{ID}&include=participants;state&per_page=50
+// GET https://api.sportmonks.com/v3/football/fixtures/between/{from}/{to}?api_token={TOKEN}&filters=fixtureLeagues:{ID}&include=participants;state;round&per_page=50
 
 const SPORTMONKS_TOKEN = process.env.SPORTMONKS_TOKEN;
 
@@ -12,7 +12,7 @@ async function fetchFixturesForLeague(leagueId, fromStr, toStr) {
     `https://api.sportmonks.com/v3/football/fixtures/between/${fromStr}/${toStr}` +
     `?api_token=${SPORTMONKS_TOKEN}` +
     `&filters=fixtureLeagues:${leagueId}` +
-    `&include=participants;state` +
+      `&include=participants;state;round` +
     `&per_page=50`;
 
   console.log(`[fixtures] Fetching league ${leagueId}:`, url.replace(SPORTMONKS_TOKEN, 'TOKEN_REDACTED'));
@@ -81,6 +81,7 @@ exports.handler = async function (event) {
           id: f.id,
           leagueId: f._leagueId || String(leagueParam),
           date: f.starting_at || null,
+          round: f.round?.name || null,
           home: { id: home.id || null, name: home.name || 'Home', short: home.short_code || home.name || 'Home', crest: home.image_path || null },
           away: { id: away.id || null, name: away.name || 'Away', short: away.short_code || away.name || 'Away', crest: away.image_path || null }
         };

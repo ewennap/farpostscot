@@ -53,13 +53,18 @@
     .section-title span { color: #e84040; margin-right: 8px; }
 
     /* Result cards */
-    .results-container { border-bottom: 1px solid #2a2b2d; }
-    .league-group { border-bottom: 1px solid #2a2b2d; }
-    .league-group:last-child { border-bottom: none; }
-    .league-header { display: flex; align-items: center; gap: 10px; padding: 0.5rem 1.25rem; background: #0d0e0f; border-bottom: 1px solid #2a2b2d; }
-    .league-badge { width: 6px; height: 6px; border-radius: 50%; background: #e84040; flex-shrink: 0; }
-    .league-name { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #666; }
-    .league-date { font-size: 11px; color: #444; margin-left: auto; }
+    .results-container { border-bottom: 1px solid #2a2b2d; padding: 1rem; }
+    .league-group { margin-bottom: 1rem; border: 1px solid #2a2b2d; background: linear-gradient(180deg, #111214 0%, #0f1011 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,0.02); }
+    .league-group:last-child { margin-bottom: 0; }
+    .league-header { display: flex; flex-direction: column; gap: 0.85rem; padding: 1rem 1.25rem 0.95rem; background: linear-gradient(180deg, #161718 0%, #0d0e0f 100%); border-bottom: 1px solid #2a2b2d; }
+    .league-header-top { display: flex; align-items: center; gap: 12px; }
+    .league-badge { width: 8px; height: 8px; border-radius: 50%; background: #e84040; flex-shrink: 0; box-shadow: 0 0 0 4px rgba(232,64,64,0.12); }
+    .league-name { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #f1efe9; line-height: 1; }
+    .league-meta { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; }
+    .league-date { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.05em; color: #bcb6ae; }
+    .league-submeta { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+    .league-round { display: inline-flex; align-items: center; padding: 0.22rem 0.6rem; border: 1px solid #3a2b2b; background: rgba(232,64,64,0.09); font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #ef9f9f; }
+    .league-count { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #666; }
     .match-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
     .match-card { display: block; padding: 1rem 1.25rem; border-right: 1px solid #2a2b2d; border-bottom: 1px solid #2a2b2d; transition: background 0.15s; text-decoration: none; color: inherit; cursor: pointer; }
     .match-card:hover { background: #161718; }
@@ -140,6 +145,11 @@
       .nav-hamburger { display: flex; }
       .page-header { padding: 1.5rem 1.25rem 0; }
       .page-title { font-size: 36px; }
+      .results-container { padding: 0.75rem; }
+      .league-group { margin-bottom: 0.75rem; }
+      .league-header { padding: 0.9rem 1rem 0.85rem; gap: 0.7rem; }
+      .league-name { font-size: 16px; }
+      .league-date { font-size: 14px; }
       .match-grid { grid-template-columns: 1fr; }
       .match-card { border-right: none; }
       .match-card:nth-child(3n) { border-right: none; }
@@ -296,6 +306,13 @@
       return '<a class="club-link ' + linkClass + '" href="' + href + '" aria-label="View ' + team.name + ' club page">' + crest + name + '</a>';
     }
 
+    function normaliseRoundLabel(round) {
+      if (!round) return '';
+      var cleaned = String(round).trim();
+      if (!cleaned) return '';
+      return /round|matchday|week|quarter|semi|final/i.test(cleaned) ? cleaned : 'Round ' + cleaned;
+    }
+
     function getCached(league, type) {
       return cache[league] && cache[league][type];
     }
@@ -414,13 +431,19 @@
       var leagueName = LEAGUE_NAMES[league] || 'Scottish Football';
       var groups = {};
       fixtures.forEach(function(f) {
-        var k = f.date ? fmtDate(f.date) : 'Recent';
+        var dateLabel = f.date ? fmtDate(f.date) : 'Recent';
+        var roundLabel = normaliseRoundLabel(f.round);
+        var k = dateLabel + '||' + roundLabel;
         if (!groups[k]) groups[k] = [];
         groups[k].push(f);
       });
       var html = '';
-      Object.entries(groups).forEach(function([date, matches]) {
-        html += '<div class="league-group"><div class="league-header"><div class="league-badge"></div><div class="league-name">' + leagueName + '</div><div class="league-date">' + date + '</div></div><div class="match-grid">';
+      Object.entries(groups).forEach(function([groupKey, matches]) {
+        var parts = groupKey.split('||');
+        var date = parts[0];
+        var round = parts[1] || '';
+        var count = matches.length;
+        html += '<div class="league-group"><div class="league-header"><div class="league-header-top"><div class="league-badge"></div><div class="league-name">' + leagueName + '</div></div><div class="league-meta"><div class="league-date">' + date + '</div><div class="league-submeta">' + (round ? '<span class="league-round">' + round + '</span>' : '') + '<span class="league-count">' + count + ' ' + (count === 1 ? 'match' : 'matches') + '</span></div></div></div><div class="match-grid">';
         matches.forEach(function(f) {
           var hw = parseInt(f.score.home) > parseInt(f.score.away);
           var aw = parseInt(f.score.away) > parseInt(f.score.home);

@@ -45,12 +45,18 @@
     .section-title { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #555; }
     .section-title span { color: #e84040; margin-right: 8px; }
 
-    .fixtures-container { border-bottom: 1px solid #2a2b2d; }
-    .date-group { border-bottom: 1px solid #2a2b2d; }
-    .date-group:last-child { border-bottom: none; }
-    .date-header { padding: 0.6rem 1.25rem; background: #0d0e0f; border-bottom: 1px solid #2a2b2d; display: flex; align-items: center; gap: 12px; }
-    .date-label { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #e8e6e1; }
-    .date-count { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; color: #555; }
+    .fixtures-container { border-bottom: 1px solid #2a2b2d; padding: 1rem; }
+    .date-group { margin-bottom: 1rem; border: 1px solid #2a2b2d; background: linear-gradient(180deg, #111214 0%, #0f1011 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,0.02); }
+    .date-group:last-child { margin-bottom: 0; }
+    .date-header { padding: 1rem 1.25rem 0.95rem; background: linear-gradient(180deg, #161718 0%, #0d0e0f 100%); border-bottom: 1px solid #2a2b2d; display: flex; flex-direction: column; gap: 0.8rem; }
+    .date-header-top { display: flex; align-items: center; gap: 12px; }
+    .date-badge { width: 8px; height: 8px; border-radius: 50%; background: #e84040; flex-shrink: 0; box-shadow: 0 0 0 4px rgba(232,64,64,0.12); }
+    .date-league { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #f1efe9; line-height: 1; }
+    .date-meta { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; }
+    .date-label { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.05em; color: #bcb6ae; }
+    .date-submeta { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+    .date-round { display: inline-flex; align-items: center; padding: 0.22rem 0.6rem; border: 1px solid #3a2b2b; background: rgba(232,64,64,0.09); font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #ef9f9f; }
+    .date-count { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #666; }
 
     .fixture-row { display: grid; grid-template-columns: 60px 1fr auto; align-items: center; padding: 1rem 1.25rem; border-bottom: 1px solid #1a1b1d; transition: background 0.15s; gap: 16px; text-decoration: none; color: inherit; }
     .fixture-row:last-child { border-bottom: none; }
@@ -91,6 +97,11 @@
       .nav-hamburger { display: flex; }
       .page-header { padding: 1.5rem 1.25rem 1rem; }
       .page-title { font-size: 36px; }
+      .fixtures-container { padding: 0.75rem; }
+      .date-group { margin-bottom: 0.75rem; }
+      .date-header { padding: 0.9rem 1rem 0.85rem; gap: 0.7rem; }
+      .date-league { font-size: 16px; }
+      .date-label { font-size: 14px; }
       .fixture-row { grid-template-columns: 50px 1fr; }
       .fixture-meta { display: none; }
       .fixture-home { font-size: 15px; }
@@ -185,6 +196,13 @@
       return `<a class="club-link" href="${href}" aria-label="View ${team.name} club page">${crest}${name}</a>`;
     }
 
+    function normaliseRoundLabel(round) {
+      if (!round) return '';
+      const cleaned = String(round).trim();
+      if (!cleaned) return '';
+      return /round|matchday|week|quarter|semi|final/i.test(cleaned) ? cleaned : `Round ${cleaned}`;
+    }
+
     function setFilter(filter, btn) {
       currentFilter = filter;
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -204,22 +222,34 @@
       // Group by date
       const groups = {};
       filtered.forEach(f => {
-        const key = f.date ? fmtDate(f.date) : 'TBC';
+        const dateLabel = f.date ? fmtDate(f.date) : 'TBC';
+        const roundLabel = normaliseRoundLabel(f.round);
+        const key = [f.leagueId, dateLabel, roundLabel].join('||');
         if (!groups[key]) groups[key] = [];
         groups[key].push(f);
       });
 
       let html = '';
-      Object.entries(groups).forEach(([date, matches]) => {
+      Object.entries(groups).forEach(([groupKey, matches]) => {
         const count = matches.length;
+        const [leagueId, date, round] = groupKey.split('||');
+        const leagueName = LEAGUE_NAMES[leagueId] || 'Scottish Football';
         html += `<div class="date-group">
           <div class="date-header">
-            <div class="date-label">${date}</div>
-            <div class="date-count">${count} ${count === 1 ? 'match' : 'matches'}</div>
+            <div class="date-header-top">
+              <div class="date-badge"></div>
+              <div class="date-league">${leagueName}</div>
+            </div>
+            <div class="date-meta">
+              <div class="date-label">${date}</div>
+              <div class="date-submeta">
+                ${round ? `<div class="date-round">${round}</div>` : ''}
+                <div class="date-count">${count} ${count === 1 ? 'match' : 'matches'}</div>
+              </div>
+            </div>
           </div>`;
 
         matches.forEach(f => {
-          const leagueName = LEAGUE_NAMES[f.leagueId] || 'Scottish Football';
           const timeStr = f.date ? fmtTime(f.date) : 'TBC';
           const timeClass = timeStr === 'TBC' ? 'fixture-time tbc' : 'fixture-time';
           html += `<div class="fixture-row" role="link" tabindex="0" data-match-href="match.html?id=${f.id}&from=fixtures&league=${encodeURIComponent(f.leagueId)}">
