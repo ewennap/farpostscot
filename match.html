@@ -384,17 +384,28 @@
     async function loadForm(home, away) {
       var el = document.getElementById('form-container');
       try {
+        var homeUrl = '/.netlify/functions/team-form?teamId=' + encodeURIComponent(home.id);
+        var awayUrl = '/.netlify/functions/team-form?teamId=' + encodeURIComponent(away.id);
+        console.log('[form-guide] team IDs', { homeTeamId: home && home.id, awayTeamId: away && away.id });
+        console.log('[form-guide] fetch URLs', { homeUrl: homeUrl, awayUrl: awayUrl });
         var responses = await Promise.all([
-          fetch('/.netlify/functions/team-form?teamId=' + home.id),
-          fetch('/.netlify/functions/team-form?teamId=' + away.id)
+          fetch(homeUrl),
+          fetch(awayUrl)
         ]);
         var homeData = await responses[0].json();
         var awayData = await responses[1].json();
+        console.log('[form-guide] raw responses', {
+          homeStatus: responses[0].status,
+          awayStatus: responses[1].status,
+          homeData: homeData,
+          awayData: awayData
+        });
         if ((homeData && homeData.error) || (awayData && awayData.error)) {
           throw new Error((homeData && homeData.error) || (awayData && awayData.error) || 'Failed');
         }
         renderForm(Array.isArray(homeData) ? homeData : [], home, Array.isArray(awayData) ? awayData : [], away);
       } catch (e) {
+        console.error('[form-guide] failed to load', e);
         el.innerHTML = '<div class="empty-state">Form guide not available.</div>';
       }
     }
@@ -409,7 +420,9 @@
         } else {
           results.forEach(function(r) {
             var isHomeTeam = r.requestedTeamSide === 'home';
-            var scoreStr  = r.homeScore + '-' + r.awayScore;
+            var teamScore = isHomeTeam ? r.homeScore : r.awayScore;
+            var oppScore = isHomeTeam ? r.awayScore : r.homeScore;
+            var scoreStr  = teamScore + '-' + oppScore;
             var crest     = (isHomeTeam ? r.awayTeamCrest : r.homeTeamCrest);
             var crestHtml = crest
               ? '<img class="form-crest" src="' + crest + '" alt="" onerror="this.style.display=\'none\'">'

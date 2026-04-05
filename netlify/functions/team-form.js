@@ -10,7 +10,8 @@ const DATE_FORMATTER = new Intl.DateTimeFormat('en-GB', {
 });
 
 function normalizeStateShort(fixture) {
-  return String(fixture && fixture.state && fixture.state.short ? fixture.state.short : '')
+  const state = fixture && fixture.state ? fixture.state : {};
+  return String(state.short || state.short_name || state.state || state.developer_name || '')
     .toUpperCase()
     .replace(/[^A-Z]/g, '');
 }
@@ -49,11 +50,17 @@ exports.handler = async function (event) {
     return { statusCode: 400, body: JSON.stringify({ error: 'teamId is required' }) };
   }
 
+  const today = new Date();
+  const from = new Date(today);
+  from.setDate(from.getDate() - 365);
+  const fromStr = from.toISOString().split('T')[0];
+  const toStr = today.toISOString().split('T')[0];
+
   const url =
-    `https://api.sportmonks.com/v3/football/fixtures` +
-    `?filters=fixtureTeams:${teamId}` +
-    `&include=participants;scores;state` +
+    `https://api.sportmonks.com/v3/football/fixtures/between/${fromStr}/${toStr}/${teamId}` +
+    `?include=participants;scores;state` +
     `&api_token=${SPORTMONKS_TOKEN}` +
+    `&order=desc` +
     `&per_page=50`;
 
   console.log(`[team-form] teamId=${teamId}`);
@@ -64,6 +71,22 @@ exports.handler = async function (event) {
     const data = await response.json();
 
     console.log(`[team-form] status=${response.status} count=${(data.data || []).length}`);
+    if (data.data && data.data[0]) {
+      console.log('[team-form] first fixture sample:', JSON.stringify({
+        id: data.data[0].id,
+        starting_at: data.data[0].starting_at,
+        state: data.data[0].state,
+        result_info: data.data[0].result_info,
+        participants: (data.data[0].participants || []).map(function (participant) {
+          return {
+            id: participant.id,
+            name: participant.name,
+            location: participant.meta && participant.meta.location
+          };
+        }),
+        scores: data.data[0].scores
+      }));
+    }
 
     if (!response.ok) {
       console.error('[team-form] Error body:', JSON.stringify(data));
