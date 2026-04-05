@@ -38,6 +38,8 @@ function getScoreBySide(scores, side) {
 }
 
 exports.handler = async function (event) {
+  console.log('[team-form] queryStringParameters:', JSON.stringify(event.queryStringParameters));
+
   if (!SPORTMONKS_TOKEN) {
     return { statusCode: 500, body: JSON.stringify({ error: 'SPORTMONKS_TOKEN not set' }) };
   }
@@ -47,17 +49,11 @@ exports.handler = async function (event) {
     return { statusCode: 400, body: JSON.stringify({ error: 'teamId is required' }) };
   }
 
-  const today = new Date();
-  const from = new Date(today);
-  from.setDate(from.getDate() - 365);
-  const fromStr = from.toISOString().split('T')[0];
-  const toStr = today.toISOString().split('T')[0];
-
   const url =
-    `https://api.sportmonks.com/v3/football/fixtures/between/${fromStr}/${toStr}/${teamId}` +
-    `?api_token=${SPORTMONKS_TOKEN}` +
+    `https://api.sportmonks.com/v3/football/fixtures` +
+    `?filters=fixtureTeams:${teamId}` +
     `&include=participants;scores;state` +
-    `&order=desc` +
+    `&api_token=${SPORTMONKS_TOKEN}` +
     `&per_page=50`;
 
   console.log(`[team-form] teamId=${teamId}`);
