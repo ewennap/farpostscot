@@ -5,6 +5,8 @@ const SPORTMONKS_TOKEN = process.env.SPORTMONKS_TOKEN;
 const FINISHED_STATES  = ['FT', 'AET', 'Pen.', 'PEN', 'ABAN'];
 
 exports.handler = async function (event) {
+  console.log('[team-form] queryStringParameters:', JSON.stringify(event.queryStringParameters));
+
   if (!SPORTMONKS_TOKEN) {
     return { statusCode: 500, body: JSON.stringify({ error: 'SPORTMONKS_TOKEN not set' }) };
   }
@@ -14,17 +16,11 @@ exports.handler = async function (event) {
     return { statusCode: 400, body: JSON.stringify({ error: 'teamId is required' }) };
   }
 
-  const today = new Date();
-  const from  = new Date(today);
-  from.setDate(from.getDate() - 90);
-  const fromStr = from.toISOString().split('T')[0];
-  const toStr   = today.toISOString().split('T')[0];
-
   const url =
-    `https://api.sportmonks.com/v3/football/fixtures/between/${fromStr}/${toStr}` +
-    `?api_token=${SPORTMONKS_TOKEN}` +
-    `&filters=fixtureTeams:${teamId}` +
-    `&include=participants;state;scores` +
+    `https://api.sportmonks.com/v3/football/fixtures` +
+    `?filters=fixtureTeams:${teamId}` +
+    `&include=participants;scores;state` +
+    `&api_token=${SPORTMONKS_TOKEN}` +
     `&per_page=50`;
 
   console.log(`[team-form] teamId=${teamId}`);
@@ -52,14 +48,21 @@ exports.handler = async function (event) {
         const ftScores = (f.scores || []).filter(s => s.description === 'CURRENT' || s.description === 'FT');
         const homeScore = ftScores.find(s => s.score && s.score.participant === 'home');
         const awayScore = ftScores.find(s => s.score && s.score.participant === 'away');
+        const hGoals   = homeScore && homeScore.score ? homeScore.score.goals : null;
+        const aGoals   = awayScore && awayScore.score ? awayScore.score.goals : null;
+        const teamIdNum = parseInt(teamId, 10);
+        const isHome   = home.id === teamIdNum;
+        const teamGoals = isHome ? hGoals : aGoals;
+        const oppGoals  = isHome ? aGoals : hGoals;
+        const result    = teamGoals == null || oppGoals == null ? null
+                        : teamGoals > oppGoals ? 'W'
+                        : teamGoals < oppGoals ? 'L' : 'D';
         return {
           date:  f.starting_at || null,
           home:  { id: home.id, name: home.name || '', crest: home.image_path || null },
           away:  { id: away.id, name: away.name || '', crest: away.image_path || null },
-          score: {
-            home: homeScore && homeScore.score ? homeScore.score.goals : '-',
-            away: awayScore && awayScore.score ? awayScore.score.goals : '-'
-          }
+          score: { home: hGoals != null ? hGoals : '-', away: aGoals != null ? aGoals : '-' },
+          result
         };
       })
       .reverse(); // oldest first for left-to-right display
