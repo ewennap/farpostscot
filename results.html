@@ -114,6 +114,7 @@
     .scorers-table td.goals { text-align: right; font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 800; color: #e8e6e1; background: #161718; }
     .scorers-table tr:hover td.goals { background: #1e1f20; }
     .scorer-crest { width: 24px; height: 24px; object-fit: contain; margin-right: 10px; vertical-align: middle; border-radius: 2px; }
+    .scorer-team-wrap { display: inline-flex; align-items: center; min-width: 0; }
 
     .empty-state { padding: 3rem 1.25rem; text-align: center; color: #555; font-size: 14px; }
     .loading-state { padding: 2rem 1.25rem; text-align: center; }
@@ -137,6 +138,18 @@
       .match-card { border-right: none; }
       .match-card:nth-child(3n) { border-right: none; }
       .tab-btn { padding: 0.75rem 1rem; font-size: 12px; }
+      .table-container { overflow-x: visible; }
+      .scorers-table { min-width: 0; width: 100%; }
+      .scorers-table thead { display: none; }
+      .scorers-table tbody { display: block; padding: 0.75rem; }
+      .scorers-table tr { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; grid-template-areas: 'rank player goals' 'rank team goals'; gap: 0.1rem 0.75rem; padding: 0.85rem 0.9rem; margin-bottom: 0.65rem; border: 1px solid #2a2b2d; background: #111213; }
+      .scorers-table tr:last-child { margin-bottom: 0; }
+      .scorers-table td { display: block; padding: 0; border-bottom: none; background: transparent !important; }
+      .scorers-table td.rank { grid-area: rank; width: auto; align-self: start; font-size: 18px; color: #7a7a7a; }
+      .scorers-table td.player-cell { grid-area: player; font-size: 18px; line-height: 1.05; }
+      .scorers-table td.team-cell-light { grid-area: team; display: flex; align-items: center; min-width: 0; white-space: normal; font-size: 13px; color: #888; }
+      .scorers-table td.goals { grid-area: goals; align-self: center; text-align: right; font-size: 30px; line-height: 1; color: #e84040; }
+      .scorer-crest { width: 22px; height: 22px; margin-right: 8px; flex-shrink: 0; }
       .footer { flex-direction: column; gap: 6px; text-align: center; }
     }
     @media (min-width: 681px) and (max-width: 1024px) {
@@ -580,7 +593,7 @@
         html += '<tr>'
           + '<td class="rank">' + (index + 1) + '</td>'
           + '<td class="player-cell">' + (row.playerName || '') + '</td>'
-          + '<td class="team-cell-light">' + crest + (row.teamName || '') + '</td>'
+          + '<td class="team-cell-light"><span class="scorer-team-wrap">' + crest + (row.teamName || '') + '</span></td>'
           + '<td class="goals">' + (row.goals || 0) + '</td>'
           + '</tr>';
       });

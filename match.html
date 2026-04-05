@@ -72,6 +72,10 @@
     .lineups-grid { display: grid; grid-template-columns: 1fr 1fr; }
     .lineup-col { padding: 1rem 1.25rem; }
     .lineup-col:first-child { border-right: 1px solid #2a2b2d; }
+    .lineup-switcher { display: flex; gap: 0; border-bottom: 1px solid #2a2b2d; background: #0d0e0f; overflow-x: auto; }
+    .lineup-switch-btn { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #555; background: none; border: none; border-right: 1px solid #2a2b2d; padding: 0.7rem 1.25rem; cursor: pointer; white-space: nowrap; transition: color 0.15s, background 0.15s; }
+    .lineup-switch-btn:hover { color: #e8e6e1; background: #161718; }
+    .lineup-switch-btn.active { color: #e84040; background: #161718; }
     .lineup-team-name { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; color: #e8e6e1; padding-bottom: 0.625rem; border-bottom: 1px solid #2a2b2d; margin-bottom: 0.625rem; }
     .lineup-group-title { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #444; margin: 0.75rem 0 0.4rem; }
     .lineup-player { display: flex; align-items: center; gap: 8px; padding: 0.3rem 0; border-bottom: 1px solid #1a1b1d; }
@@ -159,6 +163,7 @@
       .tl-player { font-size: 13px; }
       .lineups-grid { grid-template-columns: 1fr; }
       .lineup-col:first-child { border-right: none; border-bottom: 1px solid #2a2b2d; }
+      .lineup-switch-btn { padding: 0.65rem 0.85rem; font-size: 10px; }
       .form-col { padding: 0.85rem 0.75rem; }
       .form-item { flex: 0 0 calc(33.333% - 4px); min-width: 0; }
     }
@@ -437,10 +442,28 @@
         return html;
       }
 
-      el.innerHTML = '<div class="lineups-grid">'
-        + '<div class="lineup-col">' + buildCol(home.id, home.name || 'Home') + '</div>'
-        + '<div class="lineup-col">' + buildCol(away.id, away.name || 'Away') + '</div>'
+      var teamViews = {
+        home: buildCol(home.id, home.name || 'Home'),
+        away: buildCol(away.id, away.name || 'Away')
+      };
+
+      el.innerHTML = '<div class="lineup-switcher">'
+        + '<button class="lineup-switch-btn active" type="button" data-lineup-team="home">' + (home.short_code || home.name || 'Home') + '</button>'
+        + '<button class="lineup-switch-btn" type="button" data-lineup-team="away">' + (away.short_code || away.name || 'Away') + '</button>'
+        + '</div>'
+        + '<div class="lineups-grid">'
+        + '<div class="lineup-col" id="lineup-team-panel">' + teamViews.home + '</div>'
         + '</div>';
+
+      el.querySelectorAll('.lineup-switch-btn').forEach(function(button) {
+        button.addEventListener('click', function() {
+          var teamKey = button.getAttribute('data-lineup-team');
+          el.querySelectorAll('.lineup-switch-btn').forEach(function(btn) {
+            btn.classList.toggle('active', btn === button);
+          });
+          document.getElementById('lineup-team-panel').innerHTML = teamViews[teamKey] || '';
+        });
+      });
     }
 
     async function loadForm(home, away) {
