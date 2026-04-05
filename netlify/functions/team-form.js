@@ -2,7 +2,40 @@
 // Returns the last 5 completed results for a given team
 
 const SPORTMONKS_TOKEN = process.env.SPORTMONKS_TOKEN;
-const FINISHED_STATES  = ['FT', 'AET', 'Pen.', 'PEN', 'ABAN'];
+const FINISHED_STATES = new Set(['FT', 'AET', 'PEN']);
+const DATE_FORMATTER = new Intl.DateTimeFormat('en-GB', {
+  day: 'numeric',
+  month: 'short',
+  timeZone: 'UTC'
+});
+
+function normalizeStateShort(fixture) {
+  return String(fixture && fixture.state && fixture.state.short ? fixture.state.short : '')
+    .toUpperCase()
+    .replace(/[^A-Z]/g, '');
+}
+
+function isFinishedFixture(fixture) {
+  return FINISHED_STATES.has(normalizeStateShort(fixture));
+}
+
+function getParticipantByLocation(participants, location, fallbackIndex) {
+  return participants.find(function (participant) {
+    return participant && participant.meta && participant.meta.location === location;
+  }) || participants[fallbackIndex] || {};
+}
+
+function getScoreBySide(scores, side) {
+  const fullTimeScores = scores.filter(function (score) {
+    return score && (score.description === 'CURRENT' || score.description === 'FT');
+  });
+
+  const sideScore = fullTimeScores.find(function (score) {
+    return score && score.score && score.score.participant === side;
+  });
+
+  return sideScore && sideScore.score && sideScore.score.goals != null ? sideScore.score.goals : null;
+}
 
 exports.handler = async function (event) {
   if (!SPORTMONKS_TOKEN) {
@@ -14,17 +47,11 @@ exports.handler = async function (event) {
     return { statusCode: 400, body: JSON.stringify({ error: 'teamId is required' }) };
   }
 
-  const today = new Date();
-  const from  = new Date(today);
-  from.setDate(from.getDate() - 90);
-  const fromStr = from.toISOString().split('T')[0];
-  const toStr   = today.toISOString().split('T')[0];
-
   const url =
-    `https://api.sportmonks.com/v3/football/fixtures/between/${fromStr}/${toStr}` +
+    `https://api.sportmonks.com/v3/football/fixtures` +
     `?api_token=${SPORTMONKS_TOKEN}` +
     `&filters=fixtureTeams:${teamId}` +
-    `&include=participants;state;scores` +
+    `&include=participants;scores;state` +
     `&per_page=50`;
 
   console.log(`[team-form] teamId=${teamId}`);
@@ -32,44 +59,58 @@ exports.handler = async function (event) {
 
   try {
     const response = await fetch(url);
-    const data     = await response.json();
+    const data = await response.json();
 
     console.log(`[team-form] status=${response.status} count=${(data.data || []).length}`);
 
     if (!response.ok) {
       console.error('[team-form] Error body:', JSON.stringify(data));
-      return { statusCode: 500, body: JSON.stringify({ error: data.message || 'Sportmonks error' }) };
+      return { statusCode: 502, body: JSON.stringify({ error: data.message || 'Sportmonks error' }) };
     }
 
     const results = (data.data || [])
-      .filter(f => FINISHED_STATES.includes(f.state && f.state.short))
-      .sort((a, b) => new Date(b.starting_at) - new Date(a.starting_at))
+      .filter(isFinishedFixture)
+      .sort(function (a, b) {
+        return new Date(b.starting_at) - new Date(a.starting_at);
+      })
       .slice(0, 5)
-      .map(f => {
-        const parts    = f.participants || [];
-        const home     = parts.find(p => p.meta && p.meta.location === 'home') || parts[0] || {};
-        const away     = parts.find(p => p.meta && p.meta.location === 'away') || parts[1] || {};
-        const ftScores = (f.scores || []).filter(s => s.description === 'CURRENT' || s.description === 'FT');
-        const homeScore = ftScores.find(s => s.score && s.score.participant === 'home');
-        const awayScore = ftScores.find(s => s.score && s.score.participant === 'away');
+      .map(function (fixture) {
+        const participants = fixture.participants || [];
+        const scores = fixture.scores || [];
+        const home = getParticipantByLocation(participants, 'home', 0);
+        const away = getParticipantByLocation(participants, 'away', 1);
+        const homeScore = getScoreBySide(scores, 'home');
+        const awayScore = getScoreBySide(scores, 'away');
+        const requestedTeamIsHome = String(home.id) === String(teamId);
+
+        let result = 'D';
+        if (homeScore != null && awayScore != null) {
+          if (homeScore === awayScore) result = 'D';
+          else if ((requestedTeamIsHome && homeScore > awayScore) || (!requestedTeamIsHome && awayScore > homeScore)) result = 'W';
+          else result = 'L';
+        }
+
         return {
-          date:  f.starting_at || null,
-          home:  { id: home.id, name: home.name || '', crest: home.image_path || null },
-          away:  { id: away.id, name: away.name || '', crest: away.image_path || null },
-          score: {
-            home: homeScore && homeScore.score ? homeScore.score.goals : '-',
-            away: awayScore && awayScore.score ? awayScore.score.goals : '-'
-          }
+          requestedTeamId: String(teamId),
+          requestedTeamSide: requestedTeamIsHome ? 'home' : 'away',
+          date: fixture.starting_at ? DATE_FORMATTER.format(new Date(fixture.starting_at)) : '',
+          homeTeamName: home.name || '',
+          homeTeamCrest: home.image_path || null,
+          awayTeamName: away.name || '',
+          awayTeamCrest: away.image_path || null,
+          homeScore: homeScore != null ? homeScore : '-',
+          awayScore: awayScore != null ? awayScore : '-',
+          result
         };
       })
-      .reverse(); // oldest first for left-to-right display
+      .reverse();
 
     console.log(`[team-form] returning ${results.length} results`);
 
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=300' },
-      body: JSON.stringify({ results })
+      body: JSON.stringify(results)
     };
   } catch (err) {
     console.error('[team-form] Unexpected error:', err.message);

@@ -384,13 +384,17 @@
     async function loadForm(home, away) {
       var el = document.getElementById('form-container');
       try {
+        console.log('[form-guide] loading team IDs', { homeTeamId: home && home.id, awayTeamId: away && away.id });
         var responses = await Promise.all([
-          fetch('/.netlify/functions/team-form?teamId=' + home.id),
-          fetch('/.netlify/functions/team-form?teamId=' + away.id)
+          fetch('/.netlify/functions/team-form?teamId=' + encodeURIComponent(home.id)),
+          fetch('/.netlify/functions/team-form?teamId=' + encodeURIComponent(away.id))
         ]);
         var homeData = await responses[0].json();
         var awayData = await responses[1].json();
-        renderForm(homeData.results || [], home, awayData.results || [], away);
+        if (!responses[0].ok || !responses[1].ok) {
+          throw new Error((homeData && homeData.error) || (awayData && awayData.error) || 'Failed to load form guide');
+        }
+        renderForm(Array.isArray(homeData) ? homeData : [], home, Array.isArray(awayData) ? awayData : [], away);
       } catch (e) {
         el.innerHTML = '<div class="empty-state">Form guide not available.</div>';
       }
@@ -405,23 +409,18 @@
           html += '<span style="font-size:13px;color:#555">No recent results</span>';
         } else {
           results.forEach(function(r) {
-            var isHome    = r.home.id === team.id;
-            var teamGoals = parseInt(isHome ? r.score.home : r.score.away);
-            var oppGoals  = parseInt(isHome ? r.score.away : r.score.home);
-            var scoreStr  = (isNaN(teamGoals) ? '-' : teamGoals) + '-' + (isNaN(oppGoals) ? '-' : oppGoals);
-            var result    = isNaN(teamGoals) || isNaN(oppGoals) ? 'D'
-                          : teamGoals > oppGoals ? 'W'
-                          : teamGoals < oppGoals ? 'L' : 'D';
-            var opponent  = isHome ? r.away : r.home;
-            var dateStr   = r.date ? new Date(r.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '';
-            var crest     = opponent.crest
-              ? '<img class="form-crest" src="' + opponent.crest + '" alt="" onerror="this.style.display=\'none\'">'
-              : '<div class="form-crest-blank"></div>';
+            var isHomeTeam = r.requestedTeamSide === 'home';
+            var teamGoals = parseInt(isHomeTeam ? r.homeScore : r.awayScore, 10);
+            var oppGoals = parseInt(isHomeTeam ? r.awayScore : r.homeScore, 10);
+            var scoreStr = (isNaN(teamGoals) ? '-' : teamGoals) + '-' + (isNaN(oppGoals) ? '-' : oppGoals);
+            var crest = isHomeTeam ? r.awayTeamCrest : r.homeTeamCrest;
             html += '<div class="form-item">'
-              + crest
+              + (crest
+                ? '<img class="form-crest" src="' + crest + '" alt="" onerror="this.style.display=\'none\'">'
+                : '<div class="form-crest-blank"></div>')
               + '<span class="form-score">' + scoreStr + '</span>'
-              + '<span class="form-badge ' + result + '">' + result + '</span>'
-              + '<span class="form-date">' + dateStr + '</span>'
+              + '<span class="form-badge ' + (r.result || 'D') + '">' + (r.result || 'D') + '</span>'
+              + '<span class="form-date">' + (r.date || '') + '</span>'
               + '</div>';
           });
         }
