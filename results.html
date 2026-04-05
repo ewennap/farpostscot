@@ -59,7 +59,7 @@
     .league-name { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #666; }
     .league-date { font-size: 11px; color: #444; margin-left: auto; }
     .match-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
-    .match-card { padding: 1rem 1.25rem; border-right: 1px solid #2a2b2d; border-bottom: 1px solid #2a2b2d; transition: background 0.15s; }
+    .match-card { display: block; padding: 1rem 1.25rem; border-right: 1px solid #2a2b2d; border-bottom: 1px solid #2a2b2d; transition: background 0.15s; text-decoration: none; color: inherit; cursor: pointer; }
     .match-card:hover { background: #161718; }
     .match-card:nth-child(3n) { border-right: none; }
     .match-teams { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
@@ -372,14 +372,14 @@
           var live = ['LIVE','1H','2H','HT','PEN'].indexOf(f.state) !== -1;
           var status = live ? '<span class="match-status live">Live</span>' : '<span class="match-status">FT</span>';
           var time   = f.date ? '<span class="match-time">' + fmtTime(f.date) + '</span>' : '';
-          html += '<div class="match-card"><div class="match-teams">'
+          html += '<a class="match-card" href="match.html?id=' + f.id + '"><div class="match-teams">'
             + '<div class="match-team">'
             + (f.home.crest ? '<img class="result-crest" src="' + f.home.crest + '" alt="" onerror="this.style.display=\'none\'">' : '')
             + '<span class="team-name' + (hw?' winner':'') + '">' + f.home.name + '</span><span class="team-score' + (hw?' winner':'') + '">' + f.score.home + '</span></div>'
             + '<div class="match-team">'
             + (f.away.crest ? '<img class="result-crest" src="' + f.away.crest + '" alt="" onerror="this.style.display=\'none\'">' : '')
             + '<span class="team-name' + (aw?' winner':'') + '">' + f.away.name + '</span><span class="team-score' + (aw?' winner':'') + '">' + f.score.away + '</span></div>'
-            + '</div><div class="match-meta">' + status + time + '</div></div>';
+            + '</div><div class="match-meta">' + status + time + '</div></a>';
         });
         html += '</div></div>';
       });
