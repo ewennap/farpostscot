@@ -406,7 +406,7 @@
           var live = ['LIVE','1H','2H','HT','PEN'].indexOf(f.state) !== -1;
           var status = live ? '<span class="match-status live">Live</span>' : '<span class="match-status">FT</span>';
           var time   = f.date ? '<span class="match-time">' + fmtTime(f.date) + '</span>' : '';
-          html += '<a class="match-card" href="match.html?id=' + f.id + '"><div class="match-teams">'
+          html += '<a class="match-card" href="match.html?id=' + f.id + '&from=results"><div class="match-teams">'
             + '<div class="match-team">'
             + (f.home.crest ? '<img class="result-crest" src="' + f.home.crest + '" alt="" onerror="this.style.display=\'none\'">' : '')
             + '<span class="team-name' + (hw?' winner':'') + '">' + f.home.name + '</span><span class="team-score' + (hw?' winner':'') + '">' + f.score.home + '</span></div>'

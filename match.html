@@ -13,6 +13,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
     body { background: #111213; color: #e8e6e1; font-family: 'Barlow', sans-serif; min-height: 100vh; }
 
     .nav { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 1.25rem; height: 52px; border-bottom: 1px solid #2a2b2d; background: rgba(13,14,15,0.96); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: height 0.2s ease, box-shadow 0.2s ease; }
@@ -31,6 +32,12 @@
     .mobile-menu a { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #888; text-decoration: none; padding: 0.875rem 1.25rem; border-bottom: 1px solid #1a1b1d; }
     .mobile-menu a:last-child { border-bottom: none; }
 
+    .match-utility { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.85rem 1.25rem; border-bottom: 1px solid #1a1b1d; background: #0d0e0f; }
+    .match-back-link { display: inline-flex; align-items: center; gap: 0.55rem; font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #aaa; text-decoration: none; }
+    .match-back-link:hover { color: #e8e6e1; }
+    .match-back-arrow { color: #e84040; font-size: 13px; line-height: 1; }
+    .match-centre-label { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #555; white-space: nowrap; }
+
     /* ── MATCH HERO ── */
     .match-hero { background: #0d0e0f; padding: 4.5rem 1.5rem 3.75rem; border-bottom: 1px solid #2a2b2d; }
     .match-teams-header { display: flex; align-items: center; justify-content: center; gap: 1.5rem; max-width: 980px; margin: 0 auto; }
@@ -44,34 +51,55 @@
     .match-status-badge { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #555; }
     .match-status-badge.live { color: #e84040; }
 
+    .match-jump-wrap { padding: 0.85rem 1.25rem 0; background: linear-gradient(180deg, #0d0e0f 0%, #111213 100%); }
+    .match-jump-nav { display: inline-flex; gap: 0; border: 1px solid #2a2b2d; background: #0d0e0f; overflow-x: auto; max-width: 100%; }
+    .match-jump-link { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #555; text-decoration: none; padding: 0.7rem 1rem; border-right: 1px solid #2a2b2d; white-space: nowrap; transition: color 0.15s, background 0.15s, box-shadow 0.15s; }
+    .match-jump-link:last-child { border-right: none; }
+    .match-jump-link:hover { color: #e8e6e1; background: #161718; }
+    .match-jump-link.active { color: #e84040; background: #161718; box-shadow: inset 0 -2px 0 #e84040; }
+
+    .match-main { padding: 1rem 0 2.5rem; }
+    .match-section { margin-top: 1rem; border-top: 1px solid #2a2b2d; border-bottom: 1px solid #2a2b2d; background: #111213; }
+    .match-section:first-child { margin-top: 0; }
+    .match-section, .match-hero { scroll-margin-top: 108px; }
+
     /* ── SECTION HEADERS ── */
-    .section-header { display: flex; align-items: center; padding: 0.6rem 1.25rem; border-bottom: 1px solid #2a2b2d; background: #0d0e0f; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.8rem 1.25rem; border-bottom: 1px solid #2a2b2d; background: #0d0e0f; }
     .section-title { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #555; }
     .section-title span { color: #e84040; margin-right: 8px; }
+    .section-note { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #444; }
+
+    /* ── SUMMARY ── */
+    .summary-container { padding: 1.25rem; }
+    .summary-lede { max-width: 760px; font-size: 15px; line-height: 1.6; color: #b6b2ab; }
+    .summary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem; margin-top: 1rem; }
+    .summary-card { padding: 0.95rem 1rem; border: 1px solid #2a2b2d; background: #0d0e0f; min-width: 0; }
+    .summary-label { display: block; font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #555; margin-bottom: 0.35rem; }
+    .summary-value { display: block; font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; color: #e8e6e1; line-height: 1.15; }
+    .summary-value.muted { font-size: 15px; color: #aaa; }
 
     /* ── TIMELINE ── */
     .timeline-teams-header { display: grid; grid-template-columns: 1fr 48px 1fr; padding: 0.5rem 1.25rem; border-bottom: 1px solid #1a1b1d; }
     .tl-team-label { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #444; }
     .tl-team-label.home { text-align: right; padding-right: 10px; }
     .tl-team-label.away { padding-left: 10px; }
-    .timeline-wrap { position: relative; padding: 0.5rem 0; }
+    .timeline-wrap { position: relative; padding: 0.8rem 0; }
     .timeline-wrap::before { content: ''; position: absolute; top: 0; bottom: 0; left: 50%; width: 1px; background: #2a2b2d; transform: translateX(-50%); pointer-events: none; }
-    .tl-row { display: grid; grid-template-columns: 1fr 48px 1fr; align-items: center; padding: 0.3rem 1.25rem; position: relative; }
-    .tl-home { display: flex; align-items: center; justify-content: flex-end; gap: 6px; padding-right: 10px; }
-    .tl-away { display: flex; align-items: center; gap: 6px; padding-left: 10px; }
+    .tl-row { display: grid; grid-template-columns: 1fr 48px 1fr; align-items: center; padding: 0.55rem 1.25rem; position: relative; }
+    .tl-home { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding-right: 10px; min-width: 0; }
+    .tl-away { display: flex; align-items: center; gap: 8px; padding-left: 10px; min-width: 0; }
     .tl-mid { display: flex; align-items: center; justify-content: center; }
     .tl-dot { width: 34px; height: 34px; border-radius: 50%; background: #161718; border: 1px solid #2a2b2d; display: flex; align-items: center; justify-content: center; position: relative; z-index: 1; }
     .tl-dot svg { width: 18px; height: 18px; display: block; }
-    .tl-content { display: flex; flex-direction: column; }
-    .tl-player { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600; color: #e8e6e1; }
-    .tl-sub-extra { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; color: #555; }
-    .tl-min { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; color: #555; white-space: nowrap; }
+    .tl-content { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .tl-player { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600; color: #e8e6e1; line-height: 1.15; overflow-wrap: anywhere; }
+    .tl-sub-extra { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; color: #777; line-height: 1.1; }
+    .tl-min { display: inline-flex; align-items: center; justify-content: center; min-width: 38px; padding: 0.18rem 0.45rem; border: 1px solid #2a2b2d; border-radius: 999px; background: #161718; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; color: #888; white-space: nowrap; flex-shrink: 0; }
     .tl-home .tl-content { align-items: flex-end; }
 
     /* ── LINEUPS ── */
-    .lineups-grid { display: grid; grid-template-columns: 1fr 1fr; }
+    .lineups-grid { display: grid; grid-template-columns: 1fr; }
     .lineup-col { padding: 1rem 1.25rem; }
-    .lineup-col:first-child { border-right: 1px solid #2a2b2d; }
     .lineup-switcher { display: flex; gap: 0; border-bottom: 1px solid #2a2b2d; background: #0d0e0f; overflow: hidden; width: 100%; }
     .lineup-switch-btn { flex: 1 1 50%; min-width: 0; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #555; background: none; border: none; border-right: 1px solid #2a2b2d; padding: 0.85rem 1rem; cursor: pointer; white-space: nowrap; text-align: center; transition: color 0.15s, background 0.15s; }
     .lineup-switch-btn:last-child { border-right: none; }
@@ -106,8 +134,8 @@
     .form-col { padding: 1rem 1.25rem; }
     .form-col:first-child { border-right: 1px solid #2a2b2d; }
     .form-team-label { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; color: #e8e6e1; padding-bottom: 0.625rem; border-bottom: 1px solid #2a2b2d; margin-bottom: 0.75rem; }
-    .form-strip { display: flex; gap: 6px; flex-wrap: nowrap; }
-    .form-item { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; padding: 0.5rem 0.25rem; border: 1px solid #2a2b2d; border-radius: 3px; min-width: 0; background: #0d0e0f; }
+    .form-strip { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.65rem; }
+    .form-item { display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 0; padding: 0.7rem 0.35rem; border: 1px solid #2a2b2d; border-radius: 3px; background: #0d0e0f; }
     .form-crest { width: 28px; height: 28px; object-fit: contain; }
     .form-crest-blank { width: 28px; height: 28px; }
     .form-score { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; color: #e8e6e1; }
@@ -118,7 +146,11 @@
     .form-date { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; color: #555; white-space: nowrap; }
 
     @media (max-width: 768px) {
+      .match-utility { padding-left: 1rem; padding-right: 1rem; }
       .match-hero { padding: 3rem 1rem 2.5rem; }
+      .match-jump-wrap { padding-left: 1rem; padding-right: 1rem; }
+      .match-main { padding-top: 0.85rem; }
+      .match-section { margin-top: 0.85rem; }
       .match-teams-header { gap: 1rem; max-width: 100%; }
       .team-side { min-width: 0; }
       .team-crest-hero { width: 84px; height: 84px; }
@@ -127,10 +159,10 @@
       .score-line { gap: 0.5rem; }
       .score-num { font-size: 74px; min-width: 56px; }
       .score-sep { font-size: 42px; }
+      .summary-container { padding: 1rem; }
+      .summary-grid { grid-template-columns: 1fr; gap: 0.7rem; }
       .form-grid { grid-template-columns: 1fr; }
       .form-col:first-child { border-right: none; border-bottom: 1px solid #2a2b2d; }
-      .form-strip { flex-wrap: wrap; }
-      .form-item { flex: 0 0 calc(20% - 5px); min-width: 64px; }
       .lineup-switcher { width: 100%; }
       .lineup-switch-btn { flex-basis: 50%; padding: 0.9rem 0.75rem; font-size: 12px; }
     }
@@ -138,14 +170,18 @@
     @media (max-width: 680px) {
       .nav-links { display: none; }
       .nav-hamburger { display: flex; }
+      .match-utility { flex-wrap: wrap; padding: 0.75rem 1rem; }
+      .match-centre-label { width: 100%; }
       .match-hero { padding: 2.5rem 1rem 2.25rem; }
+      .match-jump-wrap { padding-top: 0.75rem; }
+      .match-jump-nav { display: flex; width: 100%; }
+      .match-jump-link { flex: 1 1 25%; text-align: center; padding-left: 0.75rem; padding-right: 0.75rem; }
       .match-teams-header { gap: 0.75rem; align-items: flex-start; }
       .score-center { min-width: 0; }
       .score-num { font-size: 68px; min-width: 52px; }
       .score-sep { font-size: 40px; }
       .team-crest-hero { width: 72px; height: 72px; }
       .team-name-hero { font-size: 16px; }
-      .lineups-grid { grid-template-columns: 1fr 1fr; }
       .lineup-col { padding: 0.75rem 0.75rem; }
       .lineup-name { font-size: 13px; }
       .footer { flex-direction: column; gap: 6px; text-align: center; }
@@ -153,6 +189,7 @@
 
     @media (max-width: 480px) {
       .match-hero { padding: 2rem 0.75rem 2rem; }
+      .match-jump-wrap { padding-left: 0.75rem; padding-right: 0.75rem; }
       .match-teams-header { gap: 0.35rem; }
       .team-side { gap: 0.65rem; }
       .team-crest-hero { width: 56px; height: 56px; }
@@ -161,14 +198,22 @@
       .score-num { font-size: 52px; min-width: 40px; }
       .score-sep { font-size: 30px; }
       .match-status-badge { font-size: 10px; letter-spacing: 0.1em; }
-      .timeline-teams-header, .tl-row { grid-template-columns: minmax(0, 1fr) 40px minmax(0, 1fr); padding-left: 0.75rem; padding-right: 0.75rem; }
-      .tl-home, .tl-away { min-width: 0; }
+      .match-jump-link { padding: 0.7rem 0.5rem; font-size: 10px; letter-spacing: 0.08em; }
+      .summary-lede { font-size: 14px; line-height: 1.55; }
+      .summary-value { font-size: 16px; }
+      .timeline-teams-header, .tl-row { grid-template-columns: minmax(0, 1fr) 44px minmax(0, 1fr); padding-left: 0.75rem; padding-right: 0.75rem; }
+      .timeline-teams-header { padding-top: 0.6rem; padding-bottom: 0.6rem; }
+      .tl-home, .tl-away { gap: 7px; }
+      .tl-dot { width: 30px; height: 30px; }
+      .tl-dot svg { width: 16px; height: 16px; }
       .tl-player { font-size: 13px; }
+      .tl-sub-extra { font-size: 11px; }
+      .tl-min { min-width: 34px; padding: 0.14rem 0.35rem; font-size: 10px; }
       .lineups-grid { grid-template-columns: 1fr; }
-      .lineup-col:first-child { border-right: none; border-bottom: 1px solid #2a2b2d; }
       .lineup-switch-btn { padding: 0.85rem 0.5rem; font-size: 11px; letter-spacing: 0.08em; }
       .form-col { padding: 0.85rem 0.75rem; }
-      .form-item { flex: 0 0 calc(33.333% - 4px); min-width: 0; }
+      .form-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .form-item { min-width: 0; padding: 0.65rem 0.25rem; }
     }
   </style>
 </head>
@@ -196,40 +241,66 @@
     <a href="fixtures.html">Fixtures</a>
   </div>
 
+  <div class="match-utility">
+    <a class="match-back-link" id="match-back-link" href="results.html">
+      <span class="match-back-arrow" aria-hidden="true">←</span>
+      <span class="match-back-text">Back to results</span>
+    </a>
+    <div class="match-centre-label">Match centre</div>
+  </div>
+
   <!-- MATCH HERO -->
   <div class="match-hero" id="match-hero">
     <div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div></div>
   </div>
 
-  <!-- TIMELINE -->
-  <div id="section-timeline">
-    <div class="section-header">
-      <div class="section-title"><span>//</span>Match timeline</div>
-    </div>
-    <div id="timeline-container">
-      <div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div></div>
-    </div>
+  <div class="match-jump-wrap">
+    <nav class="match-jump-nav" aria-label="Match sections">
+      <a class="match-jump-link active" href="#section-summary" data-jump-link="section-summary">Summary</a>
+      <a class="match-jump-link" href="#section-timeline" data-jump-link="section-timeline">Timeline</a>
+      <a class="match-jump-link" href="#section-lineups" data-jump-link="section-lineups">Lineups</a>
+      <a class="match-jump-link" href="#section-form" data-jump-link="section-form">Form</a>
+    </nav>
   </div>
 
-  <!-- LINEUPS -->
-  <div id="section-lineups">
-    <div class="section-header">
-      <div class="section-title"><span>//</span>Lineups</div>
-    </div>
-    <div id="lineups-container">
-      <div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div></div>
-    </div>
-  </div>
+  <main class="match-main">
+    <section class="match-section" id="section-summary" data-jump-section>
+      <div class="section-header">
+        <div class="section-title"><span>//</span>Summary</div>
+        <div class="section-note">Match centre</div>
+      </div>
+      <div class="summary-container" id="summary-container">
+        <div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div></div>
+      </div>
+    </section>
 
-  <!-- FORM GUIDE -->
-  <div id="section-form">
-    <div class="section-header">
-      <div class="section-title"><span>//</span>Form guide</div>
-    </div>
-    <div id="form-container">
-      <div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div></div>
-    </div>
-  </div>
+    <section class="match-section" id="section-timeline" data-jump-section>
+      <div class="section-header">
+        <div class="section-title"><span>//</span>Match timeline</div>
+      </div>
+      <div id="timeline-container">
+        <div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div></div>
+      </div>
+    </section>
+
+    <section class="match-section" id="section-lineups" data-jump-section>
+      <div class="section-header">
+        <div class="section-title"><span>//</span>Lineups</div>
+      </div>
+      <div id="lineups-container">
+        <div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div></div>
+      </div>
+    </section>
+
+    <section class="match-section" id="section-form" data-jump-section>
+      <div class="section-header">
+        <div class="section-title"><span>//</span>Form guide</div>
+      </div>
+      <div id="form-container">
+        <div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div></div>
+      </div>
+    </section>
+  </main>
 
   <footer class="footer">
     <div class="footer-logo">FAR POST<span>.</span></div>
@@ -265,6 +336,7 @@
 
       if (!id) {
         document.getElementById('match-hero').innerHTML = '<div class="empty-state">No match ID specified.</div>';
+        document.getElementById('summary-container').innerHTML = '';
         document.getElementById('timeline-container').innerHTML = '';
         document.getElementById('lineups-container').innerHTML = '';
         document.getElementById('form-container').innerHTML = '';
@@ -278,6 +350,7 @@
 
         var fixture = body.data;
         renderHero(fixture);
+        renderSummary(fixture);
         renderTimeline(fixture);
         renderLineups(fixture);
 
@@ -288,6 +361,7 @@
         else document.getElementById('form-container').innerHTML = '';
       } catch (e) {
         document.getElementById('match-hero').innerHTML = '<div class="empty-state">Could not load match data. Please try again later.</div>';
+        document.getElementById('summary-container').innerHTML = '';
         document.getElementById('timeline-container').innerHTML = '';
         document.getElementById('lineups-container').innerHTML = '';
         document.getElementById('form-container').innerHTML = '';
@@ -339,6 +413,43 @@
         + '</div>';
 
       document.title = (home.name || 'Home') + ' vs ' + (away.name || 'Away') + ' \u2014 Far Post';
+    }
+
+    function formatKickoff(isoString) {
+      if (!isoString) return 'TBC';
+
+      var date = new Date(isoString);
+      if (isNaN(date.getTime())) return 'TBC';
+
+      return date.toLocaleDateString('en-GB', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short'
+      }) + ' \u2022 ' + date.toLocaleTimeString('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    function renderSummary(fixture) {
+      var el = document.getElementById('summary-container');
+      var participants = fixture.participants || [];
+      var home = participants.find(function(p) { return p.meta && p.meta.location === 'home'; }) || participants[0] || {};
+      var away = participants.find(function(p) { return p.meta && p.meta.location === 'away'; }) || participants[1] || {};
+      var state = fixture.state || {};
+      var stateShort = state.short || '';
+      var stateName = state.name || stateShort || 'Scheduled';
+      var isLive = LIVE_STATES.indexOf(stateShort) !== -1;
+      var kickoff = formatKickoff(fixture.starting_at);
+      var homeName = home.name || 'Home';
+      var awayName = away.name || 'Away';
+
+      el.innerHTML = '<p class="summary-lede">Everything in one place for ' + homeName + ' vs ' + awayName + ', with the key moments, confirmed lineups and each side&#39;s recent form in a single match-centre view.</p>'
+        + '<div class="summary-grid">'
+        + '<div class="summary-card"><span class="summary-label">Kick-off</span><span class="summary-value">' + kickoff + '</span></div>'
+        + '<div class="summary-card"><span class="summary-label">Status</span><span class="summary-value' + (isLive ? '' : ' muted') + '">' + stateName + '</span></div>'
+        + '<div class="summary-card"><span class="summary-label">Coverage</span><span class="summary-value muted">Timeline, lineups and form guide</span></div>'
+        + '</div>';
     }
 
     function renderTimeline(fixture) {
@@ -402,7 +513,6 @@
       var away = participants.find(function(p) { return p.meta && p.meta.location === 'away'; }) || participants[1] || {};
 
       var lineups = fixture.lineups || [];
-      console.log(fixture.lineups);
       if (!lineups.length) {
         el.innerHTML = '<div class="empty-state">Lineups not available.</div>';
         return;
@@ -474,20 +584,12 @@
       try {
         var homeUrl = '/.netlify/functions/team-form?teamId=' + encodeURIComponent(home.id);
         var awayUrl = '/.netlify/functions/team-form?teamId=' + encodeURIComponent(away.id);
-        console.log('[form-guide] team IDs', { homeTeamId: home && home.id, awayTeamId: away && away.id });
-        console.log('[form-guide] fetch URLs', { homeUrl: homeUrl, awayUrl: awayUrl });
         var responses = await Promise.all([
           fetch(homeUrl),
           fetch(awayUrl)
         ]);
         var homeData = await responses[0].json();
         var awayData = await responses[1].json();
-        console.log('[form-guide] raw responses', {
-          homeStatus: responses[0].status,
-          awayStatus: responses[1].status,
-          homeData: homeData,
-          awayData: awayData
-        });
         if ((homeData && homeData.error) || (awayData && awayData.error)) {
           throw new Error((homeData && homeData.error) || (awayData && awayData.error) || 'Failed');
         }
@@ -533,6 +635,70 @@
         + '</div>';
     }
 
+    function getBackDestination() {
+      var params = new URLSearchParams(window.location.search);
+      var from = params.get('from');
+
+      if (from === 'fixtures') {
+        return { href: 'fixtures.html', label: 'Back to fixtures' };
+      }
+
+      if (from === 'results') {
+        return { href: 'results.html', label: 'Back to results' };
+      }
+
+      if (document.referrer) {
+        try {
+          var refUrl = new URL(document.referrer);
+          if (refUrl.origin === window.location.origin) {
+            if (/fixtures\.html$/i.test(refUrl.pathname)) {
+              return { href: 'fixtures.html', label: 'Back to fixtures' };
+            }
+            if (/results\.html$/i.test(refUrl.pathname)) {
+              return { href: 'results.html', label: 'Back to results' };
+            }
+          }
+        } catch (e) {
+          /* Ignore malformed referrers and fall back to results. */
+        }
+      }
+
+      return { href: 'results.html', label: 'Back to results' };
+    }
+
+    function initBackLink() {
+      var backLink = document.getElementById('match-back-link');
+      if (!backLink) return;
+
+      var destination = getBackDestination();
+      var textEl = backLink.querySelector('.match-back-text');
+      backLink.setAttribute('href', destination.href);
+      if (textEl) textEl.textContent = destination.label;
+    }
+
+    function initJumpNav() {
+      var links = Array.prototype.slice.call(document.querySelectorAll('[data-jump-link]'));
+      var sections = Array.prototype.slice.call(document.querySelectorAll('[data-jump-section]'));
+      if (!links.length || !sections.length || typeof IntersectionObserver === 'undefined') return;
+
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (!entry.isIntersecting) return;
+          var activeId = entry.target.id;
+          links.forEach(function(link) {
+            link.classList.toggle('active', link.getAttribute('data-jump-link') === activeId);
+          });
+        });
+      }, {
+        rootMargin: '-35% 0px -50% 0px',
+        threshold: 0.15
+      });
+
+      sections.forEach(function(section) {
+        observer.observe(section);
+      });
+    }
+
     (function() {
       var nav = document.querySelector('.nav');
       if (!nav) return;
@@ -541,6 +707,8 @@
       }, { passive: true });
     })();
 
+    initBackLink();
+    initJumpNav();
     loadMatch();
   </script>
 </body>

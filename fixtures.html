@@ -205,7 +205,7 @@
           const leagueName = LEAGUE_NAMES[f.leagueId] || 'Scottish Football';
           const timeStr = f.date ? fmtTime(f.date) : 'TBC';
           const timeClass = timeStr === 'TBC' ? 'fixture-time tbc' : 'fixture-time';
-          html += `<a class="fixture-row" href="match.html?id=${f.id}">
+          html += `<a class="fixture-row" href="match.html?id=${f.id}&from=fixtures">
             <div class="${timeClass}">${timeStr}</div>
             <div class="fixture-centre">
               <div class="fixture-home">
