@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <title>Club — Far Post</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: #111213; color: #e8e6e1; font-family: 'Barlow', sans-serif; min-height: 100vh; }
+
+    /* ── NAV ── */
+    .nav { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 1.25rem; height: 52px; border-bottom: 1px solid #2a2b2d; background: rgba(13,14,15,0.96); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: height 0.2s ease, box-shadow 0.2s ease; }
+    .nav.scrolled { height: 44px; box-shadow: 0 2px 24px rgba(0,0,0,0.5); border-bottom-color: #1a1b1d; }
+    .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: 0.12em; color: #e8e6e1; text-decoration: none; white-space: nowrap; transition: font-size 0.2s; }
+    .nav.scrolled .logo { font-size: 22px; }
+    .logo-dot { color: #e84040; }
+    .nav-links { display: flex; gap: 20px; }
+    .nav-links a { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-decoration: none; color: #888; text-transform: uppercase; }
+    .nav-links a:hover { color: #e8e6e1; }
+    .nav-links a.active { color: #e8e6e1; border-bottom: 2px solid #e84040; padding-bottom: 2px; }
+    .nav-hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; background: none; border: none; flex-shrink: 0; }
+    .nav-hamburger span { display: block; width: 22px; height: 2px; background: #888; }
+    .mobile-menu { display: none; flex-direction: column; background: rgba(13,14,15,0.98); border-bottom: 1px solid #2a2b2d; position: sticky; top: 52px; z-index: 99; }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #888; text-decoration: none; padding: 0.875rem 1.25rem; border-bottom: 1px solid #1a1b1d; }
+    .mobile-menu a:last-child { border-bottom: none; }
+
+    /* ── BACK BAR ── */
+    .back-bar { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1.25rem; border-bottom: 1px solid #1a1b1d; background: #0d0e0f; }
+    .back-link { display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #aaa; text-decoration: none; }
+    .back-link:hover { color: #e8e6e1; }
+    .back-arrow { color: #e84040; font-size: 14px; }
+    .back-context { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: #444; }
+
+    /* ── CLUB HERO ── */
+    .club-hero { background: #0d0e0f; padding: 3rem 1.5rem 2.5rem; border-bottom: 1px solid #2a2b2d; text-align: center; }
+    .club-hero-inner { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+    .club-crest { width: 96px; height: 96px; object-fit: contain; }
+    .club-crest-placeholder { width: 96px; height: 96px; background: #1a1b1d; border: 1px solid #2a2b2d; border-radius: 4px; }
+    .club-name { font-family: 'Barlow Condensed', sans-serif; font-size: 42px; font-weight: 800; letter-spacing: 0.02em; color: #e8e6e1; line-height: 1; }
+    .club-meta { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; justify-content: center; }
+    .club-league { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #888; display: flex; align-items: center; gap: 6px; }
+    .club-league-dot { width: 6px; height: 6px; border-radius: 50%; background: #e84040; flex-shrink: 0; }
+    .club-position { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #e84040; background: rgba(232,64,64,0.12); border: 1px solid rgba(232,64,64,0.25); padding: 3px 8px; }
+    .club-subtitle { font-size: 13px; color: #555; letter-spacing: 0.02em; }
+
+    /* ── SECTION CHROME ── */
+    .section-header { display: flex; align-items: center; justify-content: space-between; padding: 0.7rem 1.25rem; border-bottom: 1px solid #2a2b2d; background: #0d0e0f; }
+    .section-title { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #555; }
+    .section-title span { color: #e84040; margin-right: 8px; }
+    .section-note { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #444; }
+    .section-block { border-top: 1px solid #2a2b2d; border-bottom: 1px solid #2a2b2d; margin-top: -1px; background: #111213; }
+
+    /* ── FORM STRIP ── */
+    .form-section { padding: 1.25rem; }
+    .form-pills { display: flex; gap: 6px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .form-pill { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 40px; height: 40px; font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 800; letter-spacing: 0.06em; border-radius: 3px; flex-shrink: 0; }
+    .form-pill.W { background: rgba(45,158,107,0.18); color: #2d9e6b; border: 1px solid rgba(45,158,107,0.3); }
+    .form-pill.D { background: rgba(136,136,136,0.12); color: #888; border: 1px solid #2a2b2d; }
+    .form-pill.L { background: rgba(232,64,64,0.12); color: #e84040; border: 1px solid rgba(232,64,64,0.25); }
+    .form-pill.empty { background: #1a1b1d; border: 1px solid #2a2b2d; }
+
+    /* ── MATCH ROWS (results + fixtures shared) ── */
+    .match-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1.25rem; border-bottom: 1px solid #1a1b1d; text-decoration: none; color: inherit; transition: background 0.15s; }
+    .match-row:last-child { border-bottom: none; }
+    .match-row:hover { background: #161718; }
+    .match-row-date { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; color: #555; min-width: 44px; white-space: nowrap; }
+    .match-row-venue { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #444; min-width: 18px; text-align: center; }
+    .match-row-teams { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; }
+    .match-row-crest { width: 20px; height: 20px; object-fit: contain; flex-shrink: 0; }
+    .match-row-opp { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 600; color: #e8e6e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .match-row-score { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; color: #aaa; min-width: 42px; text-align: center; white-space: nowrap; }
+    .match-row-result { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 800; min-width: 22px; text-align: center; }
+    .match-row-result.W { color: #2d9e6b; }
+    .match-row-result.D { color: #888; }
+    .match-row-result.L { color: #e84040; }
+    .match-row-time { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; color: #555; min-width: 42px; text-align: center; }
+
+    /* ── TWO-COL GRID (Results / Fixtures) ── */
+    .split-grid { display: grid; grid-template-columns: 1fr 1fr; }
+    .split-col { border-right: 1px solid #2a2b2d; }
+    .split-col:last-child { border-right: none; }
+
+    /* ── LEAGUE TABLE ── */
+    .table-wrap { overflow-x: auto; }
+    .standings-table { width: 100%; border-collapse: collapse; min-width: 460px; }
+    .standings-table th { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #555; padding: 0.55rem 0.875rem; text-align: left; background: #0d0e0f; border-bottom: 2px solid #2a2b2d; white-space: nowrap; }
+    .standings-table th.num { text-align: center; }
+    .standings-table td { padding: 0.55rem 0.875rem; border-bottom: 1px solid #1a1b1d; font-size: 13px; color: #aaa; vertical-align: middle; }
+    .standings-table tr:last-child td { border-bottom: none; }
+    .standings-table tr:hover td { background: #161718; color: #e8e6e1; }
+    .standings-table tr.highlighted td { background: rgba(232,64,64,0.07); color: #e8e6e1; }
+    .standings-table tr.highlighted td.pos-cell { color: #e84040; font-weight: 800; }
+    .standings-table tr.highlighted .team-name-cell { color: #fff; font-weight: 700; }
+    .pos-cell { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; color: #555; text-align: center; min-width: 28px; }
+    .team-cell { display: flex; align-items: center; gap: 8px; }
+    .team-crest-sm { width: 20px; height: 20px; object-fit: contain; flex-shrink: 0; }
+    .team-name-cell { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 600; color: #e8e6e1; }
+    .num-cell { text-align: center; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600; }
+    .pts-cell { text-align: center; font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; color: #e8e6e1; }
+
+    /* ── TOP SCORERS ── */
+    .scorers-list { }
+    .scorer-row { display: flex; align-items: center; gap: 0.875rem; padding: 0.7rem 1.25rem; border-bottom: 1px solid #1a1b1d; }
+    .scorer-row:last-child { border-bottom: none; }
+    .scorer-rank { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; color: #444; min-width: 20px; text-align: center; }
+    .scorer-crest { width: 20px; height: 20px; object-fit: contain; flex-shrink: 0; }
+    .scorer-name { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; color: #e8e6e1; flex: 1; }
+    .scorer-team { font-size: 12px; color: #666; }
+    .scorer-goals { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 800; color: #e84040; min-width: 32px; text-align: right; }
+
+    /* ── RELATED ARTICLES ── */
+    .articles-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
+    .article-card { display: block; text-decoration: none; color: inherit; border-right: 1px solid #2a2b2d; transition: background 0.15s; }
+    .article-card:last-child { border-right: none; }
+    .article-card:hover { background: #161718; }
+    .article-img-wrap { aspect-ratio: 16/9; overflow: hidden; background: #1a1b1d; }
+    .article-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .article-body { padding: 0.875rem 1.25rem; }
+    .article-label { display: inline-block; font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #e84040; margin-bottom: 0.4rem; }
+    .article-title { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; color: #e8e6e1; line-height: 1.2; margin-bottom: 0.4rem; }
+    .article-meta { font-size: 12px; color: #555; }
+
+    /* ── EMPTY / LOADING / ERROR STATES ── */
+    .empty-state { padding: 2rem 1.25rem; text-align: center; color: #444; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+    .loading-bar { height: 2px; background: linear-gradient(90deg, transparent, #e84040, transparent); background-size: 200% 100%; animation: shimmer 1.2s infinite; }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    .skeleton-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1.25rem; border-bottom: 1px solid #1a1b1d; }
+    .skeleton-row:last-child { border-bottom: none; }
+    .skel { background: #1a1b1d; border-radius: 2px; animation: pulse 1.4s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{ opacity:0.5; } 50%{ opacity:0.9; } }
+    .skel-sm { width: 40px; height: 12px; }
+    .skel-md { width: 120px; height: 12px; }
+    .skel-lg { width: 180px; height: 12px; }
+    .skel-pill { width: 40px; height: 40px; }
+    .error-msg { padding: 1.5rem 1.25rem; color: #e84040; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; }
+
+    /* ── MAIN LAYOUT ── */
+    .page-main { max-width: 1200px; margin: 0 auto; }
+
+    /* ── FOOTER ── */
+    .footer { display: flex; align-items: center; justify-content: space-between; padding: 1.5rem 1.25rem; border-top: 1px solid #2a2b2d; margin-top: 3rem; }
+    .footer-logo { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: 0.12em; color: #e8e6e1; text-decoration: none; }
+    .footer-tagline { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #444; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 680px) {
+      .nav-links { display: none; }
+      .nav-hamburger { display: flex; }
+      .club-name { font-size: 32px; }
+      .split-grid { grid-template-columns: 1fr; }
+      .split-col { border-right: none; border-bottom: 1px solid #2a2b2d; }
+      .split-col:last-child { border-bottom: none; }
+      .articles-grid { grid-template-columns: 1fr; }
+      .article-card { border-right: none; border-bottom: 1px solid #2a2b2d; }
+      .article-card:last-child { border-bottom: none; }
+      .footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+    }
+    @media (min-width: 681px) and (max-width: 1024px) {
+      .articles-grid { grid-template-columns: repeat(2, 1fr); }
+      .article-card:nth-child(2) { border-right: none; }
+      .article-card:nth-child(3) { grid-column: 1 / -1; border-right: none; border-top: 1px solid #2a2b2d; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav" id="nav">
+    <a class="logo" href="/"><span>FAR POST</span><span class="logo-dot">.</span></a>
+    <div class="nav-links">
+      <a href="/news.html">News</a>
+      <a href="/opinions.html">Opinions</a>
+      <a href="/podcasts.html">Podcasts</a>
+      <a href="/results.html">Results</a>
+      <a href="/fixtures.html">Fixtures</a>
+    </div>
+    <button class="nav-hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <nav class="mobile-menu" id="mobileMenu">
+    <a href="/news.html">News</a>
+    <a href="/opinions.html">Opinions</a>
+    <a href="/podcasts.html">Podcasts</a>
+    <a href="/results.html">Results</a>
+    <a href="/fixtures.html">Fixtures</a>
+  </nav>
+
+  <!-- BACK BAR -->
+  <div class="back-bar">
+    <a class="back-link" id="backLink" href="/results.html">
+      <span class="back-arrow">&#8592;</span> Results
+    </a>
+    <span class="back-context">Club Profile</span>
+  </div>
+
+  <!-- LOADING BAR -->
+  <div class="loading-bar" id="loadingBar"></div>
+
+  <div class="page-main">
+
+    <!-- HERO -->
+    <section class="club-hero" id="clubHero">
+      <div class="club-hero-inner" id="heroContent">
+        <!-- Populated by JS -->
+        <div class="skel skel-pill" style="width:96px;height:96px;border-radius:4px;"></div>
+        <div class="skel skel-lg" style="width:200px;height:28px;margin-top:4px;"></div>
+        <div class="skel skel-md" style="width:140px;height:14px;"></div>
+      </div>
+    </section>
+
+    <!-- FORM SECTION -->
+    <section class="section-block">
+      <div class="section-header">
+        <span class="section-title"><span>&#9632;</span>Recent Form</span>
+        <span class="section-note" id="formNote"></span>
+      </div>
+      <div class="form-section">
+        <div class="form-pills" id="formPills">
+          <!-- skeleton pills -->
+          <div class="skel skel-pill"></div>
+          <div class="skel skel-pill"></div>
+          <div class="skel skel-pill"></div>
+          <div class="skel skel-pill"></div>
+          <div class="skel skel-pill"></div>
+        </div>
+        <div id="formRows"></div>
+      </div>
+    </section>
+
+    <!-- RESULTS + FIXTURES SPLIT -->
+    <section class="section-block" style="margin-top:0;border-top:none;">
+      <div class="split-grid">
+        <!-- RESULTS COL -->
+        <div class="split-col">
+          <div class="section-header">
+            <span class="section-title"><span>&#9632;</span>Recent Results</span>
+          </div>
+          <div id="resultsRows">
+            <div class="skeleton-row"><div class="skel skel-sm"></div><div class="skel skel-md"></div><div class="skel skel-lg"></div></div>
+            <div class="skeleton-row"><div class="skel skel-sm"></div><div class="skel skel-md"></div><div class="skel skel-lg"></div></div>
+            <div class="skeleton-row"><div class="skel skel-sm"></div><div class="skel skel-md"></div><div class="skel skel-lg"></div></div>
+          </div>
+        </div>
+        <!-- FIXTURES COL -->
+        <div class="split-col">
+          <div class="section-header">
+            <span class="section-title"><span>&#9632;</span>Upcoming Fixtures</span>
+          </div>
+          <div id="fixtureRows">
+            <div class="skeleton-row"><div class="skel skel-sm"></div><div class="skel skel-md"></div><div class="skel skel-lg"></div></div>
+            <div class="skeleton-row"><div class="skel skel-sm"></div><div class="skel skel-md"></div><div class="skel skel-lg"></div></div>
+            <div class="skeleton-row"><div class="skel skel-sm"></div><div class="skel skel-md"></div><div class="skel skel-lg"></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LEAGUE TABLE -->
+    <section class="section-block" id="tableSection">
+      <div class="section-header">
+        <span class="section-title"><span>&#9632;</span>League Table</span>
+        <span class="section-note" id="tableLeagueName"></span>
+      </div>
+      <div class="table-wrap">
+        <table class="standings-table" id="standingsTable">
+          <thead>
+            <tr>
+              <th class="num">#</th>
+              <th>Team</th>
+              <th class="num">P</th>
+              <th class="num">W</th>
+              <th class="num">D</th>
+              <th class="num">L</th>
+              <th class="num">GD</th>
+              <th class="num">Pts</th>
+            </tr>
+          </thead>
+          <tbody id="standingsBody">
+            <tr><td colspan="8"><div class="empty-state">Loading table...</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TOP SCORERS -->
+    <section class="section-block" id="scorersSection" style="display:none;">
+      <div class="section-header">
+        <span class="section-title"><span>&#9632;</span>Top Scorers</span>
+        <span class="section-note" id="scorersLeagueName"></span>
+      </div>
+      <div class="scorers-list" id="scorersList"></div>
+    </section>
+
+    <!-- RELATED ARTICLES -->
+    <section class="section-block" id="articlesSection" style="display:none;">
+      <div class="section-header">
+        <span class="section-title"><span>&#9632;</span>Far Post Coverage</span>
+      </div>
+      <div class="articles-grid" id="articlesGrid"></div>
+    </section>
+
+  </div><!-- /page-main -->
+
+  <footer class="footer">
+    <a class="footer-logo" href="/"><span>FAR POST</span><span class="logo-dot">.</span></a>
+    <span class="footer-tagline">Scottish football. No filter.</span>
+  </footer>
+
+  <script>
+    // ── Helpers ────────────────────────────────────────────────────────────────
+    const SANITY_PROJECT = 't11tx9if';
+    const SANITY_DATASET = 'production';
+
+    function qs(selector) { return document.querySelector(selector); }
+    function qsAll(selector) { return document.querySelectorAll(selector); }
+
+    function fmtMatchDate(iso) {
+      if (!iso) return '—';
+      return new Date(iso).toLocaleDateString('en-GB', {
+        day: 'numeric', month: 'short', timeZone: 'UTC'
+      });
+    }
+
+    function fmtMatchTime(iso) {
+      if (!iso) return '';
+      return new Date(iso).toLocaleTimeString('en-GB', {
+        hour: '2-digit', minute: '2-digit', timeZone: 'UTC'
+      });
+    }
+
+    function safeImg(src, alt, cls) {
+      if (!src) return `<span style="display:inline-block;width:20px;height:20px;"></span>`;
+      return `<img src="${escHtml(src)}" alt="${escHtml(alt)}" class="${cls}" onerror="this.style.visibility='hidden'">`;
+    }
+
+    function escHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function sanityImgUrl(ref, w, h) {
+      if (!ref) return null;
+      try {
+        const parts = ref.replace('image-', '').split('-');
+        const ext   = parts.pop();
+        const id    = parts.join('-');
+        return `https://cdn.sanity.io/images/${SANITY_PROJECT}/${SANITY_DATASET}/${id}.${ext}?w=${w}&h=${h}&fit=crop&auto=format`;
+      } catch { return null; }
+    }
+
+    // ── URL Params ─────────────────────────────────────────────────────────────
+    const urlParams  = new URLSearchParams(window.location.search);
+    const teamId     = urlParams.get('id');
+    const leagueId   = urlParams.get('league');
+    const fromParam  = urlParams.get('from'); // 'results' | 'fixtures'
+
+    // Set back link based on referrer
+    if (fromParam === 'fixtures') {
+      qs('#backLink').href = '/fixtures.html';
+      qs('#backLink').innerHTML = '<span class="back-arrow">&#8592;</span> Fixtures';
+    }
+
+    // ── Nav ────────────────────────────────────────────────────────────────────
+    window.addEventListener('scroll', () => {
+      document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 10);
+    });
+    document.getElementById('hamburger').addEventListener('click', () => {
+      document.getElementById('mobileMenu').classList.toggle('open');
+    });
+
+    // ── Guard ──────────────────────────────────────────────────────────────────
+    if (!teamId || !leagueId) {
+      qs('#heroContent').innerHTML = `
+        <div class="error-msg">Missing team or league ID. Use club.html?id=TEAM_ID&amp;league=LEAGUE_ID</div>`;
+      qs('#loadingBar').style.display = 'none';
+      throw new Error('Missing params');
+    }
+
+    // ── Render: Hero ───────────────────────────────────────────────────────────
+    function renderHero(team) {
+      document.title = `${team.name || 'Club'} — Far Post`;
+
+      const posTag = team.position
+        ? `<span class="club-position">${team.position}${ordinal(team.position)}</span>`
+        : '';
+
+      qs('#heroContent').innerHTML = `
+        ${team.crest
+          ? `<img class="club-crest" src="${escHtml(team.crest)}" alt="${escHtml(team.name)} crest" onerror="this.style.display='none'">`
+          : `<div class="club-crest-placeholder"></div>`
+        }
+        <h1 class="club-name">${escHtml(team.name || 'Unknown Club')}</h1>
+        <div class="club-meta">
+          <span class="club-league">
+            <span class="club-league-dot"></span>
+            ${escHtml(team.leagueName || '')}
+          </span>
+          ${posTag}
+        </div>
+        <p class="club-subtitle">Fixtures, results, form and key stats</p>`;
+    }
+
+    function ordinal(n) {
+      const s = ['th','st','nd','rd'];
+      const v = n % 100;
+      return s[(v - 20) % 10] || s[v] || s[0];
+    }
+
+    // ── Render: Form ───────────────────────────────────────────────────────────
+    function renderForm(form) {
+      const pills = qs('#formPills');
+      const rows  = qs('#formRows');
+      const note  = qs('#formNote');
+
+      if (!form || !form.length) {
+        pills.innerHTML = '<div class="empty-state">No recent data</div>';
+        rows.innerHTML  = '';
+        return;
+      }
+
+      note.textContent = `Last ${form.length} matches`;
+
+      // Pills (oldest → newest)
+      pills.innerHTML = [...form].reverse().map(f =>
+        `<div class="form-pill ${escHtml(f.result || 'empty')}" title="${escHtml(f.result || '—')}">${escHtml(f.result || '—')}</div>`
+      ).join('');
+
+      // Match rows (newest first)
+      rows.innerHTML = form.map(f => {
+        const isHome    = f.requestedIsHome;
+        const opp       = isHome ? f.away : f.home;
+        const scoreStr  = (f.score.home !== '-' && f.score.away !== '-')
+          ? `${f.score.home}–${f.score.away}`
+          : '—';
+        return `
+          <a class="match-row" href="/match.html?id=${f.id}&from=club&teamId=${encodeURIComponent(teamId)}&league=${encodeURIComponent(leagueId)}">
+            <span class="match-row-date">${fmtMatchDate(f.date)}</span>
+            <span class="match-row-venue">${isHome ? 'H' : 'A'}</span>
+            <span class="match-row-teams">
+              ${safeImg(opp.crest, opp.name, 'match-row-crest')}
+              <span class="match-row-opp">${escHtml(opp.name)}</span>
+            </span>
+            <span class="match-row-score">${escHtml(scoreStr)}</span>
+            <span class="match-row-result ${escHtml(f.result || '')}">${escHtml(f.result || '')}</span>
+          </a>`;
+      }).join('');
+    }
+
+    // ── Render: Results ────────────────────────────────────────────────────────
+    function renderResults(results) {
+      const el = qs('#resultsRows');
+      if (!results || !results.length) {
+        el.innerHTML = '<div class="empty-state">No recent results</div>';
+        return;
+      }
+      el.innerHTML = results.map(f => {
+        const isHome   = f.requestedIsHome;
+        const opp      = isHome ? f.away : f.home;
+        const scoreStr = (f.score.home !== '-' && f.score.away !== '-')
+          ? `${f.score.home}–${f.score.away}`
+          : '—';
+        return `
+          <a class="match-row" href="/match.html?id=${f.id}&from=club&teamId=${encodeURIComponent(teamId)}&league=${encodeURIComponent(leagueId)}">
+            <span class="match-row-date">${fmtMatchDate(f.date)}</span>
+            <span class="match-row-venue">${isHome ? 'H' : 'A'}</span>
+            <span class="match-row-teams">
+              ${safeImg(opp.crest, opp.name, 'match-row-crest')}
+              <span class="match-row-opp">${escHtml(opp.name)}</span>
+            </span>
+            <span class="match-row-score">${escHtml(scoreStr)}</span>
+            <span class="match-row-result ${escHtml(f.result || '')}">${escHtml(f.result || '')}</span>
+          </a>`;
+      }).join('');
+    }
+
+    // ── Render: Fixtures ───────────────────────────────────────────────────────
+    function renderFixtures(fixtures) {
+      const el = qs('#fixtureRows');
+      if (!fixtures || !fixtures.length) {
+        el.innerHTML = '<div class="empty-state">No upcoming fixtures</div>';
+        return;
+      }
+      el.innerHTML = fixtures.map(f => {
+        const isHome = f.requestedIsHome;
+        const opp    = isHome ? f.away : f.home;
+        const time   = fmtMatchTime(f.date);
+        return `
+          <a class="match-row" href="/match.html?id=${f.id}&from=club&teamId=${encodeURIComponent(teamId)}&league=${encodeURIComponent(leagueId)}">
+            <span class="match-row-date">${fmtMatchDate(f.date)}</span>
+            <span class="match-row-venue">${isHome ? 'H' : 'A'}</span>
+            <span class="match-row-teams">
+              ${safeImg(opp.crest, opp.name, 'match-row-crest')}
+              <span class="match-row-opp">${escHtml(opp.name)}</span>
+            </span>
+            <span class="match-row-time">${escHtml(time)}</span>
+          </a>`;
+      }).join('');
+    }
+
+    // ── Render: Standings ──────────────────────────────────────────────────────
+    function renderStandings(standings, team) {
+      const tbody    = qs('#standingsBody');
+      const leagueEl = qs('#tableLeagueName');
+      const section  = qs('#tableSection');
+
+      if (!standings || !standings.length) {
+        section.style.display = 'none';
+        return;
+      }
+
+      leagueEl.textContent = team.leagueName || '';
+
+      tbody.innerHTML = standings.map(row => {
+        const isClub = String(row.teamId) === String(teamId);
+        return `
+          <tr class="${isClub ? 'highlighted' : ''}">
+            <td class="pos-cell">${row.position}</td>
+            <td>
+              <div class="team-cell">
+                ${row.crest ? `<img class="team-crest-sm" src="${escHtml(row.crest)}" alt="" onerror="this.style.visibility='hidden'">` : `<span style="width:20px;flex-shrink:0;"></span>`}
+                <span class="team-name-cell">${escHtml(row.team)}</span>
+              </div>
+            </td>
+            <td class="num-cell">${row.played}</td>
+            <td class="num-cell">${row.won}</td>
+            <td class="num-cell">${row.drawn}</td>
+            <td class="num-cell">${row.lost}</td>
+            <td class="num-cell">${row.gd > 0 ? '+' : ''}${row.gd}</td>
+            <td class="pts-cell">${row.points}</td>
+          </tr>`;
+      }).join('');
+    }
+
+    // ── Render: Top Scorers ────────────────────────────────────────────────────
+    function renderScorers(scorers, team) {
+      const section  = qs('#scorersSection');
+      const list     = qs('#scorersList');
+      const leagueEl = qs('#scorersLeagueName');
+
+      if (!scorers || !scorers.length) return;
+
+      section.style.display = '';
+      leagueEl.textContent   = team.leagueName || '';
+
+      list.innerHTML = scorers.map((s, i) => `
+        <div class="scorer-row">
+          <span class="scorer-rank">${i + 1}</span>
+          ${s.teamCrest ? `<img class="scorer-crest" src="${escHtml(s.teamCrest)}" alt="" onerror="this.style.visibility='hidden'">` : `<span style="width:20px;flex-shrink:0;"></span>`}
+          <div style="flex:1;min-width:0;">
+            <div class="scorer-name">${escHtml(s.playerName)}</div>
+            <div class="scorer-team">${escHtml(s.teamName)}</div>
+          </div>
+          <span class="scorer-goals">${s.goals}</span>
+        </div>`).join('');
+    }
+
+    // ── Render: Related Articles ───────────────────────────────────────────────
+    async function loadRelatedArticles(teamName) {
+      if (!teamName) return;
+
+      // Sanitise team name for GROQ string inclusion
+      const safe = teamName.replace(/['"\\]/g, '').trim();
+      if (!safe) return;
+
+      const groq = `*[_type=="post" && title match "${safe}"]|order(publishedAt desc)[0...3]{_id,title,category,author,publishedAt,mainImage}`;
+
+      try {
+        const res  = await fetch(`/.netlify/functions/sanity-fetch?query=${encodeURIComponent(groq)}`);
+        const data = await res.json();
+        const articles = data?.result || [];
+
+        if (!articles.length) return;
+
+        const section = qs('#articlesSection');
+        const grid    = qs('#articlesGrid');
+        section.style.display = '';
+
+        grid.innerHTML = articles.map(a => {
+          const imgRef = a.mainImage?.asset?._ref;
+          const imgUrl = imgRef ? sanityImgUrl(imgRef, 600, 340) : null;
+          const pubDate = a.publishedAt
+            ? new Date(a.publishedAt).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })
+            : '';
+          return `
+            <a class="article-card" href="/article.html?id=${encodeURIComponent(a._id)}">
+              <div class="article-img-wrap">
+                ${imgUrl ? `<img class="article-img" src="${escHtml(imgUrl)}" alt="${escHtml(a.title)}" loading="lazy">` : ''}
+              </div>
+              <div class="article-body">
+                ${a.category ? `<span class="article-label">${escHtml(a.category)}</span>` : ''}
+                <div class="article-title">${escHtml(a.title)}</div>
+                <div class="article-meta">${escHtml(pubDate)}</div>
+              </div>
+            </a>`;
+        }).join('');
+      } catch (err) {
+        // Related articles are non-critical — fail silently
+        console.warn('[club] Related articles failed:', err.message);
+      }
+    }
+
+    // ── Main load ──────────────────────────────────────────────────────────────
+    async function loadClub() {
+      try {
+        const url = `/.netlify/functions/club-summary?teamId=${encodeURIComponent(teamId)}&leagueId=${encodeURIComponent(leagueId)}`;
+        const res  = await fetch(url);
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || `HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+
+        // Hide loading bar
+        qs('#loadingBar').style.display = 'none';
+
+        // Render sections
+        renderHero(data.team);
+        renderForm(data.form);
+        renderResults(data.results);
+        renderFixtures(data.fixtures);
+        renderStandings(data.standings, data.team);
+        renderScorers(data.topScorers, data.team);
+
+        // Related articles — fire and forget (uses team name from payload)
+        if (data.team?.name) {
+          loadRelatedArticles(data.team.name);
+        }
+
+      } catch (err) {
+        console.error('[club] Load error:', err.message);
+        qs('#loadingBar').style.display = 'none';
+        qs('#heroContent').innerHTML = `<div class="error-msg">Could not load club data. Please try again.</div>`;
+      }
+    }
+
+    loadClub();
+  </script>
+</body>
+</html>

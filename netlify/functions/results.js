@@ -78,8 +78,8 @@ exports.handler = async function (event) {
           state:   f.state?.short || '',
           date:    f.starting_at || null,
           round,
-          home: { name: home.name || 'Home', short: home.short_code || home.name || 'Home', crest: home.image_path || null },
-          away: { name: away.name || 'Away', short: away.short_code || away.name || 'Away', crest: away.image_path || null },
+          home: { id: home.id || null, name: home.name || 'Home', short: home.short_code || home.name || 'Home', crest: home.image_path || null },
+          away: { id: away.id || null, name: away.name || 'Away', short: away.short_code || away.name || 'Away', crest: away.image_path || null },
           score: {
             home: homeScore?.score?.goals ?? '-',
             away: awayScore?.score?.goals ?? '-'
