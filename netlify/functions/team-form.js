@@ -23,7 +23,7 @@ exports.handler = async function (event) {
   const url =
     `https://api.sportmonks.com/v3/football/fixtures/between/${fromStr}/${toStr}` +
     `?api_token=${SPORTMONKS_TOKEN}` +
-    `&filters=fixtureParticipants:${teamId}` +
+    `&filters=fixtureTeams:${teamId}` +
     `&include=participants;state;scores` +
     `&per_page=50`;
 
@@ -33,6 +33,8 @@ exports.handler = async function (event) {
   try {
     const response = await fetch(url);
     const data     = await response.json();
+
+    console.log(`[team-form] status=${response.status} count=${(data.data || []).length}`);
 
     if (!response.ok) {
       console.error('[team-form] Error body:', JSON.stringify(data));
@@ -61,6 +63,8 @@ exports.handler = async function (event) {
         };
       })
       .reverse(); // oldest first for left-to-right display
+
+    console.log(`[team-form] returning ${results.length} results`);
 
     return {
       statusCode: 200,
