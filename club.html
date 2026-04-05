@@ -41,16 +41,48 @@
     .back-context { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: #444; }
 
     /* ── CLUB HERO ── */
-    .club-hero { background: #0d0e0f; padding: 3rem 1.5rem 2.5rem; border-bottom: 1px solid #2a2b2d; text-align: center; }
-    .club-hero-inner { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 1rem; }
-    .club-crest { width: 96px; height: 96px; object-fit: contain; }
-    .club-crest-placeholder { width: 96px; height: 96px; background: #1a1b1d; border: 1px solid #2a2b2d; border-radius: 4px; }
-    .club-name { font-family: 'Barlow Condensed', sans-serif; font-size: 42px; font-weight: 800; letter-spacing: 0.02em; color: #e8e6e1; line-height: 1; }
-    .club-meta { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; justify-content: center; }
+    .club-hero { background: radial-gradient(circle at top left, rgba(232,64,64,0.16), transparent 34%), linear-gradient(180deg, #17191b 0%, #101112 55%, #0d0e0f 100%); border-bottom: 1px solid #2a2b2d; }
+    .club-hero-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.9fr); }
+    .club-hero-main { padding: 2.5rem 1.5rem 2rem; border-right: 1px solid #2a2b2d; }
+    .club-hero-top { display: flex; align-items: flex-start; gap: 1rem; }
+    .club-crest-wrap { width: 104px; height: 104px; border: 1px solid #2a2b2d; background: rgba(13,14,15,0.7); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .club-crest { width: 88px; height: 88px; object-fit: contain; }
+    .club-crest-placeholder { width: 88px; height: 88px; background: #1a1b1d; border-radius: 4px; }
+    .club-headline { min-width: 0; }
+    .club-kicker { display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #e84040; margin-bottom: 0.75rem; }
+    .club-kicker::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #e84040; box-shadow: 0 0 0 4px rgba(232,64,64,0.12); }
+    .club-name { font-family: 'Barlow Condensed', sans-serif; font-size: 52px; font-weight: 800; letter-spacing: 0.02em; color: #f4f1ea; line-height: 0.94; }
+    .club-meta { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.85rem; }
     .club-league { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #888; display: flex; align-items: center; gap: 6px; }
     .club-league-dot { width: 6px; height: 6px; border-radius: 50%; background: #e84040; flex-shrink: 0; }
     .club-position { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #e84040; background: rgba(232,64,64,0.12); border: 1px solid rgba(232,64,64,0.25); padding: 3px 8px; }
-    .club-subtitle { font-size: 13px; color: #555; letter-spacing: 0.02em; }
+    .club-subtitle { font-size: 14px; color: #9a958d; letter-spacing: 0.01em; line-height: 1.7; margin-top: 1rem; max-width: 58ch; }
+    .club-jump { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 1.25rem; }
+    .club-jump a { display: inline-flex; align-items: center; padding: 0.45rem 0.7rem; border: 1px solid #2a2b2d; background: rgba(13,14,15,0.55); text-decoration: none; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.11em; text-transform: uppercase; color: #aaa; }
+    .club-jump a:hover { color: #fff; background: #171819; }
+    .club-hero-aside { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); background: rgba(13,14,15,0.5); }
+    .hero-card { padding: 1.15rem 1.1rem; border-left: 1px solid #2a2b2d; border-bottom: 1px solid #2a2b2d; min-height: 124px; display: flex; flex-direction: column; justify-content: center; }
+    .hero-card-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #555; margin-bottom: 0.45rem; }
+    .hero-card-value { font-family: 'Barlow Condensed', sans-serif; font-size: 30px; font-weight: 800; line-height: 1; color: #f3f0e8; }
+    .hero-card-meta { font-size: 12px; color: #777; line-height: 1.45; margin-top: 0.45rem; }
+    .hero-card-value.positive { color: #2d9e6b; }
+    .hero-card-value.negative { color: #e84040; }
+
+    /* ── BRIEFING / PAGE FLOW ── */
+    .briefing-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.8fr); border-bottom: 1px solid #2a2b2d; }
+    .briefing-lead { padding: 1.35rem 1.25rem; border-right: 1px solid #2a2b2d; }
+    .briefing-kicker { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #e84040; margin-bottom: 0.55rem; }
+    .briefing-title { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 700; line-height: 1; color: #f2efe8; margin-bottom: 0.65rem; }
+    .briefing-copy { font-size: 14px; color: #908a82; line-height: 1.7; max-width: 62ch; }
+    .briefing-links { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 1rem; }
+    .briefing-link { display: inline-flex; align-items: center; padding: 0.46rem 0.7rem; border: 1px solid #2a2b2d; text-decoration: none; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #aaa; }
+    .briefing-link:hover { color: #fff; background: #171819; }
+    .briefing-side { display: flex; flex-direction: column; }
+    .briefing-note { padding: 1rem 1.15rem; border-bottom: 1px solid #1a1b1d; }
+    .briefing-note:last-child { border-bottom: none; }
+    .briefing-note-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #555; margin-bottom: 0.35rem; }
+    .briefing-note-value { font-family: 'Barlow Condensed', sans-serif; font-size: 19px; font-weight: 700; line-height: 1.05; color: #e8e6e1; }
+    .briefing-note-copy { font-size: 12px; color: #666; line-height: 1.5; margin-top: 0.3rem; }
 
     /* ── SECTION CHROME ── */
     .section-header { display: flex; align-items: center; justify-content: space-between; padding: 0.7rem 1.25rem; border-bottom: 1px solid #2a2b2d; background: #0d0e0f; }
@@ -67,6 +99,14 @@
     .form-pill.D { background: rgba(136,136,136,0.12); color: #888; border: 1px solid #2a2b2d; }
     .form-pill.L { background: rgba(232,64,64,0.12); color: #e84040; border: 1px solid rgba(232,64,64,0.25); }
     .form-pill.empty { background: #1a1b1d; border: 1px solid #2a2b2d; }
+    .form-grid { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 1.25rem; align-items: start; }
+    .form-summary { display: flex; flex-direction: column; gap: 0.8rem; }
+    .form-copy { font-size: 13px; color: #888; line-height: 1.65; }
+    .form-breakdown { border: 1px solid #2a2b2d; background: #0d0e0f; }
+    .form-breakdown-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.72rem 0.9rem; border-bottom: 1px solid #1a1b1d; }
+    .form-breakdown-row:last-child { border-bottom: none; }
+    .form-breakdown-label { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #666; }
+    .form-breakdown-value { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 800; color: #e8e6e1; }
 
     /* ── MATCH ROWS (results + fixtures shared) ── */
     .match-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1.25rem; border-bottom: 1px solid #1a1b1d; text-decoration: none; color: inherit; transition: background 0.15s; }
@@ -83,11 +123,16 @@
     .match-row-result.D { color: #888; }
     .match-row-result.L { color: #e84040; }
     .match-row-time { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; color: #555; min-width: 42px; text-align: center; }
+    .match-row-sub { font-size: 11px; color: #555; margin-top: 0.2rem; }
+    .match-row-score-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; min-width: 50px; }
+    .match-row-time-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; min-width: 56px; }
+    .match-row-status { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #444; }
 
     /* ── TWO-COL GRID (Results / Fixtures) ── */
     .split-grid { display: grid; grid-template-columns: 1fr 1fr; }
     .split-col { border-right: 1px solid #2a2b2d; }
     .split-col:last-child { border-right: none; }
+    .section-intro { padding: 1rem 1.25rem; border-bottom: 1px solid #1a1b1d; font-size: 13px; color: #777; line-height: 1.65; }
 
     /* ── LEAGUE TABLE ── */
     .table-wrap { overflow-x: auto; }
@@ -118,16 +163,26 @@
     .scorer-goals { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 800; color: #e84040; min-width: 32px; text-align: right; }
 
     /* ── RELATED ARTICLES ── */
-    .articles-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
-    .article-card { display: block; text-decoration: none; color: inherit; border-right: 1px solid #2a2b2d; transition: background 0.15s; }
-    .article-card:last-child { border-right: none; }
+    .coverage-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr); }
+    .coverage-feature { display: block; text-decoration: none; color: inherit; border-right: 1px solid #2a2b2d; transition: background 0.15s; }
+    .coverage-feature:hover,
     .article-card:hover { background: #161718; }
+    .coverage-feature-img { aspect-ratio: 16/9; background: #1a1b1d; overflow: hidden; }
+    .coverage-feature-body { padding: 1rem 1.25rem 1.2rem; }
+    .coverage-feature-title { font-family: 'Barlow Condensed', sans-serif; font-size: 30px; font-weight: 700; line-height: 0.98; color: #f3f0e9; margin-bottom: 0.6rem; }
+    .coverage-feature-excerpt { font-size: 14px; color: #8b857d; line-height: 1.65; margin-bottom: 0.75rem; }
+    .coverage-list { display: grid; grid-template-columns: 1fr; }
+    .articles-grid { display: grid; grid-template-columns: 1fr; }
+    .article-card { display: block; text-decoration: none; color: inherit; border-bottom: 1px solid #2a2b2d; transition: background 0.15s; }
+    .article-card:hover { background: #161718; }
+    .article-card:last-child { border-bottom: none; }
     .article-img-wrap { aspect-ratio: 16/9; overflow: hidden; background: #1a1b1d; }
     .article-img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .article-body { padding: 0.875rem 1.25rem; }
     .article-label { display: inline-block; font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #e84040; margin-bottom: 0.4rem; }
     .article-title { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; color: #e8e6e1; line-height: 1.2; margin-bottom: 0.4rem; }
     .article-meta { font-size: 12px; color: #555; }
+    .article-excerpt { font-size: 12px; color: #777; line-height: 1.55; margin-bottom: 0.55rem; }
 
     /* ── EMPTY / LOADING / ERROR STATES ── */
     .empty-state { padding: 2rem 1.25rem; text-align: center; color: #444; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
@@ -155,19 +210,44 @@
     @media (max-width: 680px) {
       .nav-links { display: none; }
       .nav-hamburger { display: flex; }
-      .club-name { font-size: 32px; }
+      .club-hero-inner,
+      .briefing-grid,
+      .form-grid,
+      .split-grid,
+      .coverage-grid { grid-template-columns: 1fr; }
+      .club-hero-main { padding: 1.5rem 1.25rem 1.25rem; border-right: none; border-bottom: 1px solid #2a2b2d; }
+      .club-hero-top { align-items: center; }
+      .club-crest-wrap { width: 84px; height: 84px; }
+      .club-crest,
+      .club-crest-placeholder { width: 68px; height: 68px; }
+      .club-name { font-size: 34px; }
+      .club-subtitle { font-size: 13px; line-height: 1.6; }
+      .club-jump { gap: 0.45rem; }
+      .club-jump a { padding: 0.4rem 0.58rem; font-size: 10px; }
+      .club-hero-aside { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .hero-card { border-left: none; min-height: 100px; padding: 0.9rem; }
+      .hero-card-value { font-size: 24px; }
+      .briefing-lead { padding: 1rem 1.25rem; border-right: none; border-bottom: 1px solid #2a2b2d; }
+      .briefing-title { font-size: 24px; }
+      .briefing-copy { font-size: 13px; }
+      .form-grid { gap: 1rem; }
       .split-grid { grid-template-columns: 1fr; }
       .split-col { border-right: none; border-bottom: 1px solid #2a2b2d; }
       .split-col:last-child { border-bottom: none; }
-      .articles-grid { grid-template-columns: 1fr; }
-      .article-card { border-right: none; border-bottom: 1px solid #2a2b2d; }
-      .article-card:last-child { border-bottom: none; }
+      .coverage-feature { border-right: none; border-bottom: 1px solid #2a2b2d; }
+      .match-row { padding: 0.75rem 1rem; gap: 0.6rem; }
+      .match-row-date { min-width: 42px; }
+      .match-row-opp { font-size: 14px; }
+      .section-intro { padding: 0.85rem 1rem; font-size: 12px; }
       .footer { flex-direction: column; gap: 0.5rem; text-align: center; }
     }
     @media (min-width: 681px) and (max-width: 1024px) {
-      .articles-grid { grid-template-columns: repeat(2, 1fr); }
-      .article-card:nth-child(2) { border-right: none; }
-      .article-card:nth-child(3) { grid-column: 1 / -1; border-right: none; border-top: 1px solid #2a2b2d; }
+      .club-hero-inner,
+      .briefing-grid,
+      .coverage-grid { grid-template-columns: 1fr; }
+      .club-hero-main,
+      .briefing-lead,
+      .coverage-feature { border-right: none; border-bottom: 1px solid #2a2b2d; }
     }
   </style>
 </head>
@@ -214,9 +294,36 @@
     <section class="club-hero" id="clubHero">
       <div class="club-hero-inner" id="heroContent">
         <!-- Populated by JS -->
-        <div class="skel skel-pill" style="width:96px;height:96px;border-radius:4px;"></div>
-        <div class="skel skel-lg" style="width:200px;height:28px;margin-top:4px;"></div>
-        <div class="skel skel-md" style="width:140px;height:14px;"></div>
+        <div class="club-hero-main">
+          <div class="skel skel-pill" style="width:96px;height:96px;border-radius:4px;"></div>
+          <div class="skel skel-lg" style="width:220px;height:30px;margin-top:12px;"></div>
+          <div class="skel skel-md" style="width:160px;height:14px;margin-top:10px;"></div>
+        </div>
+        <div class="club-hero-aside">
+          <div class="hero-card"><div class="skel skel-md"></div></div>
+          <div class="hero-card"><div class="skel skel-md"></div></div>
+          <div class="hero-card"><div class="skel skel-md"></div></div>
+          <div class="hero-card"><div class="skel skel-md"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BRIEFING -->
+    <section class="section-block" style="margin-top:0;border-top:none;">
+      <div class="section-header">
+        <span class="section-title"><span>&#9632;</span>Club Briefing</span>
+        <span class="section-note" id="briefingNote">Loading context</span>
+      </div>
+      <div class="briefing-grid">
+        <div class="briefing-lead">
+          <div class="briefing-kicker">Far Post lens</div>
+          <div class="briefing-title" id="briefingTitle">Loading club brief</div>
+          <div class="briefing-copy" id="briefingCopy">Loading fixtures, results, table position and editorial context.</div>
+          <div class="briefing-links" id="briefingLinks"></div>
+        </div>
+        <div class="briefing-side" id="briefingSide">
+          <div class="briefing-note"><div class="briefing-note-label">Status</div><div class="briefing-note-value">Loading...</div></div>
+        </div>
       </div>
     </section>
 
@@ -227,15 +334,26 @@
         <span class="section-note" id="formNote"></span>
       </div>
       <div class="form-section">
-        <div class="form-pills" id="formPills">
-          <!-- skeleton pills -->
-          <div class="skel skel-pill"></div>
-          <div class="skel skel-pill"></div>
-          <div class="skel skel-pill"></div>
-          <div class="skel skel-pill"></div>
-          <div class="skel skel-pill"></div>
+        <div class="form-grid">
+          <div class="form-summary">
+            <div class="form-pills" id="formPills">
+              <!-- skeleton pills -->
+              <div class="skel skel-pill"></div>
+              <div class="skel skel-pill"></div>
+              <div class="skel skel-pill"></div>
+              <div class="skel skel-pill"></div>
+              <div class="skel skel-pill"></div>
+            </div>
+            <div class="form-copy" id="formCopy">Reading the recent run...</div>
+            <div id="formRows"></div>
+          </div>
+          <div class="form-breakdown" id="formBreakdown">
+            <div class="form-breakdown-row"><span class="form-breakdown-label">Wins</span><span class="form-breakdown-value">-</span></div>
+            <div class="form-breakdown-row"><span class="form-breakdown-label">Draws</span><span class="form-breakdown-value">-</span></div>
+            <div class="form-breakdown-row"><span class="form-breakdown-label">Losses</span><span class="form-breakdown-value">-</span></div>
+            <div class="form-breakdown-row"><span class="form-breakdown-label">Return</span><span class="form-breakdown-value">-</span></div>
+          </div>
         </div>
-        <div id="formRows"></div>
       </div>
     </section>
 
@@ -246,7 +364,9 @@
         <div class="split-col">
           <div class="section-header">
             <span class="section-title"><span>&#9632;</span>Recent Results</span>
+            <span class="section-note" id="resultsNote">Form line</span>
           </div>
+          <div class="section-intro" id="resultsIntro">Recent results will appear here with direct links into the match centre.</div>
           <div id="resultsRows">
             <div class="skeleton-row"><div class="skel skel-sm"></div><div class="skel skel-md"></div><div class="skel skel-lg"></div></div>
             <div class="skeleton-row"><div class="skel skel-sm"></div><div class="skel skel-md"></div><div class="skel skel-lg"></div></div>
@@ -257,7 +377,9 @@
         <div class="split-col">
           <div class="section-header">
             <span class="section-title"><span>&#9632;</span>Upcoming Fixtures</span>
+            <span class="section-note" id="fixturesNote">Schedule view</span>
           </div>
+          <div class="section-intro" id="fixturesIntro">The next few fixtures set the immediate agenda for this club page.</div>
           <div id="fixtureRows">
             <div class="skeleton-row"><div class="skel skel-sm"></div><div class="skel skel-md"></div><div class="skel skel-lg"></div></div>
             <div class="skeleton-row"><div class="skel skel-sm"></div><div class="skel skel-md"></div><div class="skel skel-lg"></div></div>
@@ -273,6 +395,7 @@
         <span class="section-title"><span>&#9632;</span>League Table</span>
         <span class="section-note" id="tableLeagueName"></span>
       </div>
+      <div class="section-intro" id="tableIntro">See where the club sits in the wider competition picture.</div>
       <div class="table-wrap">
         <table class="standings-table" id="standingsTable">
           <thead>
@@ -300,6 +423,7 @@
         <span class="section-title"><span>&#9632;</span>Top Scorers</span>
         <span class="section-note" id="scorersLeagueName"></span>
       </div>
+      <div class="section-intro" id="scorersIntro">The main attacking names shaping the competition around this club.</div>
       <div class="scorers-list" id="scorersList"></div>
     </section>
 
@@ -307,8 +431,9 @@
     <section class="section-block" id="articlesSection" style="display:none;">
       <div class="section-header">
         <span class="section-title"><span>&#9632;</span>Far Post Coverage</span>
+        <span class="section-note" id="articlesNote">Editorial context</span>
       </div>
-      <div class="articles-grid" id="articlesGrid"></div>
+      <div class="coverage-grid" id="articlesGrid"></div>
     </section>
 
   </div><!-- /page-main -->
@@ -369,6 +494,15 @@
     const teamId     = urlParams.get('id');
     const leagueId   = urlParams.get('league');
     const fromParam  = urlParams.get('from'); // 'results' | 'fixtures'
+    let pageState = {
+      team: null,
+      form: [],
+      results: [],
+      fixtures: [],
+      standings: [],
+      topScorers: [],
+      articles: []
+    };
 
     // Set back link based on referrer
     if (fromParam === 'fixtures') {
@@ -404,19 +538,40 @@
         : '';
 
       qs('#heroContent').innerHTML = `
-        ${team.crest
-          ? `<img class="club-crest" src="${escHtml(team.crest)}" alt="${escHtml(team.name)} crest" onerror="this.style.display='none'">`
-          : `<div class="club-crest-placeholder"></div>`
-        }
-        <h1 class="club-name">${escHtml(team.name || 'Unknown Club')}</h1>
-        <div class="club-meta">
-          <span class="club-league">
-            <span class="club-league-dot"></span>
-            ${escHtml(team.leagueName || '')}
-          </span>
-          ${posTag}
+        <div class="club-hero-main">
+          <div class="club-hero-top">
+            <div class="club-crest-wrap">
+              ${team.crest
+                ? `<img class="club-crest" src="${escHtml(team.crest)}" alt="${escHtml(team.name)} crest" onerror="this.style.display='none'">`
+                : `<div class="club-crest-placeholder"></div>`
+              }
+            </div>
+            <div class="club-headline">
+              <div class="club-kicker">Club Hub</div>
+              <h1 class="club-name">${escHtml(team.name || 'Unknown Club')}</h1>
+              <div class="club-meta">
+                <span class="club-league">
+                  <span class="club-league-dot"></span>
+                  ${escHtml(team.leagueName || '')}
+                </span>
+                ${posTag}
+              </div>
+            </div>
+          </div>
+          <p class="club-subtitle" id="clubSubtitle">Fixtures, results, form, table context and the latest Far Post links around ${escHtml(team.name || 'this club')}.</p>
+          <div class="club-jump">
+            <a href="#resultsRows">Results</a>
+            <a href="#fixtureRows">Fixtures</a>
+            <a href="#tableSection">Table</a>
+            <a href="#articlesSection">Coverage</a>
+          </div>
         </div>
-        <p class="club-subtitle">Fixtures, results, form and key stats</p>`;
+        <div class="club-hero-aside" id="heroAside">
+          <div class="hero-card"><div class="hero-card-label">Club status</div><div class="hero-card-value">${team.position ? team.position + ordinal(team.position) : 'Live'}</div><div class="hero-card-meta">${escHtml(team.leagueName || 'Scottish football')} context</div></div>
+          <div class="hero-card"><div class="hero-card-label">Recent return</div><div class="hero-card-value" id="heroReturnValue">--</div><div class="hero-card-meta" id="heroReturnMeta">Loading form</div></div>
+          <div class="hero-card"><div class="hero-card-label">Next up</div><div class="hero-card-value" id="heroNextValue">--</div><div class="hero-card-meta" id="heroNextMeta">Loading fixture</div></div>
+          <div class="hero-card"><div class="hero-card-label">Far Post view</div><div class="hero-card-value" id="heroCoverageValue">--</div><div class="hero-card-meta" id="heroCoverageMeta">Loading coverage</div></div>
+        </div>`;
     }
 
     function ordinal(n) {
@@ -430,14 +585,28 @@
       const pills = qs('#formPills');
       const rows  = qs('#formRows');
       const note  = qs('#formNote');
+      const copy  = qs('#formCopy');
+      const breakdown = qs('#formBreakdown');
 
       if (!form || !form.length) {
         pills.innerHTML = '<div class="empty-state">No recent data</div>';
         rows.innerHTML  = '';
+        copy.textContent = 'No recent run is available yet.';
+        breakdown.innerHTML = '<div class="form-breakdown-row"><span class="form-breakdown-label">Recent run</span><span class="form-breakdown-value">--</span></div>';
         return;
       }
 
+      const wins = form.filter(f => f.result === 'W').length;
+      const draws = form.filter(f => f.result === 'D').length;
+      const losses = form.filter(f => f.result === 'L').length;
+      const points = wins * 3 + draws;
       note.textContent = `Last ${form.length} matches`;
+      copy.textContent = `${wins} win${wins === 1 ? '' : 's'}, ${draws} draw${draws === 1 ? '' : 's'} and ${losses} loss${losses === 1 ? '' : 'es'} across the latest run. Use the list below to jump from form line to match centre.`;
+      breakdown.innerHTML = `
+        <div class="form-breakdown-row"><span class="form-breakdown-label">Wins</span><span class="form-breakdown-value">${wins}</span></div>
+        <div class="form-breakdown-row"><span class="form-breakdown-label">Draws</span><span class="form-breakdown-value">${draws}</span></div>
+        <div class="form-breakdown-row"><span class="form-breakdown-label">Losses</span><span class="form-breakdown-value">${losses}</span></div>
+        <div class="form-breakdown-row"><span class="form-breakdown-label">Return</span><span class="form-breakdown-value">${points}/${form.length * 3}</span></div>`;
 
       // Pills (oldest → newest)
       pills.innerHTML = [...form].reverse().map(f =>
@@ -457,10 +626,15 @@
             <span class="match-row-venue">${isHome ? 'H' : 'A'}</span>
             <span class="match-row-teams">
               ${safeImg(opp.crest, opp.name, 'match-row-crest')}
-              <span class="match-row-opp">${escHtml(opp.name)}</span>
+              <span>
+                <span class="match-row-opp">${escHtml(opp.name)}</span>
+                <span class="match-row-sub">Match centre and full flow</span>
+              </span>
             </span>
-            <span class="match-row-score">${escHtml(scoreStr)}</span>
-            <span class="match-row-result ${escHtml(f.result || '')}">${escHtml(f.result || '')}</span>
+            <span class="match-row-score-wrap">
+              <span class="match-row-score">${escHtml(scoreStr)}</span>
+              <span class="match-row-result ${escHtml(f.result || '')}">${escHtml(f.result || '')}</span>
+            </span>
           </a>`;
       }).join('');
     }
@@ -468,10 +642,17 @@
     // ── Render: Results ────────────────────────────────────────────────────────
     function renderResults(results) {
       const el = qs('#resultsRows');
+      const note = qs('#resultsNote');
+      const intro = qs('#resultsIntro');
       if (!results || !results.length) {
         el.innerHTML = '<div class="empty-state">No recent results</div>';
+        note.textContent = 'No recent games';
+        intro.textContent = 'There are no completed matches to pull into the publication flow yet.';
         return;
       }
+      const wins = results.filter(f => f.result === 'W').length;
+      note.textContent = `${wins} of ${results.length} won`;
+      intro.textContent = 'The latest completed matches, presented as a results tape but still wired into the full Far Post match centre.';
       el.innerHTML = results.map(f => {
         const isHome   = f.requestedIsHome;
         const opp      = isHome ? f.away : f.home;
@@ -484,10 +665,15 @@
             <span class="match-row-venue">${isHome ? 'H' : 'A'}</span>
             <span class="match-row-teams">
               ${safeImg(opp.crest, opp.name, 'match-row-crest')}
-              <span class="match-row-opp">${escHtml(opp.name)}</span>
+              <span>
+                <span class="match-row-opp">${escHtml(opp.name)}</span>
+                <span class="match-row-sub">${isHome ? 'Home result' : 'Away result'}</span>
+              </span>
             </span>
-            <span class="match-row-score">${escHtml(scoreStr)}</span>
-            <span class="match-row-result ${escHtml(f.result || '')}">${escHtml(f.result || '')}</span>
+            <span class="match-row-score-wrap">
+              <span class="match-row-score">${escHtml(scoreStr)}</span>
+              <span class="match-row-result ${escHtml(f.result || '')}">${escHtml(f.result || '')}</span>
+            </span>
           </a>`;
       }).join('');
     }
@@ -495,10 +681,16 @@
     // ── Render: Fixtures ───────────────────────────────────────────────────────
     function renderFixtures(fixtures) {
       const el = qs('#fixtureRows');
+      const note = qs('#fixturesNote');
+      const intro = qs('#fixturesIntro');
       if (!fixtures || !fixtures.length) {
         el.innerHTML = '<div class="empty-state">No upcoming fixtures</div>';
+        note.textContent = 'No upcoming games';
+        intro.textContent = 'The next assignment has not been loaded yet.';
         return;
       }
+      note.textContent = `${fixtures.length} upcoming`;
+      intro.textContent = 'Upcoming fixtures give the page its forward rhythm and connect directly into the same match-centre reporting path.';
       el.innerHTML = fixtures.map(f => {
         const isHome = f.requestedIsHome;
         const opp    = isHome ? f.away : f.home;
@@ -509,9 +701,15 @@
             <span class="match-row-venue">${isHome ? 'H' : 'A'}</span>
             <span class="match-row-teams">
               ${safeImg(opp.crest, opp.name, 'match-row-crest')}
-              <span class="match-row-opp">${escHtml(opp.name)}</span>
+              <span>
+                <span class="match-row-opp">${escHtml(opp.name)}</span>
+                <span class="match-row-sub">${isHome ? 'Home fixture' : 'Away fixture'}</span>
+              </span>
             </span>
-            <span class="match-row-time">${escHtml(time)}</span>
+            <span class="match-row-time-wrap">
+              <span class="match-row-time">${escHtml(time)}</span>
+              <span class="match-row-status">Kick-off</span>
+            </span>
           </a>`;
       }).join('');
     }
@@ -521,6 +719,7 @@
       const tbody    = qs('#standingsBody');
       const leagueEl = qs('#tableLeagueName');
       const section  = qs('#tableSection');
+      const intro = qs('#tableIntro');
 
       if (!standings || !standings.length) {
         section.style.display = 'none';
@@ -528,6 +727,10 @@
       }
 
       leagueEl.textContent = team.leagueName || '';
+      const current = standings.find(row => String(row.teamId) === String(teamId));
+      if (current) {
+        intro.textContent = `${team.name} sit ${current.position}${ordinal(current.position)} with ${current.points} points from ${current.played} matches. The highlighted row keeps the club anchored within the wider competition picture.`;
+      }
 
       tbody.innerHTML = standings.map(row => {
         const isClub = String(row.teamId) === String(teamId);
@@ -555,11 +758,13 @@
       const section  = qs('#scorersSection');
       const list     = qs('#scorersList');
       const leagueEl = qs('#scorersLeagueName');
+      const intro = qs('#scorersIntro');
 
       if (!scorers || !scorers.length) return;
 
       section.style.display = '';
       leagueEl.textContent   = team.leagueName || '';
+      intro.textContent = `A quick read on who is driving the goal output around ${team.leagueName || 'the competition'}, giving extra context for the results and table picture above.`;
 
       list.innerHTML = scorers.map((s, i) => `
         <div class="scorer-row">
@@ -574,6 +779,75 @@
     }
 
     // ── Render: Related Articles ───────────────────────────────────────────────
+    function renderBriefing() {
+      const { team, results, fixtures, standings, articles } = pageState;
+      if (!team) return;
+
+      const nextFixture = fixtures && fixtures[0];
+      const latestResult = results && results[0];
+      const standing = standings && standings.find(row => String(row.teamId) === String(team.id));
+      const briefingNote = qs('#briefingNote');
+      const briefingTitle = qs('#briefingTitle');
+      const briefingCopy = qs('#briefingCopy');
+      const briefingLinks = qs('#briefingLinks');
+      const briefingSide = qs('#briefingSide');
+
+      briefingNote.textContent = team.leagueName || 'Club context';
+      briefingTitle.textContent = `${team.name} at a glance`;
+
+      const leadParts = [];
+      if (standing) leadParts.push(`${team.name} are ${standing.position}${ordinal(standing.position)} in the ${team.leagueName}`);
+      if (latestResult && latestResult.result) {
+        const opp = latestResult.requestedIsHome ? latestResult.away : latestResult.home;
+        leadParts.push(`their latest result was a ${latestResult.result} against ${opp.name}`);
+      }
+      if (nextFixture) {
+        const opp = nextFixture.requestedIsHome ? nextFixture.away : nextFixture.home;
+        leadParts.push(`next up is ${opp.name} on ${fmtMatchDate(nextFixture.date)}`);
+      }
+      briefingCopy.textContent = leadParts.length
+        ? leadParts.join(', ') + '.'
+        : 'This page ties together the club’s current football picture and Far Post editorial context.';
+
+      briefingLinks.innerHTML = `
+        <a class="briefing-link" href="#resultsRows">Recent results</a>
+        <a class="briefing-link" href="#fixtureRows">Upcoming fixtures</a>
+        <a class="briefing-link" href="#tableSection">League table</a>
+        ${articles.length ? `<a class="briefing-link" href="#articlesSection">Far Post coverage</a>` : ''}`;
+
+      briefingSide.innerHTML = `
+        <div class="briefing-note">
+          <div class="briefing-note-label">Latest result</div>
+          <div class="briefing-note-value">${latestResult ? escHtml((latestResult.requestedIsHome ? latestResult.away.name : latestResult.home.name)) : 'Awaiting result'}</div>
+          <div class="briefing-note-copy">${latestResult ? `${escHtml(latestResult.score.home)}–${escHtml(latestResult.score.away)} • ${latestResult.result || 'Result'}` : 'Recent match result will appear here.'}</div>
+        </div>
+        <div class="briefing-note">
+          <div class="briefing-note-label">Next assignment</div>
+          <div class="briefing-note-value">${nextFixture ? escHtml(nextFixture.requestedIsHome ? nextFixture.away.name : nextFixture.home.name) : 'No fixture loaded'}</div>
+          <div class="briefing-note-copy">${nextFixture ? `${fmtMatchDate(nextFixture.date)} • ${fmtMatchTime(nextFixture.date) || 'TBC'} • ${nextFixture.requestedIsHome ? 'Home' : 'Away'}` : 'Upcoming fixture information will appear here.'}</div>
+        </div>
+        <div class="briefing-note">
+          <div class="briefing-note-label">Table context</div>
+          <div class="briefing-note-value">${standing ? `${standing.points} pts` : 'Cup route'}</div>
+          <div class="briefing-note-copy">${standing ? `${standing.position}${ordinal(standing.position)} place from ${standing.played} matches.` : 'This competition does not currently expose a standard table view.'}</div>
+        </div>`;
+    }
+
+    function renderHeroCards() {
+      const { team, form, fixtures, articles } = pageState;
+      if (!team) return;
+      const wins = form.filter(f => f.result === 'W').length;
+      const draws = form.filter(f => f.result === 'D').length;
+      const nextFixture = fixtures[0];
+      const returnValue = `${wins * 3 + draws}/${Math.max(1, form.length * 3)}`;
+      qs('#heroReturnValue').textContent = returnValue;
+      qs('#heroReturnMeta').textContent = form.length ? `${wins}W ${draws}D ${form.filter(f => f.result === 'L').length}L in the last ${form.length}` : 'No recent form loaded';
+      qs('#heroNextValue').textContent = nextFixture ? fmtMatchDate(nextFixture.date) : 'TBC';
+      qs('#heroNextMeta').textContent = nextFixture ? `${nextFixture.requestedIsHome ? nextFixture.away.name : nextFixture.home.name} • ${nextFixture.requestedIsHome ? 'Home' : 'Away'}` : 'Upcoming fixture not available';
+      qs('#heroCoverageValue').textContent = String(articles.length).padStart(2, '0');
+      qs('#heroCoverageMeta').textContent = articles.length ? 'Recent Far Post stories tied to this club' : 'No matching Far Post coverage yet';
+    }
+
     async function loadRelatedArticles(teamName) {
       if (!teamName) return;
 
@@ -588,30 +862,51 @@
         const data = await res.json();
         const articles = data?.result || [];
 
+        pageState.articles = articles;
+        renderHeroCards();
+        renderBriefing();
+
         if (!articles.length) return;
 
         const section = qs('#articlesSection');
         const grid    = qs('#articlesGrid');
         section.style.display = '';
+        qs('#articlesNote').textContent = `${articles.length} linked ${articles.length === 1 ? 'story' : 'stories'}`;
 
-        grid.innerHTML = articles.map(a => {
+        const cards = articles.map(a => {
           const imgRef = a.mainImage?.asset?._ref;
           const imgUrl = imgRef ? sanityImgUrl(imgRef, 600, 340) : null;
           const pubDate = a.publishedAt
             ? new Date(a.publishedAt).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })
             : '';
-          return `
-            <a class="article-card" href="/article.html?id=${encodeURIComponent(a._id)}">
-              <div class="article-img-wrap">
-                ${imgUrl ? `<img class="article-img" src="${escHtml(imgUrl)}" alt="${escHtml(a.title)}" loading="lazy">` : ''}
-              </div>
-              <div class="article-body">
-                ${a.category ? `<span class="article-label">${escHtml(a.category)}</span>` : ''}
-                <div class="article-title">${escHtml(a.title)}</div>
-                <div class="article-meta">${escHtml(pubDate)}</div>
-              </div>
-            </a>`;
-        }).join('');
+          return { a, imgUrl, pubDate };
+        });
+
+        const featured = cards[0];
+        const rest = cards.slice(1);
+        grid.innerHTML = `
+          <a class="coverage-feature" href="/article.html?id=${encodeURIComponent(featured.a._id)}">
+            <div class="coverage-feature-img">
+              ${featured.imgUrl ? `<img class="article-img" src="${escHtml(featured.imgUrl)}" alt="${escHtml(featured.a.title)}" loading="lazy">` : ''}
+            </div>
+            <div class="coverage-feature-body">
+              ${featured.a.category ? `<span class="article-label">${escHtml(featured.a.category)}</span>` : ''}
+              <div class="coverage-feature-title">${escHtml(featured.a.title)}</div>
+              <div class="coverage-feature-excerpt">The strongest Far Post connection for this club right now, tying the data on this page back into publication coverage.</div>
+              <div class="article-meta">${escHtml(featured.pubDate)}</div>
+            </div>
+          </a>
+          <div class="coverage-list articles-grid">
+            ${rest.map(item => `
+              <a class="article-card" href="/article.html?id=${encodeURIComponent(item.a._id)}">
+                <div class="article-body">
+                  ${item.a.category ? `<span class="article-label">${escHtml(item.a.category)}</span>` : ''}
+                  <div class="article-title">${escHtml(item.a.title)}</div>
+                  <div class="article-excerpt">Context, reaction and perspective connected to ${escHtml(teamName)}.</div>
+                  <div class="article-meta">${escHtml(item.pubDate)}</div>
+                </div>
+              </a>`).join('')}
+          </div>`;
       } catch (err) {
         // Related articles are non-critical — fail silently
         console.warn('[club] Related articles failed:', err.message);
@@ -630,6 +925,15 @@
         }
 
         const data = await res.json();
+        pageState = {
+          team: data.team,
+          form: data.form || [],
+          results: data.results || [],
+          fixtures: data.fixtures || [],
+          standings: data.standings || [],
+          topScorers: data.topScorers || [],
+          articles: pageState.articles || []
+        };
 
         // Hide loading bar
         qs('#loadingBar').style.display = 'none';
@@ -641,6 +945,8 @@
         renderFixtures(data.fixtures);
         renderStandings(data.standings, data.team);
         renderScorers(data.topScorers, data.team);
+        renderHeroCards();
+        renderBriefing();
 
         // Related articles — fire and forget (uses team name from payload)
         if (data.team?.name) {
