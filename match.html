@@ -396,6 +396,7 @@
         }
         renderForm(Array.isArray(homeData) ? homeData : [], home, Array.isArray(awayData) ? awayData : [], away);
       } catch (e) {
+        console.error('[form-guide] failed to load', e);
         el.innerHTML = '<div class="empty-state">Form guide not available.</div>';
       }
     }
