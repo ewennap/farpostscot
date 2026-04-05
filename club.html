@@ -45,9 +45,32 @@
     .club-hero-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.9fr); }
     .club-hero-main { padding: 2.5rem 1.5rem 2rem; border-right: 1px solid #2a2b2d; }
     .club-hero-top { display: flex; align-items: flex-start; gap: 1rem; }
-    .club-crest-wrap { width: 104px; height: 104px; border: 1px solid #2a2b2d; background: rgba(13,14,15,0.7); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .club-crest { width: 88px; height: 88px; object-fit: contain; }
-    .club-crest-placeholder { width: 88px; height: 88px; background: #1a1b1d; border-radius: 4px; }
+    .club-crest-wrap {
+      width: 104px;
+      height: 104px;
+      padding: 8px;
+      border-radius: 50%;
+      background: radial-gradient(circle at center, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 52%, transparent 72%);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .club-crest {
+      width: 88px;
+      height: 88px;
+      object-fit: contain;
+      object-position: center;
+      filter: drop-shadow(0 6px 18px rgba(0,0,0,0.22));
+    }
+    .club-crest-placeholder {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
+    }
     .club-headline { min-width: 0; }
     .club-kicker { display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #e84040; margin-bottom: 0.75rem; }
     .club-kicker::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #e84040; box-shadow: 0 0 0 4px rgba(232,64,64,0.12); }
@@ -115,7 +138,7 @@
     .match-row-date { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; color: #555; min-width: 44px; white-space: nowrap; }
     .match-row-venue { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #444; min-width: 18px; text-align: center; }
     .match-row-teams { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; }
-    .match-row-crest { width: 20px; height: 20px; object-fit: contain; flex-shrink: 0; }
+    .match-row-crest { width: 20px; height: 20px; object-fit: contain; object-position: center; flex-shrink: 0; }
     .match-row-opp { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 600; color: #e8e6e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .match-row-score { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; color: #aaa; min-width: 42px; text-align: center; white-space: nowrap; }
     .match-row-result { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 800; min-width: 22px; text-align: center; }
@@ -147,7 +170,7 @@
     .standings-table tr.highlighted .team-name-cell { color: #fff; font-weight: 700; }
     .pos-cell { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; color: #555; text-align: center; min-width: 28px; }
     .team-cell { display: flex; align-items: center; gap: 8px; }
-    .team-crest-sm { width: 20px; height: 20px; object-fit: contain; flex-shrink: 0; }
+    .team-crest-sm { width: 20px; height: 20px; object-fit: contain; object-position: center; flex-shrink: 0; }
     .team-name-cell { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 600; color: #e8e6e1; }
     .num-cell { text-align: center; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600; }
     .pts-cell { text-align: center; font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; color: #e8e6e1; }
@@ -157,7 +180,7 @@
     .scorer-row { display: flex; align-items: center; gap: 0.875rem; padding: 0.7rem 1.25rem; border-bottom: 1px solid #1a1b1d; }
     .scorer-row:last-child { border-bottom: none; }
     .scorer-rank { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; color: #444; min-width: 20px; text-align: center; }
-    .scorer-crest { width: 20px; height: 20px; object-fit: contain; flex-shrink: 0; }
+    .scorer-crest { width: 20px; height: 20px; object-fit: contain; object-position: center; flex-shrink: 0; }
     .scorer-name { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; color: #e8e6e1; flex: 1; }
     .scorer-team { font-size: 12px; color: #666; }
     .scorer-goals { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 800; color: #e84040; min-width: 32px; text-align: right; }
@@ -217,7 +240,7 @@
       .coverage-grid { grid-template-columns: 1fr; }
       .club-hero-main { padding: 1.5rem 1.25rem 1.25rem; border-right: none; border-bottom: 1px solid #2a2b2d; }
       .club-hero-top { align-items: center; }
-      .club-crest-wrap { width: 84px; height: 84px; }
+      .club-crest-wrap { width: 84px; height: 84px; padding: 6px; }
       .club-crest,
       .club-crest-placeholder { width: 68px; height: 68px; }
       .club-name { font-size: 34px; }
