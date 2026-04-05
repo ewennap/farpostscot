@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <title>Clubs — Far Post</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #111213; color: #e8e6e1; font-family: 'Barlow', sans-serif; min-height: 100vh; }
+    .nav { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 1.25rem; height: 52px; border-bottom: 1px solid #2a2b2d; background: rgba(13,14,15,0.96); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: height 0.2s ease, box-shadow 0.2s ease; }
+    .nav.scrolled { height: 44px; box-shadow: 0 2px 24px rgba(0,0,0,0.5); border-bottom-color: #1a1b1d; }
+    .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: 0.12em; color: #e8e6e1; text-decoration: none; white-space: nowrap; transition: font-size 0.2s; }
+    .nav.scrolled .logo { font-size: 22px; }
+    .logo-dot { color: #e84040; }
+    .nav-links { display: flex; gap: 20px; }
+    .nav-links a { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-decoration: none; color: #888; text-transform: uppercase; }
+    .nav-links a:hover { color: #e8e6e1; }
+    .nav-links a.active { color: #e8e6e1; border-bottom: 2px solid #e84040; padding-bottom: 2px; }
+    .nav-hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; background: none; border: none; flex-shrink: 0; }
+    .nav-hamburger span { display: block; width: 22px; height: 2px; background: #888; }
+    .mobile-menu { display: none; flex-direction: column; background: rgba(13,14,15,0.98); border-bottom: 1px solid #2a2b2d; position: sticky; top: 52px; z-index: 99; }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #888; text-decoration: none; padding: 0.875rem 1.25rem; border-bottom: 1px solid #1a1b1d; }
+    .mobile-menu a:last-child { border-bottom: none; }
+    .hero { border-bottom: 1px solid #2a2b2d; background: radial-gradient(circle at top left, rgba(232,64,64,0.16), transparent 34%), linear-gradient(180deg, #17191b 0%, #101112 60%, #0d0e0f 100%); }
+    .hero-grid { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(300px, 0.9fr); }
+    .hero-copy { padding: 2.4rem 1.5rem 2rem; border-right: 1px solid #2a2b2d; }
+    .hero-kicker { display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #e84040; margin-bottom: 1rem; }
+    .hero-kicker::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #e84040; box-shadow: 0 0 0 4px rgba(232,64,64,0.12); }
+    .hero-title { font-family: 'Barlow Condensed', sans-serif; font-size: 56px; font-weight: 800; line-height: 0.95; letter-spacing: 0.02em; color: #f5f2eb; max-width: 10ch; }
+    .hero-title span { color: #e84040; }
+    .hero-deck { max-width: 58ch; margin-top: 1rem; font-size: 15px; line-height: 1.7; color: #a8a39a; }
+    .hero-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.4rem; }
+    .hero-link { display: inline-flex; align-items: center; justify-content: center; min-width: 138px; padding: 0.72rem 1rem; border: 1px solid #2a2b2d; background: #121314; color: #e8e6e1; text-decoration: none; font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; transition: background 0.15s, border-color 0.15s; }
+    .hero-link:hover { background: #191b1d; border-color: #3a3b3d; }
+    .hero-link.primary { background: #e84040; border-color: #e84040; color: #fff; }
+    .hero-link.primary:hover { background: #f04c4c; }
+    .hero-meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .meta-card { padding: 1.25rem; border-bottom: 1px solid #2a2b2d; border-left: 1px solid #2a2b2d; min-height: 114px; display: flex; flex-direction: column; justify-content: center; }
+    .meta-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #555; margin-bottom: 0.45rem; }
+    .meta-value { font-family: 'Barlow Condensed', sans-serif; font-size: 34px; font-weight: 800; color: #e8e6e1; line-height: 1; }
+    .meta-copy { font-size: 12px; color: #777; margin-top: 0.5rem; line-height: 1.5; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; padding: 0.65rem 1.25rem; border-bottom: 1px solid #2a2b2d; background: #0d0e0f; }
+    .section-title { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #555; }
+    .section-title span { color: #e84040; margin-right: 8px; }
+    .section-note { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #444; }
+    .overview-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-bottom: 1px solid #2a2b2d; }
+    .overview-card { border-right: 1px solid #2a2b2d; padding: 1.25rem; background: linear-gradient(180deg, #121314 0%, #0f1011 100%); }
+    .overview-card:last-child { border-right: none; }
+    .overview-eyebrow { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 0.85rem; }
+    .overview-competition { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #f0eee8; }
+    .overview-type { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #e84040; }
+    .overview-copy { font-size: 13px; color: #888; line-height: 1.65; min-height: 62px; }
+    .overview-stats { display: flex; gap: 0.7rem; flex-wrap: wrap; margin-top: 1rem; }
+    .overview-pill { display: inline-flex; align-items: center; padding: 0.28rem 0.55rem; border: 1px solid #2a2b2d; background: #111213; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #b8b3aa; }
+    .overview-link { display: inline-flex; align-items: center; margin-top: 1rem; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #aaa; text-decoration: none; }
+    .overview-link:hover { color: #fff; }
+    .directory-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 1.25rem; border-bottom: 1px solid #2a2b2d; background: #111213; }
+    .competition-tabs { display: flex; overflow-x: auto; border: 1px solid #2a2b2d; }
+    .competition-tab { border: none; border-right: 1px solid #2a2b2d; background: #0d0e0f; color: #666; padding: 0.7rem 1rem; cursor: pointer; font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; transition: color 0.15s, background 0.15s; }
+    .competition-tab:last-child { border-right: none; }
+    .competition-tab:hover { background: #171819; color: #e8e6e1; }
+    .competition-tab.active { background: #171819; color: #e84040; }
+    .search-wrap { display: flex; align-items: center; gap: 0.75rem; min-width: min(100%, 340px); }
+    .search-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #555; white-space: nowrap; }
+    .search-input { width: 100%; padding: 0.78rem 0.9rem; border: 1px solid #2a2b2d; background: #0d0e0f; color: #e8e6e1; font-size: 14px; font-family: 'Barlow', sans-serif; }
+    .search-input:focus { outline: 2px solid rgba(232,64,64,0.35); border-color: #4a2d2d; }
+    .directory-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-bottom: 1px solid #2a2b2d; }
+    .club-card { display: block; text-decoration: none; color: inherit; border-right: 1px solid #2a2b2d; border-bottom: 1px solid #2a2b2d; background: linear-gradient(180deg, #121314 0%, #101112 100%); transition: background 0.15s; }
+    .club-card:hover { background: #171819; }
+    .club-card:nth-child(3n) { border-right: none; }
+    .club-card-head { display: flex; align-items: center; gap: 0.9rem; padding: 1.1rem 1.25rem 0.65rem; }
+    .club-card-crest { width: 44px; height: 44px; object-fit: contain; flex-shrink: 0; }
+    .club-card-crest.placeholder { background: #1a1b1d; border: 1px solid #2a2b2d; border-radius: 4px; }
+    .club-card-name { font-family: 'Barlow Condensed', sans-serif; font-size: 23px; font-weight: 700; line-height: 0.95; color: #f5f2eb; }
+    .club-card-competition { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #777; margin-top: 0.35rem; }
+    .club-card-body { padding: 0 1.25rem 1.2rem; }
+    .club-card-stats { display: flex; gap: 0.55rem; flex-wrap: wrap; margin-bottom: 0.85rem; }
+    .club-stat { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.28rem 0.55rem; background: #0d0e0f; border: 1px solid #242527; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #bbb; }
+    .club-card-copy { font-size: 13px; line-height: 1.65; color: #8a857d; min-height: 44px; }
+    .club-card-next { margin-top: 0.9rem; padding-top: 0.8rem; border-top: 1px solid #222325; }
+    .club-card-next-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #555; margin-bottom: 0.3rem; }
+    .club-card-next-match { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; color: #e8e6e1; }
+    .club-card-next-meta { font-size: 12px; color: #666; margin-top: 0.25rem; }
+    .empty-state { padding: 3rem 1.25rem; text-align: center; border-bottom: 1px solid #2a2b2d; }
+    .empty-title { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: 0.04em; color: #e8e6e1; }
+    .empty-copy { max-width: 42ch; margin: 0.75rem auto 0; font-size: 13px; line-height: 1.65; color: #666; }
+    .loading-state { padding: 2rem 1.25rem; text-align: center; border-bottom: 1px solid #2a2b2d; }
+    .loading-dots { display: inline-flex; gap: 6px; }
+    .loading-dots span { width: 6px; height: 6px; border-radius: 50%; background: #e84040; animation: pulse 1.2s ease-in-out infinite; }
+    .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes pulse { 0%,80%,100% { opacity: 0.2; } 40% { opacity: 1; } }
+    .radar-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-bottom: 1px solid #2a2b2d; }
+    .radar-col { border-right: 1px solid #2a2b2d; }
+    .radar-col:last-child { border-right: none; }
+    .radar-row { display: flex; align-items: center; gap: 0.9rem; padding: 0.95rem 1.25rem; border-bottom: 1px solid #1a1b1d; text-decoration: none; color: inherit; transition: background 0.15s; }
+    .radar-row:last-child { border-bottom: none; }
+    .radar-row:hover { background: #161718; }
+    .radar-time { min-width: 54px; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; color: #e84040; }
+    .radar-match { flex: 1; min-width: 0; }
+    .radar-teams { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; line-height: 1.05; color: #e8e6e1; }
+    .radar-meta { font-size: 12px; color: #666; margin-top: 0.3rem; }
+    .footer { padding: 1.25rem; border-top: 1px solid #2a2b2d; background: #0d0e0f; display: flex; align-items: center; justify-content: space-between; }
+    .footer-logo { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 0.12em; color: #333; }
+    .footer-logo span { color: #e84040; }
+    .footer-copy { font-size: 12px; color: #444; }
+    @media (max-width: 1024px) {
+      .hero-grid, .overview-grid, .directory-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .hero-copy { grid-column: 1 / -1; border-right: none; border-bottom: 1px solid #2a2b2d; }
+      .overview-card:nth-child(2) { border-right: none; }
+      .overview-card:nth-child(3) { grid-column: 1 / -1; border-right: none; border-top: 1px solid #2a2b2d; }
+      .club-card:nth-child(3n) { border-right: 1px solid #2a2b2d; }
+      .club-card:nth-child(2n) { border-right: none; }
+    }
+    @media (max-width: 680px) {
+      .nav-links { display: none; }
+      .nav-hamburger { display: flex; }
+      .hero-title { font-size: 40px; max-width: none; }
+      .hero-copy { padding: 1.7rem 1.25rem 1.5rem; }
+      .hero-meta, .overview-grid, .directory-grid, .radar-grid { grid-template-columns: 1fr; }
+      .meta-card, .overview-card, .radar-col, .club-card { border-left: none; border-right: none; }
+      .directory-toolbar { flex-direction: column; align-items: stretch; }
+      .search-wrap { min-width: 0; }
+      .competition-tabs { width: 100%; }
+      .competition-tab { flex: 1 0 auto; }
+      .footer { flex-direction: column; gap: 6px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav" id="main-nav">
+    <a href="index.html" class="logo">FAR POST<span class="logo-dot">.</span></a>
+    <div class="nav-links">
+      <a href="news.html">News</a>
+      <a href="opinions.html">Opinions</a>
+      <a href="podcasts.html">Podcasts</a>
+      <a href="clubs.html" class="active">Clubs</a>
+      <a href="results.html">Results</a>
+      <a href="fixtures.html">Fixtures</a>
+    </div>
+    <button class="nav-hamburger" onclick="document.getElementById('mobile-menu').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="news.html">News</a>
+    <a href="opinions.html">Opinions</a>
+    <a href="podcasts.html">Podcasts</a>
+    <a href="clubs.html">Clubs</a>
+    <a href="results.html">Results</a>
+    <a href="fixtures.html">Fixtures</a>
+  </div>
+  <section class="hero">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <div class="hero-kicker">Club Hub</div>
+        <h1 class="hero-title">All roads lead through the <span>clubs.</span></h1>
+        <p class="hero-deck">Browse the core club map across Scottish football, jump straight into current league tables, and use the live directory to move from competition view to individual club pages without relying on fixtures or results pages as the only entry point.</p>
+        <div class="hero-actions">
+          <a class="hero-link primary" href="#club-directory">Browse clubs</a>
+          <a class="hero-link" href="results.html">Results centre</a>
+          <a class="hero-link" href="fixtures.html">Fixture list</a>
+        </div>
+      </div>
+      <div class="hero-meta">
+        <div class="meta-card">
+          <div class="meta-label">Tracked Clubs</div>
+          <div class="meta-value" id="meta-clubs">--</div>
+          <div class="meta-copy">League clubs loaded into the live directory.</div>
+        </div>
+        <div class="meta-card">
+          <div class="meta-label">Competitions</div>
+          <div class="meta-value">5</div>
+          <div class="meta-copy">Premiership, Championship, cups and more.</div>
+        </div>
+        <div class="meta-card">
+          <div class="meta-label">Upcoming Ties</div>
+          <div class="meta-value" id="meta-fixtures">--</div>
+          <div class="meta-copy">Next fixtures currently shaping club discovery.</div>
+        </div>
+        <div class="meta-card">
+          <div class="meta-label">Directory Focus</div>
+          <div class="meta-value" id="meta-focus">All</div>
+          <div class="meta-copy">Switch competitions and search clubs instantly.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section>
+    <div class="section-header">
+      <div class="section-title"><span>//</span>Competition overview</div>
+      <div class="section-note">Current pathways into club discovery</div>
+    </div>
+    <div class="overview-grid" id="overview-grid">
+      <div class="loading-state" style="grid-column:1/-1;"><div class="loading-dots"><span></span><span></span><span></span></div></div>
+    </div>
+  </section>
+  <section id="club-directory">
+    <div class="section-header">
+      <div class="section-title"><span>//</span>Club directory</div>
+      <div class="section-note" id="directory-note">Loading clubs</div>
+    </div>
+    <div class="directory-toolbar">
+      <div class="competition-tabs" id="competition-tabs"></div>
+      <div class="search-wrap">
+        <label class="search-label" for="club-search">Search</label>
+        <input class="search-input" id="club-search" type="search" placeholder="Find a club" autocomplete="off">
+      </div>
+    </div>
+    <div class="directory-grid" id="directory-grid">
+      <div class="loading-state" style="grid-column:1/-1;"><div class="loading-dots"><span></span><span></span><span></span></div></div>
+    </div>
+  </section>
+  <section>
+    <div class="section-header">
+      <div class="section-title"><span>//</span>Upcoming club radar</div>
+      <div class="section-note">The next fixtures driving movement</div>
+    </div>
+    <div class="radar-grid" id="radar-grid">
+      <div class="loading-state" style="grid-column:1/-1;"><div class="loading-dots"><span></span><span></span><span></span></div></div>
+    </div>
+  </section>
+  <footer class="footer">
+    <div class="footer-logo">FAR POST<span>.</span></div>
+    <div class="footer-copy">Scottish football. No filter.</div>
+  </footer>
+  <script>
+    const COMPETITIONS = [
+      { id: 'all', name: 'All clubs', type: 'hub' },
+      { id: '501', name: 'Premiership', type: 'league' },
+      { id: '504', name: 'Championship', type: 'league' },
+      { id: '516', name: 'League One', type: 'league' },
+      { id: '507', name: 'Scottish Cup', type: 'cup' },
+      { id: '510', name: 'League Cup', type: 'cup' }
+    ];
+    const DIRECTORY_COMPETITIONS = COMPETITIONS.filter(c => c.id !== 'all');
+    let activeCompetition = 'all';
+    let clubDirectory = [];
+    let overviewCards = [];
+    let radarFixtures = [];
+
+    function escHtml(str) {
+      if (str == null) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function fmtDateTime(iso) {
+      if (!iso) return 'Date TBC';
+      return new Date(iso).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    }
+
+    function fmtTime(iso) {
+      if (!iso) return 'TBC';
+      return new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function buildClubHref(teamId, competitionId) {
+      if (!teamId || !competitionId || competitionId === 'all') return '';
+      return 'club.html?id=' + encodeURIComponent(teamId) + '&league=' + encodeURIComponent(competitionId) + '&from=clubs';
+    }
+
+    function fetchJson(url) {
+      return fetch(url).then(async response => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Request failed');
+        return data;
+      });
+    }
+
+    function buildFixtureLookup(fixtures) {
+      const lookup = {};
+      fixtures.forEach(fixture => {
+        [fixture.home, fixture.away].forEach(team => {
+          if (!team || !team.id) return;
+          const current = lookup[team.id];
+          if (!current || new Date(fixture.date || 0) < new Date(current.date || 0)) lookup[team.id] = fixture;
+        });
+      });
+      return lookup;
+    }
+
+    function summariseNextFixture(fixture, teamId) {
+      if (!fixture) {
+        return { match: 'No upcoming fixture loaded', meta: 'The directory will fill this slot as additional schedules are added.' };
+      }
+      const isHome = String(fixture.home && fixture.home.id) === String(teamId);
+      const opponent = isHome ? fixture.away : fixture.home;
+      return { match: (opponent && opponent.name ? opponent.name : 'Opponent') + (isHome ? ' (H)' : ' (A)'), meta: fmtDateTime(fixture.date) };
+    }
+
+    function deriveOverview(competition, standings, fixtures) {
+      const uniqueTeams = new Map();
+      fixtures.forEach(fixture => [fixture.home, fixture.away].forEach(team => {
+        if (team && team.id && !uniqueTeams.has(String(team.id))) uniqueTeams.set(String(team.id), team);
+      }));
+
+      if (standings.length) {
+        return {
+          id: competition.id,
+          name: competition.name,
+          type: competition.type,
+          copy: 'Table-led club discovery with league context, route position and next-fixture hooks baked in.',
+          pills: [standings.length + ' clubs', 'Leader: ' + standings[0].team, fixtures.length + ' upcoming']
+        };
+      }
+
+      const nextFixture = fixtures[0];
+      return {
+        id: competition.id,
+        name: competition.name,
+        type: competition.type,
+        copy: 'Knockout competitions do not expose a stable table, so the hub pivots to live club routes via scheduled ties and participating sides.',
+        pills: [uniqueTeams.size + ' clubs', nextFixture ? 'Next: ' + fmtDateTime(nextFixture.date) : 'Awaiting draw', fixtures.length + ' ties']
+      };
+    }
+
+    function buildLeagueCards(competition, standings, fixtures) {
+      const fixtureLookup = buildFixtureLookup(fixtures);
+      return standings.map(row => ({
+        id: String(row.teamId),
+        name: row.team,
+        crest: row.crest,
+        competitionId: competition.id,
+        competitionName: competition.name,
+        position: row.position,
+        points: row.points,
+        played: row.played,
+        gd: row.gd,
+        next: summariseNextFixture(fixtureLookup[row.teamId], row.teamId)
+      }));
+    }
+
+    function buildCupCards(competition, fixtures) {
+      const seen = new Map();
+      fixtures.forEach(fixture => {
+        [fixture.home, fixture.away].forEach(team => {
+          if (!team || !team.id || seen.has(String(team.id))) return;
+          seen.set(String(team.id), {
+            id: String(team.id),
+            name: team.name || 'Club',
+            crest: team.crest || null,
+            competitionId: competition.id,
+            competitionName: competition.name,
+            next: summariseNextFixture(fixture, team.id)
+          });
+        });
+      });
+      return Array.from(seen.values()).sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    function renderTabs() {
+      const tabs = document.getElementById('competition-tabs');
+      tabs.innerHTML = COMPETITIONS.map(competition => '<button class="competition-tab' + (competition.id === activeCompetition ? ' active' : '') + '" data-competition="' + competition.id + '">' + escHtml(competition.name) + '</button>').join('');
+      tabs.querySelectorAll('.competition-tab').forEach(button => {
+        button.addEventListener('click', () => {
+          activeCompetition = button.getAttribute('data-competition');
+          document.getElementById('meta-focus').textContent = button.textContent.replace(' clubs', '');
+          renderTabs();
+          renderDirectory();
+        });
+      });
+    }
+
+    function renderOverview() {
+      const grid = document.getElementById('overview-grid');
+      grid.innerHTML = overviewCards.map(card => '<div class="overview-card"><div class="overview-eyebrow"><div class="overview-competition">' + escHtml(card.name) + '</div><div class="overview-type">' + escHtml(card.type) + '</div></div><div class="overview-copy">' + escHtml(card.copy) + '</div><div class="overview-stats">' + card.pills.map(pill => '<span class="overview-pill">' + escHtml(pill) + '</span>').join('') + '</div><a class="overview-link" href="#club-directory" data-jump="' + escHtml(card.id) + '">Open directory</a></div>').join('');
+      grid.querySelectorAll('[data-jump]').forEach(link => {
+        link.addEventListener('click', () => {
+          activeCompetition = link.getAttribute('data-jump');
+          document.getElementById('meta-focus').textContent = link.closest('.overview-card').querySelector('.overview-competition').textContent;
+          renderTabs();
+          renderDirectory();
+        });
+      });
+    }
+
+    function renderDirectory() {
+      const grid = document.getElementById('directory-grid');
+      const note = document.getElementById('directory-note');
+      const query = document.getElementById('club-search').value.trim().toLowerCase();
+      const directorySource = activeCompetition === 'all'
+        ? Array.from(clubDirectory.reduce((map, card) => {
+            const existing = map.get(card.id);
+            if (!existing || (!existing.position && card.position)) map.set(card.id, card);
+            return map;
+          }, new Map()).values()).sort((a, b) => a.name.localeCompare(b.name))
+        : clubDirectory;
+      const filtered = directorySource.filter(card => {
+        const competitionMatch = activeCompetition === 'all' || card.competitionId === activeCompetition;
+        const searchMatch = !query || card.name.toLowerCase().includes(query) || card.competitionName.toLowerCase().includes(query);
+        return competitionMatch && searchMatch;
+      });
+
+      note.textContent = filtered.length + ' club' + (filtered.length === 1 ? '' : 's') + ' shown';
+
+      if (!filtered.length) {
+        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-title">No clubs match this view</div><div class="empty-copy">Try a different competition or clear the search term. The hub is set up so more league and cup data can be layered in without changing the basic browsing flow.</div></div>';
+        return;
+      }
+
+      grid.innerHTML = filtered.map(card => {
+        const href = buildClubHref(card.id, card.competitionId);
+        const stats = [];
+        if (card.position) stats.push('<span class="club-stat">Pos ' + escHtml(card.position) + '</span>');
+        if (typeof card.points === 'number') stats.push('<span class="club-stat">' + escHtml(card.points) + ' pts</span>');
+        if (typeof card.played === 'number') stats.push('<span class="club-stat">' + escHtml(card.played) + ' played</span>');
+        if (typeof card.gd === 'number') stats.push('<span class="club-stat">GD ' + (card.gd > 0 ? '+' : '') + escHtml(card.gd) + '</span>');
+        const copy = card.position
+          ? 'Position ' + card.position + ' in the ' + card.competitionName + ', with direct access to fixtures, results and table context.'
+          : 'Cup route currently discoverable through the upcoming tie list, ready for richer knockout-specific club context later.';
+        const inner = '<div class="club-card-head">' + (card.crest ? '<img class="club-card-crest" src="' + escHtml(card.crest) + '" alt="" onerror="this.style.display=\'none\'">' : '<span class="club-card-crest placeholder"></span>') + '<div style="min-width:0;"><div class="club-card-name">' + escHtml(card.name) + '</div><div class="club-card-competition">' + escHtml(card.competitionName) + '</div></div></div><div class="club-card-body"><div class="club-card-stats">' + stats.join('') + '</div><div class="club-card-copy">' + escHtml(copy) + '</div><div class="club-card-next"><div class="club-card-next-label">Next route in</div><div class="club-card-next-match">' + escHtml(card.next.match) + '</div><div class="club-card-next-meta">' + escHtml(card.next.meta) + '</div></div></div>';
+        return href ? '<a class="club-card" href="' + href + '">' + inner + '</a>' : '<div class="club-card">' + inner + '</div>';
+      }).join('');
+    }
+
+    function renderRadar() {
+      const grid = document.getElementById('radar-grid');
+      if (!radarFixtures.length) {
+        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-title">Fixture radar unavailable</div><div class="empty-copy">The club hub is still usable through its competition directories, but upcoming fixtures could not be loaded right now.</div></div>';
+        return;
+      }
+      const columns = [radarFixtures.slice(0, 4), radarFixtures.slice(4, 8)];
+      grid.innerHTML = columns.map(column => '<div class="radar-col">' + column.map(fixture => '<a class="radar-row" href="match.html?id=' + encodeURIComponent(fixture.id) + '&from=fixtures&league=' + encodeURIComponent(fixture.leagueId) + '"><div class="radar-time">' + escHtml(fmtTime(fixture.date)) + '</div><div class="radar-match"><div class="radar-teams">' + escHtml(fixture.home.name) + ' v ' + escHtml(fixture.away.name) + '</div><div class="radar-meta">' + escHtml(((COMPETITIONS.find(c => c.id === fixture.leagueId) || {}).name) || 'Competition') + ' • ' + escHtml(fmtDateTime(fixture.date)) + '</div></div></a>').join('') + '</div>').join('');
+    }
+
+    function loadHub() {
+      Promise.all(DIRECTORY_COMPETITIONS.map(competition => {
+        const fixturesPromise = fetchJson('/.netlify/functions/fixtures?league=' + competition.id);
+        const standingsPromise = competition.type === 'league' ? fetchJson('/.netlify/functions/standings?league=' + competition.id) : Promise.resolve({ standings: [] });
+        return Promise.all([fixturesPromise, standingsPromise]).then(([fixturesData, standingsData]) => ({
+          competition: competition,
+          fixtures: fixturesData.fixtures || [],
+          standings: standingsData.standings || []
+        }));
+      })).then(payloads => {
+        overviewCards = payloads.map(bundle => deriveOverview(bundle.competition, bundle.standings, bundle.fixtures));
+        clubDirectory = payloads.flatMap(bundle => bundle.competition.type === 'league' ? buildLeagueCards(bundle.competition, bundle.standings, bundle.fixtures) : buildCupCards(bundle.competition, bundle.fixtures));
+        radarFixtures = payloads.flatMap(bundle => bundle.fixtures).sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 8);
+
+        const leagueClubCount = payloads.filter(bundle => bundle.competition.type === 'league').reduce((sum, bundle) => sum + bundle.standings.length, 0);
+        const fixtureCount = payloads.reduce((sum, bundle) => sum + bundle.fixtures.length, 0);
+        document.getElementById('meta-clubs').textContent = leagueClubCount;
+        document.getElementById('meta-fixtures').textContent = fixtureCount;
+
+        renderTabs();
+        renderOverview();
+        renderDirectory();
+        renderRadar();
+      }).catch(() => {
+        document.getElementById('overview-grid').innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-title">Could not load club hub</div><div class="empty-copy">The layout is in place, but the live competition data could not be fetched right now. Existing club routes remain untouched.</div></div>';
+        document.getElementById('directory-grid').innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-title">Club directory unavailable</div><div class="empty-copy">Please try again in a moment.</div></div>';
+        document.getElementById('radar-grid').innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-title">Upcoming club radar unavailable</div><div class="empty-copy">Please try again in a moment.</div></div>';
+        document.getElementById('directory-note').textContent = 'Unavailable';
+      });
+    }
+
+    document.getElementById('club-search').addEventListener('input', renderDirectory);
+    window.addEventListener('scroll', () => {
+      document.getElementById('main-nav').classList.toggle('scrolled', window.scrollY > 10);
+    });
+    loadHub();
+  </script>
+</body>
+</html>
