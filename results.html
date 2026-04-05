@@ -63,6 +63,7 @@
     .match-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
     .match-card { display: block; padding: 1rem 1.25rem; border-right: 1px solid #2a2b2d; border-bottom: 1px solid #2a2b2d; transition: background 0.15s; text-decoration: none; color: inherit; cursor: pointer; }
     .match-card:hover { background: #161718; }
+    .match-card:focus-visible { outline: 2px solid #e84040; outline-offset: -2px; }
     .match-card:nth-child(3n) { border-right: none; }
     .match-teams { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
     .match-team { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
@@ -105,6 +106,11 @@
     .standings-table tr:hover td.pts { background: #1e1f20; }
     .team-crest { width: 20px; height: 20px; object-fit: contain; margin-right: 10px; vertical-align: middle; border-radius: 2px; }
     .result-crest { width: 20px; height: 20px; object-fit: contain; margin-right: 8px; vertical-align: middle; flex-shrink: 0; }
+    .club-link { display: inline-flex; align-items: center; gap: 8px; min-width: 0; color: inherit; text-decoration: none; border-radius: 3px; transition: color 0.15s ease; }
+    .club-link:hover { color: #fff; }
+    .club-link:focus-visible { outline: 2px solid #e84040; outline-offset: 2px; }
+    .club-link .team-name { min-width: 0; }
+    .club-link .result-crest, .club-link .team-crest { margin-right: 0; }
     .split-row td { border-top: 2px solid #333 !important; }
     .zone-europe td.pos { border-left: 3px solid #4caf50; }
     .zone-relegation td.pos { border-left: 3px solid #e84040; }
@@ -275,6 +281,21 @@
     // Simple data cache per league, per content type
     var cache = {};   // cache[league][type] = data
 
+    function buildClubHref(teamId, leagueId) {
+      if (!teamId || !leagueId) return '';
+      return 'club.html?id=' + encodeURIComponent(teamId) + '&league=' + encodeURIComponent(leagueId);
+    }
+
+    function buildClubLink(team, leagueId, linkClass, nameClass, crestClass) {
+      var crest = team.crest
+        ? '<img class="' + crestClass + '" src="' + team.crest + '" alt="" onerror="this.style.display=\'none\'">'
+        : '';
+      var name = '<span class="' + nameClass + '">' + team.name + '</span>';
+      var href = buildClubHref(team.id, leagueId);
+      if (!href) return crest + name;
+      return '<a class="club-link ' + linkClass + '" href="' + href + '" aria-label="View ' + team.name + ' club page">' + crest + name + '</a>';
+    }
+
     function getCached(league, type) {
       return cache[league] && cache[league][type];
     }
@@ -406,14 +427,14 @@
           var live = ['LIVE','1H','2H','HT','PEN'].indexOf(f.state) !== -1;
           var status = live ? '<span class="match-status live">Live</span>' : '<span class="match-status">FT</span>';
           var time   = f.date ? '<span class="match-time">' + fmtTime(f.date) + '</span>' : '';
-          html += '<a class="match-card" href="match.html?id=' + f.id + '&from=results"><div class="match-teams">'
+          html += '<div class="match-card" role="link" tabindex="0" data-match-href="match.html?id=' + f.id + '&from=results&league=' + encodeURIComponent(league) + '"><div class="match-teams">'
             + '<div class="match-team">'
-            + (f.home.crest ? '<img class="result-crest" src="' + f.home.crest + '" alt="" onerror="this.style.display=\'none\'">' : '')
-            + '<span class="team-name' + (hw?' winner':'') + '">' + f.home.name + '</span><span class="team-score' + (hw?' winner':'') + '">' + f.score.home + '</span></div>'
+            + buildClubLink(f.home, league, 'result-team-link', 'team-name' + (hw?' winner':''), 'result-crest')
+            + '<span class="team-score' + (hw?' winner':'') + '">' + f.score.home + '</span></div>'
             + '<div class="match-team">'
-            + (f.away.crest ? '<img class="result-crest" src="' + f.away.crest + '" alt="" onerror="this.style.display=\'none\'">' : '')
-            + '<span class="team-name' + (aw?' winner':'') + '">' + f.away.name + '</span><span class="team-score' + (aw?' winner':'') + '">' + f.score.away + '</span></div>'
-            + '</div><div class="match-meta">' + status + time + '</div></a>';
+            + buildClubLink(f.away, league, 'result-team-link', 'team-name' + (aw?' winner':''), 'result-crest')
+            + '<span class="team-score' + (aw?' winner':'') + '">' + f.score.away + '</span></div>'
+            + '</div><div class="match-meta">' + status + time + '</div></div>';
         });
         html += '</div></div>';
       });
@@ -523,7 +544,7 @@
           : '';
         html += '<tr class="' + zone + ' ' + split + '">'
           + '<td class="pos">' + pos + '</td>'
-          + '<td class="team-cell">' + crest + row.team + '</td>'
+          + '<td class="team-cell">' + (row.teamId ? buildClubLink({ id: row.teamId, name: row.team, crest: row.crest }, league, 'table-team-link', 'team-name', 'team-crest') : crest + row.team) + '</td>'
           + '<td class="num">' + row.played + '</td>'
           + '<td class="num">' + row.won + '</td>'
           + '<td class="num">' + row.drawn + '</td>'
@@ -612,6 +633,19 @@
         nav.classList.toggle('scrolled', window.scrollY > 24);
       }, { passive: true });
     })();
+
+    document.addEventListener('click', function(event) {
+      if (event.target.closest('a, button')) return;
+      var card = event.target.closest('[data-match-href]');
+      if (!card) return;
+      window.location.href = card.getAttribute('data-match-href');
+    });
+
+    document.addEventListener('keydown', function(event) {
+      if ((event.key !== 'Enter' && event.key !== ' ') || !event.target.matches('[data-match-href]')) return;
+      event.preventDefault();
+      window.location.href = event.target.getAttribute('data-match-href');
+    });
 
     loadResults();
   </script>

@@ -107,6 +107,7 @@ exports.handler = async function (event) {
 
         return {
           position: row.position,
+          teamId:   row.participant_id,
           team:     row.participant?.name       || '',
           crest:    row.participant?.image_path || null,
           points:   row.points ?? 0,
