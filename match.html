@@ -390,7 +390,10 @@
         ]);
         var homeData = await responses[0].json();
         var awayData = await responses[1].json();
-        renderForm(homeData.results || [], home, awayData.results || [], away);
+        if ((homeData && homeData.error) || (awayData && awayData.error)) {
+          throw new Error((homeData && homeData.error) || (awayData && awayData.error) || 'Failed');
+        }
+        renderForm(Array.isArray(homeData) ? homeData : [], home, Array.isArray(awayData) ? awayData : [], away);
       } catch (e) {
         el.innerHTML = '<div class="empty-state">Form guide not available.</div>';
       }
@@ -405,23 +408,17 @@
           html += '<span style="font-size:13px;color:#555">No recent results</span>';
         } else {
           results.forEach(function(r) {
-            var isHome    = r.home.id === team.id;
-            var teamGoals = parseInt(isHome ? r.score.home : r.score.away);
-            var oppGoals  = parseInt(isHome ? r.score.away : r.score.home);
-            var scoreStr  = (isNaN(teamGoals) ? '-' : teamGoals) + '-' + (isNaN(oppGoals) ? '-' : oppGoals);
-            var result    = isNaN(teamGoals) || isNaN(oppGoals) ? 'D'
-                          : teamGoals > oppGoals ? 'W'
-                          : teamGoals < oppGoals ? 'L' : 'D';
-            var opponent  = isHome ? r.away : r.home;
-            var dateStr   = r.date ? new Date(r.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '';
-            var crest     = opponent.crest
-              ? '<img class="form-crest" src="' + opponent.crest + '" alt="" onerror="this.style.display=\'none\'">'
+            var isHomeTeam = r.requestedTeamSide === 'home';
+            var scoreStr  = r.homeScore + '-' + r.awayScore;
+            var crest     = (isHomeTeam ? r.awayTeamCrest : r.homeTeamCrest);
+            var crestHtml = crest
+              ? '<img class="form-crest" src="' + crest + '" alt="" onerror="this.style.display=\'none\'">'
               : '<div class="form-crest-blank"></div>';
             html += '<div class="form-item">'
-              + crest
+              + crestHtml
               + '<span class="form-score">' + scoreStr + '</span>'
-              + '<span class="form-badge ' + result + '">' + result + '</span>'
-              + '<span class="form-date">' + dateStr + '</span>'
+              + '<span class="form-badge ' + (r.result || 'D') + '">' + (r.result || 'D') + '</span>'
+              + '<span class="form-date">' + (r.date || '') + '</span>'
               + '</div>';
           });
         }
