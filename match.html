@@ -246,7 +246,7 @@
       var homeId = home.id;
 
       var events = (fixture.events || [])
-        .filter(function(e) { return RELEVANT_TYPES.indexOf(e.type_id) !== -1; })
+        .filter(function(e) { return RELEVANT_TYPES.indexOf(e.type_id) !== -1 && e.player_name; })
         .sort(function(a, b) {
           var ma = (a.minute || 0) * 100 + (a.minute_extra || 0);
           var mb = (b.minute || 0) * 100 + (b.minute_extra || 0);
@@ -299,13 +299,14 @@
       var away = participants.find(function(p) { return p.meta && p.meta.location === 'away'; }) || participants[1] || {};
 
       var lineups = fixture.lineups || [];
+      console.log(fixture.lineups);
       if (!lineups.length) {
         el.innerHTML = '<div class="empty-state">Lineups not available.</div>';
         return;
       }
 
       function buildCol(teamId, teamName) {
-        var players   = lineups.filter(function(p) { return p.participant_id === teamId; });
+        var players   = lineups.filter(function(p) { return (p.team_id === teamId) || (p.participant_id === teamId); });
         var starters  = players.filter(function(p) { return p.type_id === 11; })
           .sort(function(a, b) { return (a.jersey_number || 99) - (b.jersey_number || 99); });
         var subs      = players.filter(function(p) { return p.type_id === 12; })
