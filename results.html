@@ -88,7 +88,7 @@
     .fixture-vs { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; color: #444; padding: 0 12px; }
     .fixture-away { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 600; color: #e8e6e1; flex: 1; }
 
-    /* League table */
+    /* League table / top scorers */
     .table-container { border-bottom: 1px solid #2a2b2d; overflow-x: auto; }
     .standings-table { width: 100%; border-collapse: collapse; min-width: 480px; }
     .standings-table th { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #555; padding: 0.6rem 1rem; text-align: left; background: #0d0e0f; border-bottom: 2px solid #2a2b2d; white-space: nowrap; }
@@ -106,6 +106,12 @@
     .split-row td { border-top: 2px solid #333 !important; }
     .zone-europe td.pos { border-left: 3px solid #4caf50; }
     .zone-relegation td.pos { border-left: 3px solid #e84040; }
+    .scorers-table td.rank { width: 52px; text-align: center; font-family: 'Barlow Condensed', sans-serif; font-size: 15px; color: #666; }
+    .scorers-table td.player-cell { font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 600; color: #e8e6e1; }
+    .scorers-table td.team-cell-light { font-size: 14px; color: #aaa; white-space: nowrap; }
+    .scorers-table td.goals { text-align: right; font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 800; color: #e8e6e1; background: #161718; }
+    .scorers-table tr:hover td.goals { background: #1e1f20; }
+    .scorer-crest { width: 24px; height: 24px; object-fit: contain; margin-right: 10px; vertical-align: middle; border-radius: 2px; }
 
     .empty-state { padding: 3rem 1.25rem; text-align: center; color: #555; font-size: 14px; }
     .loading-state { padding: 2rem 1.25rem; text-align: center; }
@@ -173,6 +179,7 @@
     -->
     <div class="tab-bar" id="top-tab-bar">
       <button class="tab-btn active" id="toptab-results" onclick="showContentTab('results')">Results</button>
+      <button class="tab-btn" id="toptab-topscorers" onclick="showContentTab('topscorers')">Top scorers</button>
       <button class="tab-btn" id="toptab-table" onclick="showContentTab('table')">Table</button>
     </div>
   </div>
@@ -219,6 +226,15 @@
     </div>
   </div>
 
+  <div id="panel-topscorers" style="display:none">
+    <div class="section-header">
+      <div class="section-title"><span>//</span>Top scorers</div>
+    </div>
+    <div class="table-container" id="topscorers-container">
+      <div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div></div>
+    </div>
+  </div>
+
   <footer class="footer">
     <div class="footer-logo">FAR POST<span>.</span></div>
     <div class="footer-copy">Scottish football. No filter.</div>
@@ -228,7 +244,7 @@
     // ─────────────────────────────────────────
     //  STATE — two completely independent vars
     // ─────────────────────────────────────────
-    var activeContentTab = 'results';   // 'results' | 'fixtures' | 'table'
+    var activeContentTab = 'results';   // 'results' | 'topscorers' | 'table'
     var activeLeague     = '501';       // league ID string
 
     var KNOCKOUTS = ['507', '510'];     // no standings for these
@@ -261,20 +277,22 @@
     function showContentTab(name) {
       activeContentTab = name;
 
-      // Update top-tab button active class (only results and table exist)
-      ['results','table'].forEach(function(t) {
+      // Update top-tab button active class
+      ['results','topscorers','table'].forEach(function(t) {
         document.getElementById('toptab-' + t).classList.toggle('active', t === name);
       });
 
       // Show/hide content panels
-      document.getElementById('panel-results').style.display  = name === 'results'  ? 'block' : 'none';
-      document.getElementById('panel-fixtures').style.display = name === 'fixtures' ? 'block' : 'none';
-      document.getElementById('panel-table').style.display    = name === 'table'    ? 'block' : 'none';
+      document.getElementById('panel-results').style.display    = name === 'results'    ? 'block' : 'none';
+      document.getElementById('panel-fixtures').style.display   = name === 'fixtures'   ? 'block' : 'none';
+      document.getElementById('panel-table').style.display      = name === 'table'      ? 'block' : 'none';
+      document.getElementById('panel-topscorers').style.display = name === 'topscorers' ? 'block' : 'none';
 
       // Load data for this panel (uses current league, respects cache)
-      if      (name === 'results')  loadResults();
-      else if (name === 'fixtures') loadFixtures();
-      else if (name === 'table')    loadTable();
+      if      (name === 'results')    loadResults();
+      else if (name === 'fixtures')   loadFixtures();
+      else if (name === 'table')      loadTable();
+      else if (name === 'topscorers') loadTopScorers();
     }
 
     // ─────────────────────────────────────────
@@ -306,9 +324,10 @@
       }
 
       // Refresh data for whatever content tab is currently active
-      if      (activeContentTab === 'results')  loadResults();
-      else if (activeContentTab === 'fixtures') loadFixtures();
-      else if (activeContentTab === 'table')    loadTable();
+      if      (activeContentTab === 'results')    loadResults();
+      else if (activeContentTab === 'fixtures')   loadFixtures();
+      else if (activeContentTab === 'table')      loadTable();
+      else if (activeContentTab === 'topscorers') loadTopScorers();
     }
 
     // ─────────────────────────────────────────
@@ -504,6 +523,67 @@
         + '<span><span style="display:inline-block;width:3px;height:12px;background:#4caf50;margin-right:5px;border-radius:1px;vertical-align:middle"></span>European</span>'
         + '<span><span style="display:inline-block;width:3px;height:12px;background:#e84040;margin-right:5px;border-radius:1px;vertical-align:middle"></span>Relegation</span>'
         + '</div>';
+      el.innerHTML = html;
+    }
+
+    // ─────────────────────────────────────────
+    //  TOP SCORERS
+    // ─────────────────────────────────────────
+    async function loadTopScorers() {
+      var league = activeLeague;
+      var el = document.getElementById('topscorers-container');
+
+      if (KNOCKOUTS.indexOf(league) !== -1) {
+        el.innerHTML = '<div class="empty-state">Top scorers not available for cup competitions</div>';
+        return;
+      }
+
+      var cached = getCached(league, 'topscorers');
+      if (cached) { renderTopScorers(cached, league); return; }
+
+      el.innerHTML = loadingHtml();
+      try {
+        var res = await fetch('/.netlify/functions/top-scorers?leagueId=' + league);
+        var data = await res.json();
+        var scorers = Array.isArray(data) ? data : [];
+        setCache(league, 'topscorers', scorers);
+        if (activeLeague === league) renderTopScorers(scorers, league);
+      } catch (e) {
+        if (activeLeague === league) {
+          el.innerHTML = '<div class="empty-state">Could not load top scorers. Please try again later.</div>';
+        }
+      }
+    }
+
+    function renderTopScorers(scorers, league) {
+      var el = document.getElementById('topscorers-container');
+      if (!scorers.length) {
+        el.innerHTML = '<div class="empty-state">Top scorers not available for this competition.</div>';
+        return;
+      }
+
+      var name = LEAGUE_NAMES[league] || 'Top Scorers';
+      var html = '<div class="league-header" style="border-bottom:1px solid #2a2b2d">'
+        + '<div class="league-badge"></div>'
+        + '<div class="league-name">' + name + ' top scorers</div>'
+        + '</div>'
+        + '<table class="standings-table scorers-table"><thead><tr>'
+        + '<th class="num">#</th><th>Player</th><th>Club</th><th class="num">Goals</th>'
+        + '</tr></thead><tbody>';
+
+      scorers.forEach(function(row, index) {
+        var crest = row.teamCrest
+          ? '<img class="scorer-crest" src="' + row.teamCrest + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">'
+          : '';
+        html += '<tr>'
+          + '<td class="rank">' + (index + 1) + '</td>'
+          + '<td class="player-cell">' + (row.playerName || '') + '</td>'
+          + '<td class="team-cell-light">' + crest + (row.teamName || '') + '</td>'
+          + '<td class="goals">' + (row.goals || 0) + '</td>'
+          + '</tr>';
+      });
+
+      html += '</tbody></table>';
       el.innerHTML = html;
     }
 
