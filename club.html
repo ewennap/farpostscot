@@ -759,20 +759,30 @@
       const list     = qs('#scorersList');
       const leagueEl = qs('#scorersLeagueName');
       const intro = qs('#scorersIntro');
+      const supportsScorers = ['501', '504', '516'].includes(String(team.leagueId));
 
-      if (!scorers || !scorers.length) return;
+      if (!supportsScorers) {
+        section.style.display = 'none';
+        return;
+      }
 
       section.style.display = '';
       leagueEl.textContent   = team.leagueName || '';
-      intro.textContent = `A quick read on who is driving the goal output around ${team.leagueName || 'the competition'}, giving extra context for the results and table picture above.`;
+      if (!scorers || !scorers.length) {
+        intro.textContent = `No reliable club-specific scorer data is available for ${team.name || 'this club'} right now.`;
+        list.innerHTML = '<div class="empty-state">No club scorer data available</div>';
+        return;
+      }
+
+      intro.textContent = `A quick read on who is driving the goal output for ${team.name || 'this club'}, giving extra context for the results and table picture above.`;
 
       list.innerHTML = scorers.map((s, i) => `
         <div class="scorer-row">
           <span class="scorer-rank">${i + 1}</span>
           ${s.teamCrest ? `<img class="scorer-crest" src="${escHtml(s.teamCrest)}" alt="" onerror="this.style.visibility='hidden'">` : `<span style="width:20px;flex-shrink:0;"></span>`}
           <div style="flex:1;min-width:0;">
-            <div class="scorer-name">${escHtml(s.playerName)}</div>
-            <div class="scorer-team">${escHtml(s.teamName)}</div>
+            <div class="scorer-name">${escHtml(s.playerName || 'Unnamed scorer')}</div>
+            <div class="scorer-team">${escHtml(s.teamName || team.name || '')}</div>
           </div>
           <span class="scorer-goals">${s.goals}</span>
         </div>`).join('');

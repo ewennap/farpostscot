@@ -156,24 +156,28 @@ exports.handler = async function (event) {
           };
         });
 
-      // Process top scorers — mirror top-scorers.js logic
+      // Process top scorers — but keep only scorers for the requested club
       if (scorersJson && Array.isArray(scorersJson.data)) {
         topScorers = scorersJson.data
           .filter(row => Number(row.type_id) === 208)
+          .filter(row => {
+            const participant = row.participant || row.team || {};
+            return String(participant.id) === String(teamId);
+          })
           .sort((a, b) => (a.position || 999) - (b.position || 999) || (b.total || 0) - (a.total || 0))
           .slice(0, 5)
           .map(row => {
             const player      = row.player      || {};
             const participant = row.participant  || row.team || {};
             return {
-              playerName: player.display_name || player.common_name || player.name || '',
+              playerName: player.display_name || player.common_name || player.name || 'Unnamed scorer',
               teamName:   participant.name        || '',
               teamId:     participant.id,
               teamCrest:  participant.image_path  || null,
               goals:      Number(row.total || 0)
             };
           })
-          .filter(row => row.playerName || row.teamName);
+          .filter(row => row.goals > 0 && (row.playerName || row.teamName));
       }
     } catch (err) {
       console.error('[club-summary] Standings/scorers error:', err.message);
