@@ -384,19 +384,17 @@
     async function loadForm(home, away) {
       var el = document.getElementById('form-container');
       try {
-        console.log('[form-guide] loading team IDs', { homeTeamId: home && home.id, awayTeamId: away && away.id });
         var responses = await Promise.all([
-          fetch('/.netlify/functions/team-form?teamId=' + encodeURIComponent(home.id)),
-          fetch('/.netlify/functions/team-form?teamId=' + encodeURIComponent(away.id))
+          fetch('/.netlify/functions/team-form?teamId=' + home.id),
+          fetch('/.netlify/functions/team-form?teamId=' + away.id)
         ]);
         var homeData = await responses[0].json();
         var awayData = await responses[1].json();
-        if (!responses[0].ok || !responses[1].ok) {
-          throw new Error((homeData && homeData.error) || (awayData && awayData.error) || 'Failed to load form guide');
+        if ((homeData && homeData.error) || (awayData && awayData.error)) {
+          throw new Error((homeData && homeData.error) || (awayData && awayData.error) || 'Failed');
         }
         renderForm(Array.isArray(homeData) ? homeData : [], home, Array.isArray(awayData) ? awayData : [], away);
       } catch (e) {
-        console.error('[form-guide] failed to load', e);
         el.innerHTML = '<div class="empty-state">Form guide not available.</div>';
       }
     }
@@ -411,14 +409,13 @@
         } else {
           results.forEach(function(r) {
             var isHomeTeam = r.requestedTeamSide === 'home';
-            var teamGoals = parseInt(isHomeTeam ? r.homeScore : r.awayScore, 10);
-            var oppGoals = parseInt(isHomeTeam ? r.awayScore : r.homeScore, 10);
-            var scoreStr = (isNaN(teamGoals) ? '-' : teamGoals) + '-' + (isNaN(oppGoals) ? '-' : oppGoals);
-            var crest = isHomeTeam ? r.awayTeamCrest : r.homeTeamCrest;
+            var scoreStr  = r.homeScore + '-' + r.awayScore;
+            var crest     = (isHomeTeam ? r.awayTeamCrest : r.homeTeamCrest);
+            var crestHtml = crest
+              ? '<img class="form-crest" src="' + crest + '" alt="" onerror="this.style.display=\'none\'">'
+              : '<div class="form-crest-blank"></div>';
             html += '<div class="form-item">'
-              + (crest
-                ? '<img class="form-crest" src="' + crest + '" alt="" onerror="this.style.display=\'none\'">'
-                : '<div class="form-crest-blank"></div>')
+              + crestHtml
               + '<span class="form-score">' + scoreStr + '</span>'
               + '<span class="form-badge ' + (r.result || 'D') + '">' + (r.result || 'D') + '</span>'
               + '<span class="form-date">' + (r.date || '') + '</span>'
