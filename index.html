@@ -344,6 +344,177 @@
     .pod-meta { font-size: 11px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.08em; }
     .play-pill { display: inline-flex; align-items: center; gap: 5px; margin-top: 0.7rem; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-soft); border: 1px solid var(--border); padding: 4px 9px; border-radius: 2px; }
 
+    /* ── ACROSS THE LEAGUES ── */
+    .league-spotlight {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .spotlight-column {
+      border-right: 1px solid var(--border);
+      min-width: 0;
+    }
+    .spotlight-column:last-child { border-right: none; }
+    .spotlight-column-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.8rem;
+      padding: 0.9rem 1.1rem;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(18,19,21,0.92) 0%, rgba(14,15,16,0.92) 100%);
+    }
+    .spotlight-heading {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+    .spotlight-note {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      white-space: nowrap;
+    }
+    .spotlight-list {
+      display: grid;
+      grid-template-columns: 1fr;
+    }
+    .spotlight-item {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      padding: 0.95rem 1.1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      text-decoration: none;
+      color: inherit;
+      background: transparent;
+      transition: background 0.15s ease, border-color 0.15s ease;
+      min-width: 0;
+    }
+    .spotlight-item:last-child { border-bottom: none; }
+    .spotlight-item:hover {
+      background: #161718;
+      border-bottom-color: var(--border-strong);
+    }
+    .spotlight-media {
+      position: relative;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .spotlight-media.club {
+      width: 42px;
+      height: 42px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.02);
+      border-radius: 4px;
+    }
+    .spotlight-media.player {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      overflow: hidden;
+      background: radial-gradient(circle at 40% 30%, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .spotlight-badge {
+      width: 26px;
+      height: 26px;
+      object-fit: contain;
+    }
+    .spotlight-player-image {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+    }
+    .spotlight-player-fallback {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+    }
+    .spotlight-body {
+      min-width: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.18rem;
+    }
+    .spotlight-name {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.18rem;
+      font-weight: 700;
+      line-height: 1;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .spotlight-sub {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      min-width: 0;
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .spotlight-sub .dot {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--text-faint);
+      flex-shrink: 0;
+    }
+    .spotlight-highlight {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-top: 0.18rem;
+    }
+    .spotlight-meta {
+      flex-shrink: 0;
+      text-align: right;
+      min-width: 68px;
+    }
+    .spotlight-value {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 800;
+      line-height: 0.95;
+      color: var(--text);
+    }
+    .spotlight-label {
+      margin-top: 0.18rem;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+    }
+
     /* ── FOOTER ── */
     .footer { margin-top: var(--section-gap); border-top: 1px solid var(--border); background: rgba(11,12,13,0.96); }
     .footer-inner { padding: 1.5rem 0 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
@@ -370,6 +541,9 @@
       .results-grid { grid-template-columns: repeat(3,1fr); }
       .result-card:nth-child(3n) { border-right: none; }
       .result-card:nth-child(n+4) { border-top: 1px solid var(--border); }
+      .league-spotlight { grid-template-columns: 1fr; }
+      .spotlight-column { border-right: none; border-bottom: 1px solid var(--border); }
+      .spotlight-column:last-child { border-bottom: none; }
     }
     @media (max-width: 680px) {
       .nav-inner { min-height: 58px; }
@@ -398,6 +572,18 @@
       .pod-card { border-right: none; border-bottom: 1px solid var(--border); }
       .pod-card:last-child { border-bottom: none; }
       .pod-desc { display: none; }
+      .spotlight-column-head,
+      .spotlight-item { padding-left: 1rem; padding-right: 1rem; }
+      .spotlight-heading { font-size: 11px; }
+      .spotlight-note { font-size: 9px; }
+      .spotlight-name { font-size: 1.05rem; }
+      .spotlight-sub { font-size: 10px; }
+      .spotlight-highlight { font-size: 10px; }
+      .spotlight-meta { min-width: 58px; }
+      .spotlight-value { font-size: 1.18rem; }
+      .spotlight-label { font-size: 8px; }
+      .spotlight-media.club { width: 38px; height: 38px; }
+      .spotlight-media.player { width: 42px; height: 42px; }
       .results-grid { grid-template-columns: repeat(2,1fr); }
       .result-card:nth-child(2n) { border-right: none; }
       .result-card { border-top: 1px solid var(--border); min-height: 0; }
@@ -495,6 +681,33 @@
 
   <section class="home-section page-shell">
     <div class="section-header">
+      <div class="section-title"><span>//</span>Across the leagues</div>
+      <div class="see-all" aria-hidden="true">Curated snapshot</div>
+    </div>
+    <div class="league-spotlight">
+      <div class="spotlight-column">
+        <div class="spotlight-column-head">
+          <div class="spotlight-heading">Club highlights</div>
+          <div class="spotlight-note">Three live leaders</div>
+        </div>
+        <div class="spotlight-list" id="club-highlights-list">
+          <div class="loading-text">Loading club highlights...</div>
+        </div>
+      </div>
+      <div class="spotlight-column">
+        <div class="spotlight-column-head">
+          <div class="spotlight-heading">Player highlights</div>
+          <div class="spotlight-note">Three standout scorers</div>
+        </div>
+        <div class="spotlight-list" id="player-highlights-list">
+          <div class="loading-text">Loading player highlights...</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="home-section page-shell">
+    <div class="section-header">
       <div class="section-title"><span>//</span>Latest podcasts — Across the Tiers</div>
       <a href="podcasts.html" class="see-all">All episodes</a>
     </div>
@@ -519,12 +732,26 @@
     const catLabel = c => ({opinion:'Opinion',analysis:'Analysis',news:'News',interview:'Interview',feature:'Feature'}[c]||'Article');
     const podArt = () => `<div class="pod-art"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e84040" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16" fill="#e84040" stroke="none"/></svg></div>`;
     const playIcon = () => `<svg width="9" height="9" viewBox="0 0 12 12" fill="#888"><polygon points="2,1 10,6 2,11"/></svg>`;
+    const HIGHLIGHT_LEAGUES = [
+      { id: '501', name: 'Premiership' },
+      { id: '504', name: 'Championship' },
+      { id: '516', name: 'League One' }
+    ];
 
     function imageUrl(ref) {
       if (!ref) return null;
       const parts = ref.replace('image-','').split('-');
       const ext = parts.pop();
       return `https://cdn.sanity.io/images/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${parts.join('-')}.${ext}`;
+    }
+
+    function escHtml(str) {
+      if (str == null) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
     }
 
     function readTime(body) {
@@ -722,6 +949,148 @@
         <div class="result-card"><div class="result-competition">League Cup</div><div class="result-none">No recent results</div></div>`;
     }
 
+    function buildClubHighlight(rows, fixtures, league) {
+      if (!rows?.length) return null;
+      const club = rows[0];
+      const nextFixture = (fixtures || []).find(f =>
+        String(f.home?.id) === String(club.teamId) || String(f.away?.id) === String(club.teamId)
+      );
+      const nextOpponent = nextFixture
+        ? (String(nextFixture.home?.id) === String(club.teamId) ? nextFixture.away : nextFixture.home)
+        : null;
+      const nextVenue = nextFixture
+        ? (String(nextFixture.home?.id) === String(club.teamId) ? 'H' : 'A')
+        : null;
+      const highlight = club.gd > 0
+        ? `1st place · GD +${club.gd}`
+        : `1st place · ${club.points} pts`;
+      const label = nextFixture && nextOpponent?.name
+        ? `${nextOpponent.name} (${nextVenue})`
+        : `${club.points} pts`;
+
+      return {
+        href: `club.html?id=${encodeURIComponent(club.teamId)}&league=${encodeURIComponent(league.id)}&from=home`,
+        badge: club.crest || null,
+        name: club.team,
+        league: league.name,
+        highlight,
+        value: club.position ? `#${club.position}` : 'Live',
+        label
+      };
+    }
+
+    function buildPlayerHighlight(player, league) {
+      if (!player?.playerId) return null;
+      const params = new URLSearchParams({
+        id: player.playerId,
+        teamId: player.teamId || '',
+        teamName: player.teamName || '',
+        leagueId: league.leagueId || '',
+        seasonId: league.seasonId || '',
+        goals: player.goals || 0,
+        assists: player.assists || 0,
+        rank: player.rank || '',
+        from: 'home'
+      });
+      return {
+        href: `player.html?${params.toString()}`,
+        photo: player.playerPhoto || null,
+        name: player.playerName,
+        club: player.teamName || 'Club',
+        league: league.leagueName,
+        highlight: player.assists > 0 ? `${player.goals} goals · ${player.assists} assists` : `${player.goals} goals this season`,
+        value: player.rank ? `#${player.rank}` : `${player.goals}`,
+        label: player.rank ? 'Rank' : 'Goals'
+      };
+    }
+
+    function renderClubHighlights(items) {
+      const list = document.getElementById('club-highlights-list');
+      if (!items.length) {
+        list.innerHTML = '<div class="loading-text">Club highlights unavailable right now.</div>';
+        return;
+      }
+      list.innerHTML = items.map(item => `
+        <a class="spotlight-item" href="${item.href}">
+          <div class="spotlight-media club">
+            ${item.badge ? `<img class="spotlight-badge" src="${escHtml(item.badge)}" alt="" onerror="this.style.display='none'">` : ''}
+          </div>
+          <div class="spotlight-body">
+            <div class="spotlight-name">${escHtml(item.name)}</div>
+            <div class="spotlight-sub"><span>${escHtml(item.league)}</span></div>
+            <div class="spotlight-highlight">${escHtml(item.highlight)}</div>
+          </div>
+          <div class="spotlight-meta">
+            <div class="spotlight-value">${escHtml(item.value)}</div>
+            <div class="spotlight-label">${escHtml(item.label)}</div>
+          </div>
+        </a>
+      `).join('');
+    }
+
+    function renderPlayerHighlights(items) {
+      const list = document.getElementById('player-highlights-list');
+      if (!items.length) {
+        list.innerHTML = '<div class="loading-text">Player highlights unavailable right now.</div>';
+        return;
+      }
+      list.innerHTML = items.map(item => `
+        <a class="spotlight-item" href="${item.href}">
+          <div class="spotlight-media player">
+            <div class="spotlight-player-fallback">${escHtml(initials(item.name))}</div>
+            ${item.photo ? `<img class="spotlight-player-image" src="${escHtml(item.photo)}" alt="" onerror="this.style.display='none'">` : ''}
+          </div>
+          <div class="spotlight-body">
+            <div class="spotlight-name">${escHtml(item.name)}</div>
+            <div class="spotlight-sub"><span>${escHtml(item.club)}</span><span class="dot"></span><span>${escHtml(item.league)}</span></div>
+            <div class="spotlight-highlight">${escHtml(item.highlight)}</div>
+          </div>
+          <div class="spotlight-meta">
+            <div class="spotlight-value">${escHtml(item.value)}</div>
+            <div class="spotlight-label">${escHtml(item.label)}</div>
+          </div>
+        </a>
+      `).join('');
+    }
+
+    async function loadLeagueHighlights() {
+      try {
+        const clubBundles = await Promise.all(
+          HIGHLIGHT_LEAGUES.map(async league => {
+            const [standingsData, fixturesData] = await Promise.all([
+              fetch(`/.netlify/functions/standings?league=${league.id}`).then(r => r.json()).catch(() => ({ standings: [] })),
+              fetch(`/.netlify/functions/fixtures?league=${league.id}`).then(r => r.json()).catch(() => ({ fixtures: [] }))
+            ]);
+            return {
+              league,
+              standings: standingsData.standings || [],
+              fixtures: fixturesData.fixtures || []
+            };
+          })
+        );
+
+        const playerHub = await fetch('/.netlify/functions/players-hub')
+          .then(r => r.json())
+          .catch(() => ({ leagues: [] }));
+
+        const clubHighlights = clubBundles
+          .map(bundle => buildClubHighlight(bundle.standings, bundle.fixtures, bundle.league))
+          .filter(Boolean)
+          .slice(0, 3);
+
+        const playerHighlights = (playerHub.leagues || [])
+          .map(league => buildPlayerHighlight((league.topScorers || [])[0], league))
+          .filter(Boolean)
+          .slice(0, 3);
+
+        renderClubHighlights(clubHighlights);
+        renderPlayerHighlights(playerHighlights);
+      } catch (e) {
+        renderClubHighlights([]);
+        renderPlayerHighlights([]);
+      }
+    }
+
     // ── PODCASTS ──
     async function loadPodcasts() {
       const grid = document.getElementById('podcast-grid');
@@ -762,6 +1131,7 @@
 
     loadArticles();
     loadScores();
+    loadLeagueHighlights();
     loadPodcasts();
   </script>
 </body>
