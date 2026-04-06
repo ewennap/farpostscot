@@ -97,6 +97,8 @@
     .tl-dot svg { width: 20px; height: 20px; display: block; }
     .tl-dot.goal { background: #1c1d1f; border-color: #4a4c50; box-shadow: 0 0 0 4px rgba(255,255,255,0.03); }
     .tl-dot.own-goal { background: rgba(204,0,0,0.12); border-color: rgba(204,0,0,0.32); box-shadow: 0 0 0 4px rgba(204,0,0,0.08); }
+    .tl-dot-label { display: inline-flex; align-items: center; justify-content: center; min-width: 0; font-family: 'Barlow Condensed', sans-serif; font-size: 8px; font-weight: 800; letter-spacing: 0.16em; line-height: 1; text-transform: uppercase; color: #f4f1eb; transform: translateX(0.08em); }
+    .tl-dot.own-goal .tl-dot-label { color: #ffd8d8; }
     .tl-content { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
     .tl-player { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600; color: #e8e6e1; line-height: 1.15; overflow-wrap: anywhere; }
     .tl-sub-extra { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; color: #777; line-height: 1.1; }
@@ -229,6 +231,7 @@
       .tl-home, .tl-away { gap: 7px; }
       .tl-dot { width: 30px; height: 30px; }
       .tl-dot svg { width: 18px; height: 18px; }
+      .tl-dot-label { font-size: 7px; letter-spacing: 0.14em; }
       .tl-player { font-size: 13px; }
       .tl-sub-extra { font-size: 11px; }
       .tl-min { min-width: 34px; padding: 0.14rem 0.35rem; font-size: 10px; }
@@ -364,23 +367,41 @@
       return '<a class="section-team-link" href="' + href + '" aria-label="View ' + (teamName || 'team') + ' club page">' + content + '</a>';
     }
 
-    function getEventIcon(typeId) {
+    function getEventMarker(typeId) {
       if (typeId === 14) {
-        return '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="#f4f1eb"/><polygon points="12,8.05 14.25,9.7 13.4,12.35 10.6,12.35 9.75,9.7" fill="#111213"/><path d="M9.75 9.7 7.25 10.55 6.55 13.05 8.35 14.85 10.6 12.35M14.25 9.7 16.75 10.55 17.45 13.05 15.65 14.85 13.4 12.35M8.35 14.85 10.95 15.65 12 17.95 13.05 15.65 15.65 14.85" fill="#111213"/><circle cx="12" cy="12" r="8.5" fill="none" stroke="#f4f1eb" stroke-width="1.1"/></svg>';
+        return {
+          className: 'goal',
+          content: '<span class="tl-dot-label" aria-hidden="true">Goal</span>'
+        };
       }
       if (typeId === 15) {
-        return '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="#cc0000"/><polygon points="12,8.05 14.25,9.7 13.4,12.35 10.6,12.35 9.75,9.7" fill="#fff4f4"/><path d="M9.75 9.7 7.25 10.55 6.55 13.05 8.35 14.85 10.6 12.35M14.25 9.7 16.75 10.55 17.45 13.05 15.65 14.85 13.4 12.35M8.35 14.85 10.95 15.65 12 17.95 13.05 15.65 15.65 14.85" fill="#fff4f4"/><circle cx="12" cy="12" r="8.5" fill="none" stroke="#cc0000" stroke-width="1.1"/></svg>';
+        return {
+          className: 'own-goal',
+          content: '<span class="tl-dot-label" aria-hidden="true">OG</span>'
+        };
       }
       if (typeId === 19) {
-        return '<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="5" y="3.5" width="10" height="13" rx="1.7" fill="#f5c842"/></svg>';
+        return {
+          className: '',
+          content: '<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="5" y="3.5" width="10" height="13" rx="1.7" fill="#f5c842"/></svg>'
+        };
       }
       if (typeId === 20) {
-        return '<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="5" y="3.5" width="10" height="13" rx="1.7" fill="#CC0000"/></svg>';
+        return {
+          className: '',
+          content: '<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="5" y="3.5" width="10" height="13" rx="1.7" fill="#CC0000"/></svg>'
+        };
       }
       if (typeId === 18) {
-        return '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 4.5h5.5l-1.9-1.9 1.2-1.1 4 4-4 4-1.2-1.1 1.9-1.9H6z" fill="#e8e6e1"/><path d="M14 15.5H8.5l1.9 1.9-1.2 1.1-4-4 4-4 1.2 1.1-1.9 1.9H14z" fill="#CC0000"/></svg>';
+        return {
+          className: '',
+          content: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 4.5h5.5l-1.9-1.9 1.2-1.1 4 4-4 4-1.2-1.1 1.9-1.9H6z" fill="#e8e6e1"/><path d="M14 15.5H8.5l1.9 1.9-1.2 1.1-4-4 4-4 1.2 1.1-1.9 1.9H14z" fill="#CC0000"/></svg>'
+        };
       }
-      return '<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="3" fill="#666"/></svg>';
+      return {
+        className: '',
+        content: '<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="3" fill="#666"/></svg>'
+      };
     }
 
     async function loadMatch() {
@@ -553,10 +574,8 @@
 
       events.forEach(function(e) {
         var isHome  = e.participant_id === homeId;
-        var icon    = getEventIcon(e.type_id);
-        var dotClass = 'tl-dot';
-        if (e.type_id === 14) dotClass += ' goal';
-        if (e.type_id === 15) dotClass += ' own-goal';
+        var marker = getEventMarker(e.type_id);
+        var dotClass = 'tl-dot' + (marker.className ? ' ' + marker.className : '');
         var minStr  = (e.minute || 0) + (e.minute_extra ? '+' + e.minute_extra : '') + '\'';
         var player  = e.player_name || '';
         var related = e.related_player_name || '';
@@ -572,7 +591,7 @@
 
         html += '<div class="tl-row">'
           + '<div class="tl-home">' + homeContent + '</div>'
-          + '<div class="tl-mid"><div class="' + dotClass + '">' + icon + '</div></div>'
+          + '<div class="tl-mid"><div class="' + dotClass + '">' + marker.content + '</div></div>'
           + '<div class="tl-away">' + awayContent + '</div>'
           + '</div>';
       });
