@@ -506,6 +506,15 @@
         '</span>';
     }
 
+    function normaliseAssetPath(path) {
+      if (!path) return '';
+      var value = String(path).trim();
+      if (!value) return '';
+      if (/^https?:\/\//i.test(value) || value.indexOf('//') === 0 || value.indexOf('data:') === 0) return value;
+      if (value.charAt(0) === '/') return value;
+      return '/' + value.replace(/^\.?\//, '');
+    }
+
     function fmtDate(iso) {
       if (!iso) return 'TBC';
       return new Date(iso).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
@@ -526,6 +535,7 @@
     var teamId     = params.get('teamId') || '';
     var leagueId   = params.get('leagueId') || '';
     var seasonId   = params.get('seasonId') || '';
+    var teamCrestParam = normaliseAssetPath(params.get('teamCrest') || '');
     var goals      = parseInt(params.get('goals') || '0', 10);
     var assists    = parseInt(params.get('assists') || '0', 10);
     var rank       = params.get('rank') || '';
@@ -573,7 +583,7 @@
 
       var clubHref = teamId && leagueId ? 'club.html?id=' + encodeURIComponent(teamId) + '&league=' + encodeURIComponent(leagueId) + '&from=player' : '#';
       var teamName = player.teamName || params.get('teamName') || '';
-      var teamCrest = player.teamCrest || null;
+      var teamCrest = normaliseAssetPath(player.teamCrest || teamCrestParam || '');
       var statsGoals = stats && stats.goals != null ? stats.goals : goals;
       var statsAssists = stats && stats.assists != null ? stats.assists : assists;
       var statsRank = stats && stats.rank ? stats.rank : rank;
@@ -753,7 +763,7 @@
     /* ── RENDER CLUB LINK ── */
     function renderClubLink(player) {
       var teamNameVal = player.teamName || params.get('teamName') || '';
-      var teamCrestVal = player.teamCrest || null;
+      var teamCrestVal = normaliseAssetPath(player.teamCrest || teamCrestParam || '');
       if (!teamNameVal && !teamId) return;
 
       document.getElementById('clubSection').style.display = '';
@@ -787,7 +797,7 @@
 
         // Augment player with URL-param fallbacks
         if (!player.teamName && params.get('teamName')) player.teamName = params.get('teamName');
-        if (!player.teamCrest && params.get('teamCrest')) player.teamCrest = params.get('teamCrest');
+        if (!player.teamCrest && teamCrestParam) player.teamCrest = teamCrestParam;
 
         // Stash next fixture for hero card
         window._nextFixture = upcomingFixtures[0] || null;
