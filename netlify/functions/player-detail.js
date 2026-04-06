@@ -13,11 +13,19 @@
 
 const SPORTMONKS_TOKEN = process.env.SPORTMONKS_TOKEN;
 const BASE = 'https://api.sportmonks.com/v3/football';
+const GOALS_TYPE = 208;
+const ASSISTS_TYPE = 209;
 
 const FINISHED = new Set(['FT', 'AET', 'PEN']);
 
 function fmtDate(d) {
   return d.toISOString().split('T')[0];
+}
+
+async function requestJson(url) {
+  const res = await fetch(url);
+  if (!res.ok) return null;
+  return res.json();
 }
 
 function stateShort(fix) {
@@ -72,6 +80,54 @@ function normFixture(fix, teamId) {
   };
 }
 
+function getCurrentSeasonId(leagueData) {
+  const season = leagueData && leagueData.data && (leagueData.data.currentseason || leagueData.data.currentSeason);
+  return season ? season.id : null;
+}
+
+async function getSeasonStats(playerId, leagueId, providedSeasonId) {
+  let seasonId = providedSeasonId || null;
+
+  if (!seasonId && leagueId) {
+    const leagueData = await requestJson(
+      `${BASE}/leagues/${leagueId}?include=currentSeason&api_token=${SPORTMONKS_TOKEN}`
+    );
+    seasonId = getCurrentSeasonId(leagueData);
+  }
+
+  if (!seasonId) {
+    return { seasonId: null, goals: null, assists: null, rank: null, assistRank: null };
+  }
+
+  const [goalsData, assistsData] = await Promise.all([
+    requestJson(
+      `${BASE}/topscorers/seasons/${seasonId}` +
+      `?include=player;participant&filters=seasonTopscorerTypes:${GOALS_TYPE}` +
+      `&api_token=${SPORTMONKS_TOKEN}`
+    ),
+    requestJson(
+      `${BASE}/topscorers/seasons/${seasonId}` +
+      `?include=player;participant&filters=seasonTopscorerTypes:${ASSISTS_TYPE}` +
+      `&api_token=${SPORTMONKS_TOKEN}`
+    )
+  ]);
+
+  const goalRow = Array.isArray(goalsData && goalsData.data)
+    ? goalsData.data.find(function(row) { return String(row.player && row.player.id) === String(playerId); })
+    : null;
+  const assistRow = Array.isArray(assistsData && assistsData.data)
+    ? assistsData.data.find(function(row) { return String(row.player && row.player.id) === String(playerId); })
+    : null;
+
+  return {
+    seasonId: seasonId,
+    goals: goalRow ? Number(goalRow.total || 0) : null,
+    assists: assistRow ? Number(assistRow.total || 0) : null,
+    rank: goalRow ? goalRow.position || null : null,
+    assistRank: assistRow ? assistRow.position || null : null
+  };
+}
+
 exports.handler = async function (event) {
   if (!SPORTMONKS_TOKEN) {
     return { statusCode: 500, body: JSON.stringify({ error: 'SPORTMONKS_TOKEN not set' }) };
@@ -81,9 +137,10 @@ exports.handler = async function (event) {
   const playerId = qs.playerId;
   const teamId = qs.teamId;
   const leagueId = qs.leagueId;
+  const seasonId = qs.seasonId;
 
-  if (!playerId || !teamId || !leagueId) {
-    return { statusCode: 400, body: JSON.stringify({ error: 'playerId, teamId and leagueId are required' }) };
+  if (!playerId) {
+    return { statusCode: 400, body: JSON.stringify({ error: 'playerId is required' }) };
   }
 
   const now = new Date();
@@ -99,12 +156,12 @@ exports.handler = async function (event) {
         `?include=position;nationality` +
         `&api_token=${SPORTMONKS_TOKEN}`
       ),
-      fetch(
+      teamId ? fetch(
         `${BASE}/fixtures/between/${fmtDate(past)}/${fmtDate(future)}/${teamId}` +
         `?include=participants;scores;state` +
         `&api_token=${SPORTMONKS_TOKEN}` +
         `&per_page=30`
-      )
+      ) : Promise.resolve(null)
     ]);
 
     // Player info
@@ -128,7 +185,7 @@ exports.handler = async function (event) {
 
     // Fixtures
     let allFixtures = [];
-    if (fixturesRes.ok) {
+    if (fixturesRes && fixturesRes.ok) {
       const fd = await fixturesRes.json();
       if (Array.isArray(fd.data)) {
         allFixtures = fd.data.map(function (fix) { return normFixture(fix, teamId); });
@@ -149,11 +206,14 @@ exports.handler = async function (event) {
       .slice(0, 5)
       .map(function (m) { return m.result || 'D'; });
 
+    const stats = await getSeasonStats(playerId, leagueId, seasonId);
+
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=300' },
       body: JSON.stringify({
         player: player,
+        stats: stats,
         recentMatches: recentMatches,
         upcomingFixtures: upcomingFixtures,
         form: form
@@ -164,7 +224,13 @@ exports.handler = async function (event) {
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ player: {}, recentMatches: [], upcomingFixtures: [], form: [] })
+      body: JSON.stringify({
+        player: {},
+        stats: { seasonId: seasonId || null, goals: null, assists: null, rank: null, assistRank: null },
+        recentMatches: [],
+        upcomingFixtures: [],
+        form: []
+      })
     };
   }
 };
