@@ -210,7 +210,56 @@
     .player-card-info { min-width: 0; }
     .player-card-comp { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #696c70; margin-bottom: 0.35rem; }
     .player-card-name { font-family: 'Barlow Condensed', sans-serif; font-size: 1.65rem; font-weight: 700; line-height: 0.94; color: #f5f2eb; max-width: 12ch; text-wrap: balance; }
-    .player-card-club { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 600; color: #969088; margin-top: 0.42rem; letter-spacing: 0.03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .player-card-club {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      min-width: 0;
+      margin-top: 0.42rem;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: #969088;
+      letter-spacing: 0.03em;
+    }
+    .player-card-club-name {
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .player-card-club-crest-wrap {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: radial-gradient(circle at 50% 45%, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+      overflow: hidden;
+    }
+    .player-card-club-crest {
+      width: 13px;
+      height: 13px;
+      object-fit: contain;
+      object-position: center;
+      filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2));
+    }
+    .player-card-club-fallback {
+      width: 13px;
+      height: 13px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 7px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: #6f7378;
+      text-transform: uppercase;
+    }
     .player-card-body { padding: 0 1.25rem 1.2rem; }
     .player-card-meta { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; padding-top: 0.8rem; border-top: 1px solid #202123; }
     .player-card-stats { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
@@ -303,6 +352,9 @@
       .player-photo-placeholder { font-size: 16px; }
       .player-card-name { font-size: 1.45rem; max-width: none; }
       .player-card-club { font-size: 11.5px; }
+      .player-card-club-crest-wrap { width: 15px; height: 15px; }
+      .player-card-club-crest,
+      .player-card-club-fallback { width: 12px; height: 12px; }
       .player-card-body { padding: 0 1rem 1rem; }
       .player-card-meta { align-items: flex-end; gap: 0.6rem; }
       .player-stat strong { font-size: 15px; }
@@ -454,6 +506,15 @@
       return parts[0].slice(0, 2);
     }
 
+    function normaliseAssetPath(path) {
+      if (!path) return '';
+      const value = String(path).trim();
+      if (!value) return '';
+      if (/^https?:\/\//i.test(value) || value.indexOf('//') === 0 || value.indexOf('data:') === 0) return value;
+      if (value.charAt(0) === '/') return value;
+      return '/' + value.replace(/^\.?\//, '');
+    }
+
     function buildPlayerHref(player, leagueId, seasonId) {
       if (!player.playerId) return '';
       const p = new URLSearchParams({
@@ -536,6 +597,18 @@
       const note = document.getElementById('directory-note');
       const query = document.getElementById('player-search').value.trim().toLowerCase();
 
+      function clubCrestMarkup(crest, clubName) {
+        const fallback = '<span class="player-card-club-fallback">' + escHtml(initials(clubName || 'Club')) + '</span>';
+        const normalised = normaliseAssetPath(crest);
+        if (!normalised) {
+          return '<span class="player-card-club-crest-wrap">' + fallback + '</span>';
+        }
+        return '<span class="player-card-club-crest-wrap">' +
+          '<img class="player-card-club-crest" src="' + escHtml(normalised) + '" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'inline-flex\'">' +
+          '<span class="player-card-club-fallback" style="display:none;">' + escHtml(initials(clubName || 'Club')) + '</span>' +
+          '</span>';
+      }
+
       const filtered = playerDirectory.filter(function(p) {
         const leagueMatch = activeLeague === 'all' || p.leagueId === activeLeague;
         const searchMatch = !query ||
@@ -566,12 +639,13 @@
         if (p.assists > 0) stats.push('<span class="player-stat"><strong>' + escHtml(p.assists) + '</strong> ast</span>');
         const rankText = p.rank ? 'Ranked #' + p.rank + ' in ' + p.leagueName : p.leagueName;
         const routeText = p.teamName ? 'Profile, club context and fixtures' : 'Player profile and competition context';
+        const clubMarkup = '<div class="player-card-club">' + clubCrestMarkup(p.teamCrest, p.teamName) + '<span class="player-card-club-name">' + escHtml(p.teamName || 'Club') + '</span></div>';
         const inner = (
           '<div class="player-card-head">' + photoEl +
           '<div class="player-card-info">' +
           '<div class="player-card-comp">' + escHtml(p.leagueName) + '</div>' +
           '<div class="player-card-name">' + escHtml(p.playerName) + '</div>' +
-          '<div class="player-card-club">' + escHtml(p.teamName) + '</div>' +
+          clubMarkup +
           '</div></div>' +
           '<div class="player-card-body">' +
           '<div class="player-card-meta">' +
