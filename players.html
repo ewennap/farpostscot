@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <title>Players — Far Post</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #111213; color: #e8e6e1; font-family: 'Barlow', sans-serif; min-height: 100vh; }
+
+    /* ── NAV ── */
+    .nav { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 1.25rem; height: 52px; border-bottom: 1px solid #2a2b2d; background: rgba(13,14,15,0.96); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: height 0.2s ease, box-shadow 0.2s ease; }
+    .nav.scrolled { height: 44px; box-shadow: 0 2px 24px rgba(0,0,0,0.5); border-bottom-color: #1a1b1d; }
+    .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: 0.12em; color: #e8e6e1; text-decoration: none; white-space: nowrap; transition: font-size 0.2s; }
+    .nav.scrolled .logo { font-size: 22px; }
+    .logo-dot { color: #e84040; }
+    .nav-links { display: flex; gap: 20px; }
+    .nav-links a { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-decoration: none; color: #888; text-transform: uppercase; }
+    .nav-links a:hover { color: #e8e6e1; }
+    .nav-links a.active { color: #e8e6e1; border-bottom: 2px solid #e84040; padding-bottom: 2px; }
+    .nav-hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; background: none; border: none; flex-shrink: 0; }
+    .nav-hamburger span { display: block; width: 22px; height: 2px; background: #888; }
+    .mobile-menu { display: none; flex-direction: column; background: rgba(13,14,15,0.98); border-bottom: 1px solid #2a2b2d; position: sticky; top: 52px; z-index: 99; }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #888; text-decoration: none; padding: 0.875rem 1.25rem; border-bottom: 1px solid #1a1b1d; }
+    .mobile-menu a:last-child { border-bottom: none; }
+
+    /* ── HERO ── */
+    .hero { border-bottom: 1px solid #2a2b2d; background: radial-gradient(circle at top left, rgba(232,64,64,0.16), transparent 34%), linear-gradient(180deg, #17191b 0%, #101112 60%, #0d0e0f 100%); }
+    .hero-grid { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(300px, 0.9fr); }
+    .hero-copy { padding: 2.4rem 1.5rem 2rem; border-right: 1px solid #2a2b2d; }
+    .hero-kicker { display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #e84040; margin-bottom: 1rem; }
+    .hero-kicker::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #e84040; box-shadow: 0 0 0 4px rgba(232,64,64,0.12); }
+    .hero-title { font-family: 'Barlow Condensed', sans-serif; font-size: 56px; font-weight: 800; line-height: 0.95; letter-spacing: 0.02em; color: #f5f2eb; max-width: 12ch; }
+    .hero-title span { color: #e84040; }
+    .hero-deck { max-width: 58ch; margin-top: 1rem; font-size: 15px; line-height: 1.7; color: #a8a39a; }
+    .hero-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.4rem; }
+    .hero-link { display: inline-flex; align-items: center; justify-content: center; min-width: 138px; padding: 0.72rem 1rem; border: 1px solid #2a2b2d; background: #121314; color: #e8e6e1; text-decoration: none; font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; transition: background 0.15s, border-color 0.15s; }
+    .hero-link:hover { background: #191b1d; border-color: #3a3b3d; }
+    .hero-link.primary { background: #e84040; border-color: #e84040; color: #fff; }
+    .hero-link.primary:hover { background: #f04c4c; }
+    .hero-meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .meta-card { padding: 1.25rem; border-bottom: 1px solid #2a2b2d; border-left: 1px solid #2a2b2d; min-height: 114px; display: flex; flex-direction: column; justify-content: center; }
+    .meta-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #555; margin-bottom: 0.45rem; }
+    .meta-value { font-family: 'Barlow Condensed', sans-serif; font-size: 34px; font-weight: 800; color: #e8e6e1; line-height: 1; }
+    .meta-copy { font-size: 12px; color: #777; margin-top: 0.5rem; line-height: 1.5; }
+
+    /* ── SECTION CHROME ── */
+    .section-header { display: flex; align-items: center; justify-content: space-between; padding: 0.65rem 1.25rem; border-bottom: 1px solid #2a2b2d; background: #0d0e0f; }
+    .section-title { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #555; }
+    .section-title span { color: #e84040; margin-right: 8px; }
+    .section-note { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #444; }
+
+    /* ── OVERVIEW CARDS ── */
+    .overview-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-bottom: 1px solid #2a2b2d; }
+    .overview-card { border-right: 1px solid #2a2b2d; padding: 1.25rem; background: linear-gradient(180deg, #121314 0%, #0f1011 100%); }
+    .overview-card:last-child { border-right: none; }
+    .overview-eyebrow { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 0.85rem; }
+    .overview-competition { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #f0eee8; }
+    .overview-type { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #e84040; }
+    .overview-copy { font-size: 13px; color: #888; line-height: 1.65; min-height: 62px; }
+    .overview-stats { display: flex; gap: 0.7rem; flex-wrap: wrap; margin-top: 1rem; }
+    .overview-pill { display: inline-flex; align-items: center; padding: 0.28rem 0.55rem; border: 1px solid #2a2b2d; background: #111213; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #b8b3aa; }
+    .overview-link { display: inline-flex; align-items: center; margin-top: 1rem; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #aaa; text-decoration: none; }
+    .overview-link:hover { color: #fff; }
+    .overview-leader { margin-top: 0.9rem; padding-top: 0.85rem; border-top: 1px solid #1e2022; display: flex; align-items: center; gap: 0.65rem; }
+    .overview-leader-photo { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: #1a1b1d; border: 1px solid #2a2b2d; }
+    .overview-leader-info { min-width: 0; flex: 1; }
+    .overview-leader-name { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; color: #e8e6e1; line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .overview-leader-sub { font-size: 11px; color: #666; margin-top: 0.2rem; }
+    .overview-leader-goals { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 800; color: #e84040; flex-shrink: 0; }
+
+    /* ── DIRECTORY TOOLBAR ── */
+    .directory-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 1.25rem; border-bottom: 1px solid #2a2b2d; background: #111213; }
+    .competition-tabs { display: flex; overflow-x: auto; border: 1px solid #2a2b2d; }
+    .competition-tab { border: none; border-right: 1px solid #2a2b2d; background: #0d0e0f; color: #666; padding: 0.7rem 1rem; cursor: pointer; font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; transition: color 0.15s, background 0.15s; }
+    .competition-tab:last-child { border-right: none; }
+    .competition-tab:hover { background: #171819; color: #e8e6e1; }
+    .competition-tab.active { background: #171819; color: #e84040; }
+    .search-wrap { display: flex; align-items: center; gap: 0.75rem; min-width: min(100%, 340px); }
+    .search-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #555; white-space: nowrap; }
+    .search-input { width: 100%; padding: 0.78rem 0.9rem; border: 1px solid #2a2b2d; background: #0d0e0f; color: #e8e6e1; font-size: 14px; font-family: 'Barlow', sans-serif; }
+    .search-input::placeholder { color: #444; }
+    .search-input:focus { outline: 2px solid rgba(232,64,64,0.35); border-color: #4a2d2d; }
+
+    /* ── PLAYER DIRECTORY GRID ── */
+    .directory-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-bottom: 1px solid #2a2b2d; }
+    .player-card { display: block; text-decoration: none; color: inherit; border-right: 1px solid #2a2b2d; border-bottom: 1px solid #2a2b2d; background: linear-gradient(180deg, #121314 0%, #101112 100%); transition: background 0.15s; }
+    .player-card:hover { background: #171819; }
+    .player-card:nth-child(3n) { border-right: none; }
+    .player-card-head { display: flex; align-items: center; gap: 0.9rem; padding: 1.1rem 1.25rem 0.65rem; }
+    .player-photo-stack { position: relative; width: 48px; height: 48px; flex-shrink: 0; }
+    .player-photo-placeholder { width: 48px; height: 48px; border-radius: 50%; background: radial-gradient(circle at 40% 30%, #1f2022, #18191b); border: 1px solid #272829; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; color: #444; letter-spacing: 0.04em; }
+    .player-photo { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 50%; object-fit: cover; object-position: top center; }
+    .player-card-info { min-width: 0; }
+    .player-card-name { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700; line-height: 0.95; color: #f5f2eb; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .player-card-club { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 600; color: #888; margin-top: 0.3rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .player-card-comp { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #555; margin-top: 0.15rem; }
+    .player-card-body { padding: 0 1.25rem 1.2rem; }
+    .player-card-stats { display: flex; gap: 0.55rem; flex-wrap: wrap; margin-bottom: 0.7rem; }
+    .player-stat { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.28rem 0.55rem; background: #0d0e0f; border: 1px solid #242527; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #bbb; }
+    .player-stat.goals { color: #e84040; border-color: rgba(232,64,64,0.2); background: rgba(232,64,64,0.06); }
+    .player-card-rank { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #444; }
+
+    /* ── SCORERS BOARD (like radar) ── */
+    .radar-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-bottom: 1px solid #2a2b2d; }
+    .radar-col { border-right: 1px solid #2a2b2d; }
+    .radar-col:last-child { border-right: none; }
+    .radar-col-header { padding: 0.65rem 1.25rem; border-bottom: 1px solid #1a1b1d; }
+    .radar-col-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #444; }
+    .scorer-row { display: flex; align-items: center; gap: 0.9rem; padding: 0.85rem 1.25rem; border-bottom: 1px solid #1a1b1d; text-decoration: none; color: inherit; transition: background 0.15s; }
+    .scorer-row:last-child { border-bottom: none; }
+    .scorer-row:hover { background: #161718; }
+    .scorer-rank-num { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; color: #444; min-width: 18px; text-align: center; flex-shrink: 0; }
+    .scorer-photo-stack { position: relative; width: 36px; height: 36px; flex-shrink: 0; }
+    .scorer-photo-placeholder { width: 36px; height: 36px; border-radius: 50%; background: #1a1b1d; border: 1px solid #242527; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; color: #444; }
+    .scorer-photo { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 50%; object-fit: cover; object-position: top center; }
+    .scorer-info { flex: 1; min-width: 0; }
+    .scorer-name { font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 700; color: #e8e6e1; line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .scorer-club { display: flex; align-items: center; gap: 0.45rem; margin-top: 0.25rem; }
+    .scorer-club-crest { width: 16px; height: 16px; object-fit: contain; flex-shrink: 0; }
+    .scorer-club-name { font-size: 12px; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .scorer-goals-val { font-family: 'Barlow Condensed', sans-serif; font-size: 24px; font-weight: 800; color: #e84040; min-width: 32px; text-align: right; flex-shrink: 0; }
+    .scorer-goals-label { font-family: 'Barlow Condensed', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #555; text-align: right; }
+
+    /* ── EMPTY / LOADING ── */
+    .empty-state { padding: 3rem 1.25rem; text-align: center; border-bottom: 1px solid #2a2b2d; }
+    .empty-title { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: 0.04em; color: #e8e6e1; }
+    .empty-copy { max-width: 42ch; margin: 0.75rem auto 0; font-size: 13px; line-height: 1.65; color: #666; }
+    .loading-state { padding: 2rem 1.25rem; text-align: center; border-bottom: 1px solid #2a2b2d; }
+    .loading-dots { display: inline-flex; gap: 6px; }
+    .loading-dots span { width: 6px; height: 6px; border-radius: 50%; background: #e84040; animation: pulse 1.2s ease-in-out infinite; }
+    .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes pulse { 0%,80%,100% { opacity: 0.2; } 40% { opacity: 1; } }
+
+    /* ── FOOTER ── */
+    .footer { padding: 1.25rem; border-top: 1px solid #2a2b2d; background: #0d0e0f; display: flex; align-items: center; justify-content: space-between; }
+    .footer-logo { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 0.12em; color: #333; }
+    .footer-logo span { color: #e84040; }
+    .footer-copy { font-size: 12px; color: #444; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1024px) {
+      .hero-grid, .overview-grid, .directory-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .hero-copy { grid-column: 1 / -1; border-right: none; border-bottom: 1px solid #2a2b2d; }
+      .overview-card:nth-child(2) { border-right: none; }
+      .overview-card:nth-child(3) { grid-column: 1 / -1; border-right: none; border-top: 1px solid #2a2b2d; }
+      .player-card:nth-child(3n) { border-right: 1px solid #2a2b2d; }
+      .player-card:nth-child(2n) { border-right: none; }
+    }
+    @media (max-width: 680px) {
+      .nav-links { display: none; }
+      .nav-hamburger { display: flex; }
+      .hero-grid { grid-template-columns: 1fr; }
+      .hero-copy { padding: 1.2rem 1rem 1rem; border-right: none; border-bottom: 1px solid #252628; }
+      .hero-kicker { margin-bottom: 0.7rem; font-size: 10px; }
+      .hero-title { font-size: 34px; line-height: 0.94; }
+      .hero-deck { margin-top: 0.8rem; font-size: 13px; line-height: 1.55; }
+      .hero-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 0.55rem; margin-top: 1rem; }
+      .hero-link { min-width: 0; width: 100%; padding: 0.68rem 0.8rem; font-size: 11px; }
+      .hero-link.primary { grid-column: 1 / -1; }
+      .hero-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .meta-card { min-height: 0; padding: 0.9rem 0.95rem 0.85rem; border-left: none; }
+      .meta-label { font-size: 9px; margin-bottom: 0.25rem; }
+      .meta-value { font-size: 26px; }
+      .meta-copy { font-size: 11px; margin-top: 0.35rem; }
+      .overview-grid, .directory-grid, .radar-grid { grid-template-columns: 1fr; }
+      .overview-card, .radar-col, .player-card { border-left: none; border-right: none; }
+      .overview-card { padding: 0.95rem 1rem 1rem; border-bottom: 1px solid #232426; }
+      .overview-competition { font-size: 16px; }
+      .directory-toolbar { flex-direction: column; align-items: stretch; gap: 0.7rem; padding: 0.8rem 1rem; }
+      .search-wrap { min-width: 0; }
+      .search-label { display: none; }
+      .search-input { padding: 0.72rem 0.82rem; font-size: 13px; }
+      .competition-tabs { width: 100%; }
+      .competition-tab { flex: 0 0 auto; padding: 0.65rem 0.8rem; font-size: 11px; }
+      .player-card-head { padding: 0.9rem 1rem 0.5rem; gap: 0.8rem; }
+      .player-card-name { font-size: 19px; }
+      .player-card-body { padding: 0 1rem 0.95rem; }
+      .scorer-row { padding: 0.75rem 1rem; gap: 0.75rem; }
+      .scorer-name { font-size: 16px; }
+      .scorer-goals-val { font-size: 20px; }
+      .footer { flex-direction: column; gap: 6px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav" id="main-nav">
+    <a href="index.html" class="logo">FAR POST<span class="logo-dot">.</span></a>
+    <div class="nav-links">
+      <a href="news.html">News</a>
+      <a href="opinions.html">Opinions</a>
+      <a href="podcasts.html">Podcasts</a>
+      <a href="clubs.html">Clubs</a>
+      <a href="players.html" class="active">Players</a>
+      <a href="results.html">Results</a>
+      <a href="fixtures.html">Fixtures</a>
+    </div>
+    <button class="nav-hamburger" onclick="document.getElementById('mobile-menu').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="news.html">News</a>
+    <a href="opinions.html">Opinions</a>
+    <a href="podcasts.html">Podcasts</a>
+    <a href="clubs.html">Clubs</a>
+    <a href="players.html">Players</a>
+    <a href="results.html">Results</a>
+    <a href="fixtures.html">Fixtures</a>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <div class="hero-kicker">Player Hub</div>
+        <h1 class="hero-title">The players shaping Scottish <span>football.</span></h1>
+        <p class="hero-deck">Track who is performing across the Premiership, Championship, and League One. Browse the player directory by league, search by name or club, and move directly from player profiles into clubs, fixtures, results, and editorial coverage.</p>
+        <div class="hero-actions">
+          <a class="hero-link primary" href="#player-directory">Browse directory</a>
+          <a class="hero-link" href="clubs.html">Club hub</a>
+          <a class="hero-link" href="results.html">Results</a>
+        </div>
+      </div>
+      <div class="hero-meta">
+        <div class="meta-card">
+          <div class="meta-label">Tracked Players</div>
+          <div class="meta-value" id="meta-players">--</div>
+          <div class="meta-copy">Top performers across all three league tiers.</div>
+        </div>
+        <div class="meta-card">
+          <div class="meta-label">Competitions</div>
+          <div class="meta-value">3</div>
+          <div class="meta-copy">Premiership, Championship, League One.</div>
+        </div>
+        <div class="meta-card">
+          <div class="meta-label">Season Goals</div>
+          <div class="meta-value" id="meta-goals">--</div>
+          <div class="meta-copy">Combined total across all tracked players.</div>
+        </div>
+        <div class="meta-card">
+          <div class="meta-label">Top Scorer</div>
+          <div class="meta-value" id="meta-top-name" style="font-size:18px;line-height:1.1;">--</div>
+          <div class="meta-copy" id="meta-top-detail">Loading top performer.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPETITION OVERVIEW -->
+  <section>
+    <div class="section-header">
+      <div class="section-title"><span>//</span>League overview</div>
+      <div class="section-note">Current scoring picture by competition</div>
+    </div>
+    <div class="overview-grid" id="overview-grid">
+      <div class="loading-state" style="grid-column:1/-1;"><div class="loading-dots"><span></span><span></span><span></span></div></div>
+    </div>
+  </section>
+
+  <!-- PLAYER DIRECTORY -->
+  <section id="player-directory">
+    <div class="section-header">
+      <div class="section-title"><span>//</span>Player directory</div>
+      <div class="section-note" id="directory-note">Loading players</div>
+    </div>
+    <div class="directory-toolbar">
+      <div class="competition-tabs" id="competition-tabs"></div>
+      <div class="search-wrap">
+        <label class="search-label" for="player-search">Search</label>
+        <input class="search-input" id="player-search" type="search" placeholder="Find a player or club" autocomplete="off">
+      </div>
+    </div>
+    <div class="directory-grid" id="directory-grid">
+      <div class="loading-state" style="grid-column:1/-1;"><div class="loading-dots"><span></span><span></span><span></span></div></div>
+    </div>
+  </section>
+
+  <!-- TOP SCORERS BOARD -->
+  <section>
+    <div class="section-header">
+      <div class="section-title"><span>//</span>Top scorers</div>
+      <div class="section-note">Current leading scorers by competition</div>
+    </div>
+    <div class="radar-grid" id="scorers-board">
+      <div class="loading-state" style="grid-column:1/-1;"><div class="loading-dots"><span></span><span></span><span></span></div></div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-logo">FAR POST<span>.</span></div>
+    <div class="footer-copy">Scottish football. No filter.</div>
+  </footer>
+
+  <script>
+    const LEAGUES = [
+      { id: '501', name: 'Premiership', type: 'league' },
+      { id: '504', name: 'Championship', type: 'league' },
+      { id: '516', name: 'League One', type: 'league' }
+    ];
+    const TABS = [{ id: 'all', name: 'All leagues' }].concat(LEAGUES);
+
+    let activeLeague = 'all';
+    let playerDirectory = [];
+    let overviewCards = [];
+    let scorersBoard = [];
+
+    function escHtml(str) {
+      if (str == null) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function initials(name) {
+      if (!name) return '';
+      const parts = name.trim().split(/\s+/);
+      if (parts.length >= 2) return parts[0][0] + parts[parts.length - 1][0];
+      return parts[0].slice(0, 2);
+    }
+
+    function buildPlayerHref(player, leagueId, seasonId) {
+      if (!player.playerId) return '';
+      const p = new URLSearchParams({
+        id: player.playerId,
+        teamId: player.teamId || '',
+        teamName: player.teamName || '',
+        leagueId: leagueId || '',
+        seasonId: seasonId || '',
+        goals: player.goals || 0,
+        assists: player.assists || 0,
+        rank: player.rank || '',
+        from: 'players'
+      });
+      return 'player.html?' + p.toString();
+    }
+
+    function fetchJson(url) {
+      return fetch(url).then(function(res) {
+        return res.json();
+      });
+    }
+
+    function renderTabs() {
+      const tabs = document.getElementById('competition-tabs');
+      tabs.innerHTML = TABS.map(function(t) {
+        return '<button class="competition-tab' + (t.id === activeLeague ? ' active' : '') + '" data-league="' + t.id + '">' + escHtml(t.name) + '</button>';
+      }).join('');
+      tabs.querySelectorAll('.competition-tab').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          activeLeague = btn.getAttribute('data-league');
+          renderTabs();
+          renderDirectory();
+        });
+      });
+    }
+
+    function renderOverview() {
+      const grid = document.getElementById('overview-grid');
+      if (!overviewCards.length) {
+        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-title">Competition data unavailable</div><div class="empty-copy">Player intelligence could not be loaded right now. The directory is still available when data returns.</div></div>';
+        return;
+      }
+      grid.innerHTML = overviewCards.map(function(card) {
+        const leader = card.topScorers && card.topScorers[0];
+        const leaderBlock = leader ? (
+          '<div class="overview-leader">' +
+          '<div style="position:relative;width:32px;height:32px;flex-shrink:0;">' +
+          '<div class="overview-leader-photo" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#444;font-family:\'Barlow Condensed\',sans-serif;">' + escHtml(initials(leader.playerName)) + '</div>' +
+          (leader.playerPhoto ? '<img class="overview-leader-photo" src="' + escHtml(leader.playerPhoto) + '" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;" onerror="this.style.display=\'none\'">' : '') +
+          '</div>' +
+          '<div class="overview-leader-info"><div class="overview-leader-name">' + escHtml(leader.playerName) + '</div><div class="overview-leader-sub">' + escHtml(leader.teamName) + '</div></div>' +
+          '<div><div class="overview-leader-goals">' + escHtml(leader.goals) + '</div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#555;text-align:right;">goals</div></div>' +
+          '</div>'
+        ) : '';
+        return (
+          '<div class="overview-card">' +
+          '<div class="overview-eyebrow"><div class="overview-competition">' + escHtml(card.leagueName) + '</div><div class="overview-type">League</div></div>' +
+          '<div class="overview-copy">' + escHtml(card.copy) + '</div>' +
+          '<div class="overview-stats">' +
+          card.pills.map(function(p) { return '<span class="overview-pill">' + escHtml(p) + '</span>'; }).join('') +
+          '</div>' +
+          leaderBlock +
+          '<a class="overview-link" href="#player-directory" data-jump="' + escHtml(card.leagueId) + '">View scorers</a>' +
+          '</div>'
+        );
+      }).join('');
+      grid.querySelectorAll('[data-jump]').forEach(function(link) {
+        link.addEventListener('click', function() {
+          activeLeague = link.getAttribute('data-jump');
+          renderTabs();
+          renderDirectory();
+        });
+      });
+    }
+
+    function renderDirectory() {
+      const grid = document.getElementById('directory-grid');
+      const note = document.getElementById('directory-note');
+      const query = document.getElementById('player-search').value.trim().toLowerCase();
+
+      const filtered = playerDirectory.filter(function(p) {
+        const leagueMatch = activeLeague === 'all' || p.leagueId === activeLeague;
+        const searchMatch = !query ||
+          p.playerName.toLowerCase().includes(query) ||
+          p.teamName.toLowerCase().includes(query) ||
+          p.leagueName.toLowerCase().includes(query);
+        return leagueMatch && searchMatch;
+      });
+
+      note.textContent = filtered.length + ' player' + (filtered.length === 1 ? '' : 's') + ' shown';
+
+      if (!filtered.length) {
+        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-title">No players match this view</div><div class="empty-copy">Try adjusting the competition filter or search term. The directory covers top performers across all three league tiers.</div></div>';
+        return;
+      }
+
+      grid.innerHTML = filtered.map(function(p) {
+        const href = buildPlayerHref(p, p.leagueId, p.seasonId);
+        const photoEl = '<div class="player-photo-stack"><div class="player-photo-placeholder">' + escHtml(initials(p.playerName)) + '</div>' +
+          (p.playerPhoto ? '<img class="player-photo" src="' + escHtml(p.playerPhoto) + '" alt="" onerror="this.style.display=\'none\'">' : '') +
+          '</div>';
+        const stats = [
+          '<span class="player-stat goals">' + escHtml(p.goals) + ' goals</span>'
+        ];
+        if (p.assists > 0) stats.push('<span class="player-stat">' + escHtml(p.assists) + ' ast</span>');
+        const rankText = p.rank ? 'Ranked #' + p.rank + ' in ' + p.leagueName : p.leagueName;
+        const inner = (
+          '<div class="player-card-head">' + photoEl +
+          '<div class="player-card-info">' +
+          '<div class="player-card-name">' + escHtml(p.playerName) + '</div>' +
+          '<div class="player-card-club">' + escHtml(p.teamName) + '</div>' +
+          '<div class="player-card-comp">' + escHtml(p.leagueName) + '</div>' +
+          '</div></div>' +
+          '<div class="player-card-body">' +
+          '<div class="player-card-stats">' + stats.join('') + '</div>' +
+          '<div class="player-card-rank">' + escHtml(rankText) + '</div>' +
+          '</div>'
+        );
+        return href
+          ? '<a class="player-card" href="' + href + '">' + inner + '</a>'
+          : '<div class="player-card">' + inner + '</div>';
+      }).join('');
+    }
+
+    function renderScorersBoard() {
+      const board = document.getElementById('scorers-board');
+      if (!scorersBoard.length) {
+        board.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-title">Scorers board unavailable</div><div class="empty-copy">Player scoring data could not be loaded right now.</div></div>';
+        return;
+      }
+
+      // Split into two columns by league
+      const cols = [
+        { label: 'Premiership', players: scorersBoard.filter(function(p) { return p.leagueId === '501'; }).slice(0, 5) },
+        { label: 'Championship & League One', players: scorersBoard.filter(function(p) { return p.leagueId === '504' || p.leagueId === '516'; }).slice(0, 5) }
+      ];
+
+      board.innerHTML = cols.map(function(col) {
+        if (!col.players.length) return '';
+        return (
+          '<div class="radar-col">' +
+          '<div class="radar-col-header"><div class="radar-col-label">' + escHtml(col.label) + '</div></div>' +
+          col.players.map(function(p, i) {
+            const href = buildPlayerHref(p, p.leagueId, p.seasonId);
+            const photoEl = '<div class="scorer-photo-stack"><div class="scorer-photo-placeholder">' + escHtml(initials(p.playerName)) + '</div>' +
+              (p.playerPhoto ? '<img class="scorer-photo" src="' + escHtml(p.playerPhoto) + '" alt="" onerror="this.style.display=\'none\'">' : '') +
+              '</div>';
+            const crestEl = p.teamCrest
+              ? '<img class="scorer-club-crest" src="' + escHtml(p.teamCrest) + '" alt="" onerror="this.style.display=\'none\'">'
+              : '';
+            const inner = (
+              '<span class="scorer-rank-num">' + (i + 1) + '</span>' +
+              photoEl +
+              '<div class="scorer-info">' +
+              '<div class="scorer-name">' + escHtml(p.playerName) + '</div>' +
+              '<div class="scorer-club">' + crestEl + '<span class="scorer-club-name">' + escHtml(p.teamName) + ' · ' + escHtml(p.leagueName) + '</span></div>' +
+              '</div>' +
+              '<div style="text-align:right;flex-shrink:0;">' +
+              '<div class="scorer-goals-val">' + escHtml(p.goals) + '</div>' +
+              '<div class="scorer-goals-label">goals</div>' +
+              '</div>'
+            );
+            return href
+              ? '<a class="scorer-row" href="' + href + '">' + inner + '</a>'
+              : '<div class="scorer-row">' + inner + '</div>';
+          }).join('') +
+          '</div>'
+        );
+      }).filter(Boolean).join('');
+    }
+
+    function loadHub() {
+      fetchJson('/.netlify/functions/players-hub').then(function(data) {
+        const leagues = data.leagues || [];
+
+        // Build overview cards
+        overviewCards = leagues.map(function(league) {
+          const scorers = league.topScorers || [];
+          const totalGoals = scorers.reduce(function(sum, p) { return sum + (p.goals || 0); }, 0);
+          const pills = [scorers.length + ' players tracked'];
+          if (scorers.length) pills.push('Top: ' + scorers[0].goals + ' goals');
+          return {
+            leagueId: league.leagueId,
+            leagueName: league.leagueName,
+            seasonId: league.seasonId,
+            topScorers: scorers,
+            copy: 'Top scorers tracked across the current ' + league.leagueName + ' season, with direct links to player profiles, club pages, and competition context.',
+            pills: pills
+          };
+        });
+
+        // Flatten player directory — each player tagged with their league
+        playerDirectory = leagues.flatMap(function(league) {
+          return (league.topScorers || []).map(function(p) {
+            return Object.assign({}, p, {
+              leagueId: league.leagueId,
+              leagueName: league.leagueName,
+              seasonId: league.seasonId
+            });
+          });
+        });
+
+        // Scorers board — all players for the board
+        scorersBoard = playerDirectory.slice();
+
+        // Meta
+        const totalPlayers = playerDirectory.length;
+        const totalGoals = playerDirectory.reduce(function(sum, p) { return sum + (p.goals || 0); }, 0);
+        document.getElementById('meta-players').textContent = totalPlayers;
+        document.getElementById('meta-goals').textContent = totalGoals;
+
+        // Top scorer overall
+        const topOverall = playerDirectory.slice().sort(function(a, b) { return (b.goals || 0) - (a.goals || 0); })[0];
+        if (topOverall) {
+          document.getElementById('meta-top-name').textContent = topOverall.playerName;
+          document.getElementById('meta-top-detail').textContent = topOverall.goals + ' goals · ' + topOverall.teamName;
+        }
+
+        renderTabs();
+        renderOverview();
+        renderDirectory();
+        renderScorersBoard();
+      }).catch(function() {
+        document.getElementById('overview-grid').innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-title">Could not load player hub</div><div class="empty-copy">The layout is in place but player data could not be fetched right now. Please try again in a moment.</div></div>';
+        document.getElementById('directory-grid').innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-title">Directory unavailable</div><div class="empty-copy">Please try again in a moment.</div></div>';
+        document.getElementById('scorers-board').innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-title">Scorers board unavailable</div></div>';
+        document.getElementById('directory-note').textContent = 'Unavailable';
+      });
+    }
+
+    document.getElementById('player-search').addEventListener('input', renderDirectory);
+    window.addEventListener('scroll', function() {
+      document.getElementById('main-nav').classList.toggle('scrolled', window.scrollY > 10);
+    });
+    loadHub();
+  </script>
+</body>
+</html>

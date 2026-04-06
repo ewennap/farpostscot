@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <title>Player — Far Post</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: #111213; color: #e8e6e1; font-family: 'Barlow', sans-serif; min-height: 100vh; }
+
+    /* ── NAV ── */
+    .nav { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 1.25rem; height: 52px; border-bottom: 1px solid #2a2b2d; background: rgba(13,14,15,0.96); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: height 0.2s ease, box-shadow 0.2s ease; }
+    .nav.scrolled { height: 44px; box-shadow: 0 2px 24px rgba(0,0,0,0.5); border-bottom-color: #1a1b1d; }
+    .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: 0.12em; color: #e8e6e1; text-decoration: none; white-space: nowrap; transition: font-size 0.2s; }
+    .nav.scrolled .logo { font-size: 22px; }
+    .logo-dot { color: #e84040; }
+    .nav-links { display: flex; gap: 20px; }
+    .nav-links a { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-decoration: none; color: #888; text-transform: uppercase; }
+    .nav-links a:hover { color: #e8e6e1; }
+    .nav-links a.active { color: #e8e6e1; border-bottom: 2px solid #e84040; padding-bottom: 2px; }
+    .nav-hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; background: none; border: none; flex-shrink: 0; }
+    .nav-hamburger span { display: block; width: 22px; height: 2px; background: #888; }
+    .mobile-menu { display: none; flex-direction: column; background: rgba(13,14,15,0.98); border-bottom: 1px solid #2a2b2d; position: sticky; top: 52px; z-index: 99; }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #888; text-decoration: none; padding: 0.875rem 1.25rem; border-bottom: 1px solid #1a1b1d; }
+    .mobile-menu a:last-child { border-bottom: none; }
+
+    /* ── BACK BAR ── */
+    .back-bar { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1.25rem; border-bottom: 1px solid #1a1b1d; background: #0d0e0f; }
+    .back-link { display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #aaa; text-decoration: none; }
+    .back-link:hover { color: #e8e6e1; }
+    .back-arrow { color: #e84040; font-size: 14px; }
+    .back-context { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: #444; }
+
+    /* ── LOADING BAR ── */
+    .loading-bar { height: 2px; background: linear-gradient(90deg, transparent, #e84040, transparent); background-size: 200% 100%; animation: shimmer 1.2s infinite; }
+    .loading-bar.done { display: none; }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
+    /* ── PAGE LAYOUT ── */
+    .page-main { max-width: 1200px; margin: 0 auto; }
+
+    /* ── PLAYER HERO ── */
+    .player-hero { background: radial-gradient(circle at top left, rgba(232,64,64,0.16), transparent 34%), linear-gradient(180deg, #17191b 0%, #101112 55%, #0d0e0f 100%); border-bottom: 1px solid #2a2b2d; }
+    .player-hero-inner { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.9fr); }
+    .player-hero-main { padding: 2.5rem 1.5rem 2rem; border-right: 1px solid #2a2b2d; }
+    .player-hero-top { display: flex; align-items: flex-start; gap: 1.25rem; }
+    .player-photo-wrap {
+      width: 104px;
+      height: 104px;
+      border-radius: 50%;
+      background: radial-gradient(circle at center, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 52%, transparent 72%);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+      flex-shrink: 0;
+      overflow: hidden;
+      position: relative;
+    }
+    .player-photo-placeholder {
+      width: 104px;
+      height: 104px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 40% 30%, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: #444;
+      letter-spacing: 0.04em;
+    }
+    .player-photo {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+    }
+    .player-headline { min-width: 0; }
+    .player-kicker { display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #e84040; margin-bottom: 0.75rem; }
+    .player-kicker::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #e84040; box-shadow: 0 0 0 4px rgba(232,64,64,0.12); }
+    .player-name { font-family: 'Barlow Condensed', sans-serif; font-size: 48px; font-weight: 800; letter-spacing: 0.02em; color: #f4f1ea; line-height: 0.94; }
+    .player-meta { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.85rem; }
+    .player-club-link { display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #bbb; text-decoration: none; }
+    .player-club-link:hover { color: #fff; }
+    .player-club-crest { width: 20px; height: 20px; object-fit: contain; }
+    .player-league-dot { width: 4px; height: 4px; border-radius: 50%; background: #333; flex-shrink: 0; }
+    .player-comp { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #666; }
+    .player-position { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #e84040; background: rgba(232,64,64,0.1); border: 1px solid rgba(232,64,64,0.22); padding: 3px 8px; }
+    .player-jump { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 1.25rem; }
+    .player-jump a { display: inline-flex; align-items: center; padding: 0.45rem 0.7rem; border: 1px solid #2a2b2d; background: rgba(13,14,15,0.55); text-decoration: none; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.11em; text-transform: uppercase; color: #aaa; transition: background 0.15s, color 0.15s; }
+    .player-jump a:hover { color: #fff; background: #171819; }
+    .player-hero-aside { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .hero-card { padding: 1.15rem 1.1rem; border-left: 1px solid #2a2b2d; border-bottom: 1px solid #2a2b2d; min-height: 124px; display: flex; flex-direction: column; justify-content: center; }
+    .hero-card-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #555; margin-bottom: 0.45rem; }
+    .hero-card-value { font-family: 'Barlow Condensed', sans-serif; font-size: 30px; font-weight: 800; line-height: 1; color: #f3f0e8; }
+    .hero-card-value.accent { color: #e84040; }
+    .hero-card-meta { font-size: 12px; color: #777; line-height: 1.45; margin-top: 0.45rem; }
+
+    /* ── INTEL SECTION ── */
+    .intel-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.8fr); border-bottom: 1px solid #2a2b2d; }
+    .intel-lead { padding: 1.35rem 1.25rem; border-right: 1px solid #2a2b2d; }
+    .intel-kicker { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #e84040; margin-bottom: 0.55rem; }
+    .intel-title { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 700; line-height: 1.05; color: #f2efe8; margin-bottom: 0.65rem; }
+    .intel-copy { font-size: 14px; color: #908a82; line-height: 1.7; max-width: 62ch; }
+    .intel-links { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 1rem; }
+    .intel-link { display: inline-flex; align-items: center; padding: 0.46rem 0.7rem; border: 1px solid #2a2b2d; text-decoration: none; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #aaa; transition: background 0.15s, color 0.15s; }
+    .intel-link:hover { color: #fff; background: #171819; }
+    .intel-side { display: flex; flex-direction: column; }
+    .intel-note { padding: 1rem 1.15rem; border-bottom: 1px solid #1a1b1d; }
+    .intel-note:last-child { border-bottom: none; }
+    .intel-note-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #555; margin-bottom: 0.35rem; }
+    .intel-note-value { font-family: 'Barlow Condensed', sans-serif; font-size: 19px; font-weight: 700; line-height: 1.05; color: #e8e6e1; }
+    .intel-note-copy { font-size: 12px; color: #666; line-height: 1.5; margin-top: 0.3rem; }
+
+    /* ── SECTION CHROME ── */
+    .section-header { display: flex; align-items: center; justify-content: space-between; padding: 0.7rem 1.25rem; border-bottom: 1px solid #2a2b2d; background: #0d0e0f; }
+    .section-title { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #555; }
+    .section-title span { color: #e84040; margin-right: 8px; }
+    .section-note { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #444; }
+    .section-block { border-top: 1px solid #2a2b2d; border-bottom: 1px solid #2a2b2d; margin-top: -1px; background: #111213; }
+    .section-intro { padding: 1rem 1.25rem; border-bottom: 1px solid #1a1b1d; font-size: 13px; color: #777; line-height: 1.65; }
+
+    /* ── FORM PILLS ── */
+    .form-section { padding: 1.25rem; }
+    .form-pills { display: flex; gap: 6px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .form-pill { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 40px; height: 40px; font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 800; letter-spacing: 0.06em; border-radius: 3px; flex-shrink: 0; }
+    .form-pill.W { background: rgba(45,158,107,0.18); color: #2d9e6b; border: 1px solid rgba(45,158,107,0.3); }
+    .form-pill.D { background: rgba(136,136,136,0.12); color: #888; border: 1px solid #2a2b2d; }
+    .form-pill.L { background: rgba(232,64,64,0.12); color: #e84040; border: 1px solid rgba(232,64,64,0.25); }
+    .form-pill.empty { background: #1a1b1d; border: 1px solid #2a2b2d; }
+    .form-grid { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 1.25rem; align-items: start; }
+    .form-copy { font-size: 13px; color: #888; line-height: 1.65; }
+    .form-breakdown { border: 1px solid #2a2b2d; background: #0d0e0f; }
+    .form-breakdown-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.72rem 0.9rem; border-bottom: 1px solid #1a1b1d; }
+    .form-breakdown-row:last-child { border-bottom: none; }
+    .form-breakdown-label { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #666; }
+    .form-breakdown-value { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 800; color: #e8e6e1; }
+
+    /* ── MATCH ROWS ── */
+    .match-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1.25rem; border-bottom: 1px solid #1a1b1d; text-decoration: none; color: inherit; transition: background 0.15s; }
+    .match-row:last-child { border-bottom: none; }
+    .match-row:hover { background: #161718; }
+    .match-row-date { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; color: #555; min-width: 44px; white-space: nowrap; }
+    .match-row-venue { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #444; min-width: 18px; text-align: center; }
+    .match-row-teams { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; }
+    .match-row-crest { width: 20px; height: 20px; object-fit: contain; object-position: center; flex-shrink: 0; }
+    .match-row-opp { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 600; color: #e8e6e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .match-row-score { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; color: #aaa; min-width: 42px; text-align: center; white-space: nowrap; }
+    .match-row-result { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 800; min-width: 22px; text-align: center; }
+    .match-row-result.W { color: #2d9e6b; }
+    .match-row-result.D { color: #888; }
+    .match-row-result.L { color: #e84040; }
+    .match-row-time { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; color: #555; min-width: 42px; text-align: center; }
+
+    /* ── SPLIT GRID (results + fixtures side by side) ── */
+    .split-grid { display: grid; grid-template-columns: 1fr 1fr; }
+    .split-col { border-right: 1px solid #2a2b2d; }
+    .split-col:last-child { border-right: none; }
+
+    /* ── SKELETON ── */
+    .skel { background: #1a1b1d; border-radius: 2px; animation: skel-pulse 1.4s ease-in-out infinite; }
+    @keyframes skel-pulse { 0%,100%{ opacity: 0.5; } 50%{ opacity: 0.9; } }
+    .skel-sm { width: 60px; height: 12px; }
+    .skel-md { width: 140px; height: 14px; }
+    .skel-lg { width: 220px; height: 28px; }
+    .skel-circle { border-radius: 50%; width: 104px; height: 104px; }
+
+    /* ── EMPTY / ERROR ── */
+    .empty-state { padding: 2rem 1.25rem; text-align: center; color: #444; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+    .error-msg { padding: 1.5rem 1.25rem; color: #e84040; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; }
+
+    /* ── CLUB CARD LINK (at bottom) ── */
+    .club-link-card { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.25rem; border-bottom: 1px solid #2a2b2d; text-decoration: none; color: inherit; background: linear-gradient(90deg, #121314, #101112); transition: background 0.15s; }
+    .club-link-card:hover { background: #161718; }
+    .club-link-head { display: flex; align-items: center; gap: 0.85rem; }
+    .club-link-crest { width: 44px; height: 44px; object-fit: contain; flex-shrink: 0; }
+    .club-link-crest-placeholder { width: 44px; height: 44px; background: #1a1b1d; border: 1px solid #2a2b2d; border-radius: 4px; flex-shrink: 0; }
+    .club-link-name { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700; color: #f5f2eb; }
+    .club-link-sub { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #666; margin-top: 0.2rem; }
+    .club-link-arrow { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #e84040; white-space: nowrap; }
+
+    /* ── FOOTER ── */
+    .footer { display: flex; align-items: center; justify-content: space-between; padding: 1.5rem 1.25rem; border-top: 1px solid #2a2b2d; margin-top: 3rem; }
+    .footer-logo { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: 0.12em; color: #e8e6e1; text-decoration: none; }
+    .footer-tagline { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #444; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 680px) {
+      .nav-links { display: none; }
+      .nav-hamburger { display: flex; }
+      .player-hero-inner,
+      .intel-grid,
+      .form-grid,
+      .split-grid { grid-template-columns: 1fr; }
+      .player-hero-main { padding: 1.5rem 1.25rem 1.25rem; border-right: none; border-bottom: 1px solid #2a2b2d; }
+      .player-hero-top { align-items: center; }
+      .player-photo-wrap { width: 80px; height: 80px; }
+      .player-photo { width: 80px; height: 80px; }
+      .player-photo-placeholder { width: 80px; height: 80px; font-size: 24px; }
+      .player-name { font-size: 34px; }
+      .player-hero-aside { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .hero-card { border-left: none; min-height: 100px; padding: 0.9rem; }
+      .hero-card-value { font-size: 24px; }
+      .intel-lead { padding: 1rem 1.25rem; border-right: none; border-bottom: 1px solid #2a2b2d; }
+      .intel-title { font-size: 22px; }
+      .intel-copy { font-size: 13px; }
+      .split-col { border-right: none; border-bottom: 1px solid #2a2b2d; }
+      .split-col:last-child { border-bottom: none; }
+      .match-row { padding: 0.75rem 1rem; gap: 0.6rem; }
+      .match-row-opp { font-size: 14px; }
+      .form-grid { gap: 1rem; }
+      .footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+    }
+    @media (min-width: 681px) and (max-width: 1024px) {
+      .player-hero-inner,
+      .intel-grid { grid-template-columns: 1fr; }
+      .player-hero-main,
+      .intel-lead { border-right: none; border-bottom: 1px solid #2a2b2d; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav" id="nav">
+    <a class="logo" href="/"><span>FAR POST</span><span class="logo-dot">.</span></a>
+    <div class="nav-links">
+      <a href="/news.html">News</a>
+      <a href="/opinions.html">Opinions</a>
+      <a href="/podcasts.html">Podcasts</a>
+      <a href="/clubs.html">Clubs</a>
+      <a href="/players.html" class="active">Players</a>
+      <a href="/results.html">Results</a>
+      <a href="/fixtures.html">Fixtures</a>
+    </div>
+    <button class="nav-hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <nav class="mobile-menu" id="mobileMenu">
+    <a href="/news.html">News</a>
+    <a href="/opinions.html">Opinions</a>
+    <a href="/podcasts.html">Podcasts</a>
+    <a href="/clubs.html">Clubs</a>
+    <a href="/players.html">Players</a>
+    <a href="/results.html">Results</a>
+    <a href="/fixtures.html">Fixtures</a>
+  </nav>
+
+  <!-- BACK BAR -->
+  <div class="back-bar">
+    <a class="back-link" id="backLink" href="/players.html">
+      <span class="back-arrow">&#8592;</span> Players
+    </a>
+    <span class="back-context">Player Profile</span>
+  </div>
+
+  <!-- LOADING BAR -->
+  <div class="loading-bar" id="loadingBar"></div>
+
+  <div class="page-main">
+
+    <!-- HERO (skeleton until data loads) -->
+    <section class="player-hero">
+      <div class="player-hero-inner" id="heroContent">
+        <div class="player-hero-main" id="heroMain">
+          <div class="player-hero-top">
+            <div class="player-photo-wrap">
+              <div class="skel skel-circle"></div>
+            </div>
+            <div class="player-headline" style="padding-top:0.5rem;">
+              <div class="skel skel-sm" style="margin-bottom:0.75rem;"></div>
+              <div class="skel skel-lg" style="margin-bottom:0.75rem;"></div>
+              <div class="skel skel-md"></div>
+            </div>
+          </div>
+        </div>
+        <div class="player-hero-aside" id="heroAside">
+          <div class="hero-card"><div class="skel skel-md" style="margin-bottom:0.5rem;"></div><div class="skel skel-sm"></div></div>
+          <div class="hero-card"><div class="skel skel-md" style="margin-bottom:0.5rem;"></div><div class="skel skel-sm"></div></div>
+          <div class="hero-card"><div class="skel skel-md" style="margin-bottom:0.5rem;"></div><div class="skel skel-sm"></div></div>
+          <div class="hero-card"><div class="skel skel-md" style="margin-bottom:0.5rem;"></div><div class="skel skel-sm"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INTEL / BRIEFING -->
+    <section class="section-block" style="margin-top:0;border-top:none;" id="intelSection">
+      <div class="section-header">
+        <span class="section-title"><span>&#9632;</span>Player Intelligence</span>
+        <span class="section-note" id="intelNote">Loading context</span>
+      </div>
+      <div class="intel-grid">
+        <div class="intel-lead">
+          <div class="intel-kicker">Far Post lens</div>
+          <div class="intel-title" id="intelTitle">Loading player brief</div>
+          <div class="intel-copy" id="intelCopy">Pulling in season stats, recent appearances, and club context.</div>
+          <div class="intel-links" id="intelLinks"></div>
+        </div>
+        <div class="intel-side" id="intelSide">
+          <div class="intel-note"><div class="intel-note-label">Status</div><div class="intel-note-value">Loading...</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RECENT FORM -->
+    <section class="section-block" id="formSection" style="display:none;">
+      <div class="section-header">
+        <span class="section-title"><span>&#9632;</span>Club Form</span>
+        <span class="section-note" id="formNote">Last 5 matches</span>
+      </div>
+      <div class="form-section" id="formContent"></div>
+    </section>
+
+    <!-- RESULTS + UPCOMING -->
+    <section class="section-block" id="matchesSection" style="display:none;">
+      <div class="section-header">
+        <span class="section-title"><span>&#9632;</span>Fixtures &amp; Results</span>
+        <span class="section-note" id="matchesNote">Recent &amp; upcoming</span>
+      </div>
+      <div class="split-grid">
+        <div class="split-col">
+          <div class="section-header" style="background:#0a0b0c;border-bottom-color:#1a1b1d;">
+            <span class="section-title" style="color:#444;">Recent results</span>
+          </div>
+          <div id="resultsContent"></div>
+        </div>
+        <div class="split-col">
+          <div class="section-header" style="background:#0a0b0c;border-bottom-color:#1a1b1d;">
+            <span class="section-title" style="color:#444;">Upcoming fixtures</span>
+          </div>
+          <div id="fixturesContent"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CLUB LINK -->
+    <section class="section-block" id="clubSection" style="display:none;">
+      <div class="section-header">
+        <span class="section-title"><span>&#9632;</span>Club</span>
+        <span class="section-note">View the full club profile</span>
+      </div>
+      <a class="club-link-card" id="clubLinkCard" href="#">
+        <div class="club-link-head">
+          <span class="club-link-crest-placeholder" id="clubLinkCrestWrap"></span>
+          <div>
+            <div class="club-link-name" id="clubLinkName">Loading</div>
+            <div class="club-link-sub" id="clubLinkSub">View club page</div>
+          </div>
+        </div>
+        <div class="club-link-arrow">Club hub &#8594;</div>
+      </a>
+    </section>
+
+  </div><!-- /page-main -->
+
+  <footer class="footer">
+    <a class="footer-logo" href="/">FAR POST.</a>
+    <span class="footer-tagline">Scottish football. No filter.</span>
+  </footer>
+
+  <script>
+    /* ── UTILS ── */
+    function escHtml(str) {
+      if (str == null) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function initials(name) {
+      if (!name) return '';
+      var parts = name.trim().split(/\s+/);
+      if (parts.length >= 2) return parts[0][0] + parts[parts.length - 1][0];
+      return parts[0].slice(0, 2);
+    }
+
+    function fmtDate(iso) {
+      if (!iso) return 'TBC';
+      return new Date(iso).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+    }
+
+    function fmtTime(iso) {
+      if (!iso) return 'TBC';
+      return new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function fetchJson(url) {
+      return fetch(url).then(function(res) { return res.json(); });
+    }
+
+    /* ── URL PARAMS ── */
+    var params = new URLSearchParams(window.location.search);
+    var playerId   = params.get('id') || '';
+    var teamId     = params.get('teamId') || '';
+    var leagueId   = params.get('leagueId') || '';
+    var seasonId   = params.get('seasonId') || '';
+    var goals      = parseInt(params.get('goals') || '0', 10);
+    var assists    = parseInt(params.get('assists') || '0', 10);
+    var rank       = params.get('rank') || '';
+    var fromPage   = params.get('from') || 'players';
+
+    /* ── LEAGUE NAMES ── */
+    var LEAGUE_NAMES = { '501': 'Premiership', '504': 'Championship', '516': 'League One', '507': 'Scottish Cup', '510': 'League Cup' };
+    var leagueName = LEAGUE_NAMES[leagueId] || 'Scottish Football';
+
+    /* ── BACK LINK ── */
+    (function() {
+      var back = document.getElementById('backLink');
+      if (fromPage === 'club') {
+        back.href = 'club.html?id=' + encodeURIComponent(teamId) + '&league=' + encodeURIComponent(leagueId);
+        back.querySelector('.back-arrow').nextSibling.textContent = ' Club';
+        back.querySelector('.back-arrow').nextSibling.nodeValue = ' Club';
+        back.innerHTML = '<span class="back-arrow">&#8592;</span> Club';
+      } else {
+        back.href = '/players.html';
+        back.innerHTML = '<span class="back-arrow">&#8592;</span> Players';
+      }
+    })();
+
+    /* ── NAV SCROLL ── */
+    window.addEventListener('scroll', function() {
+      document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 10);
+    });
+
+    /* ── HAMBURGER ── */
+    document.getElementById('hamburger').addEventListener('click', function() {
+      document.getElementById('mobileMenu').classList.toggle('open');
+    });
+
+    /* ── RENDER HERO ── */
+    function renderHero(player, stats) {
+      var name = player.name || 'Unknown Player';
+      var photo = player.photo || null;
+      var position = player.position || null;
+
+      document.title = name + ' — Far Post';
+
+      var photoEl = '<div class="player-photo-placeholder">' + escHtml(initials(name)) + '</div>' +
+        (photo ? '<img class="player-photo" src="' + escHtml(photo) + '" alt="' + escHtml(name) + '" onerror="this.style.display=\'none\'">' : '');
+
+      var kickerText = position || leagueName;
+      var positionBadge = position ? '<span class="player-position">' + escHtml(position) + '</span>' : '';
+
+      var clubHref = teamId && leagueId ? 'club.html?id=' + encodeURIComponent(teamId) + '&league=' + encodeURIComponent(leagueId) + '&from=player' : '#';
+      var teamName = player.teamName || params.get('teamName') || '';
+      var teamCrest = player.teamCrest || null;
+
+      var clubLinkInner = (teamCrest ? '<img class="player-club-crest" src="' + escHtml(teamCrest) + '" alt="" onerror="this.style.display=\'none\'">' : '') +
+        (teamName || 'Club');
+
+      document.getElementById('heroMain').innerHTML =
+        '<div class="player-hero-top">' +
+        '<div class="player-photo-wrap">' + photoEl + '</div>' +
+        '<div class="player-headline">' +
+        '<div class="player-kicker">' + escHtml(kickerText) + '</div>' +
+        '<div class="player-name">' + escHtml(name) + '</div>' +
+        '<div class="player-meta">' +
+        (teamName ? '<a class="player-club-link" href="' + clubHref + '">' + clubLinkInner + '</a><span class="player-league-dot"></span>' : '') +
+        '<span class="player-comp">' + escHtml(leagueName) + '</span>' +
+        (positionBadge ? '<span class="player-league-dot"></span>' + positionBadge : '') +
+        '</div>' +
+        '<div class="player-jump">' +
+        '<a href="#form-section">Form</a>' +
+        '<a href="#matches-section">Fixtures</a>' +
+        (teamName ? '<a href="' + clubHref + '">Club page</a>' : '') +
+        '</div>' +
+        '</div></div>';
+
+      // Stat cards
+      var goalsVal = stats && stats.goals != null ? stats.goals : goals;
+      var assistsVal = stats && stats.assists != null ? stats.assists : assists;
+      var rankText = rank ? '#' + rank + ' scorer' : leagueName;
+      var nextFixture = window._nextFixture || null;
+      var nextText = nextFixture
+        ? (nextFixture.opponent && nextFixture.opponent.name ? nextFixture.opponent.name : 'Opponent') + ' (' + (nextFixture.isHome ? 'H' : 'A') + ')'
+        : 'TBC';
+      var nextMeta = nextFixture ? fmtDate(nextFixture.date) : 'Upcoming fixture';
+
+      document.getElementById('heroAside').innerHTML =
+        '<div class="hero-card">' +
+        '<div class="hero-card-label">Season Goals</div>' +
+        '<div class="hero-card-value accent">' + escHtml(goalsVal) + '</div>' +
+        '<div class="hero-card-meta">Goals scored this season in ' + escHtml(leagueName) + '.</div>' +
+        '</div>' +
+        '<div class="hero-card">' +
+        '<div class="hero-card-label">Season Assists</div>' +
+        '<div class="hero-card-value">' + escHtml(assistsVal) + '</div>' +
+        '<div class="hero-card-meta">Assists recorded this season.</div>' +
+        '</div>' +
+        '<div class="hero-card">' +
+        '<div class="hero-card-label">Scorer Rank</div>' +
+        '<div class="hero-card-value">' + escHtml(rankText) + '</div>' +
+        '<div class="hero-card-meta">Current position in ' + escHtml(leagueName) + ' scoring charts.</div>' +
+        '</div>' +
+        '<div class="hero-card">' +
+        '<div class="hero-card-label">Next Fixture</div>' +
+        '<div class="hero-card-value" style="font-size:17px;line-height:1.15;">' + escHtml(nextText) + '</div>' +
+        '<div class="hero-card-meta">' + escHtml(nextMeta) + '</div>' +
+        '</div>';
+    }
+
+    /* ── RENDER INTEL ── */
+    function renderIntel(player, form) {
+      var name = player.name || 'This player';
+      var teamName = player.teamName || params.get('teamName') || 'their club';
+      var goalsVal = goals;
+      var assistsVal = assists;
+
+      var wins = form.filter(function(r) { return r === 'W'; }).length;
+      var draws = form.filter(function(r) { return r === 'D'; }).length;
+      var losses = form.filter(function(r) { return r === 'L'; }).length;
+
+      var formSummary = form.length
+        ? wins + 'W · ' + draws + 'D · ' + losses + 'L from the last ' + form.length + ' matches'
+        : 'Recent form data loading';
+
+      var copy = name + ' currently has ' + goalsVal + ' goal' + (goalsVal !== 1 ? 's' : '') +
+        (assistsVal > 0 ? ' and ' + assistsVal + ' assist' + (assistsVal !== 1 ? 's' : '') : '') +
+        ' in the ' + leagueName + ' this season.' +
+        ' Their club, ' + teamName + ', has recorded ' + formSummary.toLowerCase() + '.';
+
+      var rankNote = rank ? 'Ranked #' + rank + ' in the ' + leagueName + ' scoring charts.' : '';
+      if (rankNote) copy += ' ' + rankNote;
+
+      document.getElementById('intelTitle').textContent = name + ' · ' + leagueName + ' ' + new Date().getFullYear();
+      document.getElementById('intelCopy').textContent = copy;
+      document.getElementById('intelNote').textContent = leagueName;
+
+      var clubHref = teamId && leagueId ? 'club.html?id=' + encodeURIComponent(teamId) + '&league=' + encodeURIComponent(leagueId) + '&from=player' : '#';
+      document.getElementById('intelLinks').innerHTML =
+        '<a class="intel-link" href="' + clubHref + '">Club page</a>' +
+        '<a class="intel-link" href="/results.html">Results</a>' +
+        '<a class="intel-link" href="/fixtures.html">Fixtures</a>';
+
+      var notePosition = player.position ? ('<div class="intel-note"><div class="intel-note-label">Position</div><div class="intel-note-value">' + escHtml(player.position) + '</div></div>') : '';
+      var noteNationality = player.nationality ? ('<div class="intel-note"><div class="intel-note-label">Nationality</div><div class="intel-note-value">' + escHtml(player.nationality) + '</div></div>') : '';
+      var noteGoals = '<div class="intel-note"><div class="intel-note-label">Season goals</div><div class="intel-note-value">' + escHtml(goalsVal) + '</div><div class="intel-note-copy">In the current ' + escHtml(leagueName) + ' campaign.</div></div>';
+      var noteAssists = assistsVal > 0 ? ('<div class="intel-note"><div class="intel-note-label">Season assists</div><div class="intel-note-value">' + escHtml(assistsVal) + '</div></div>') : '';
+
+      document.getElementById('intelSide').innerHTML = noteGoals + noteAssists + notePosition + noteNationality;
+    }
+
+    /* ── RENDER FORM ── */
+    function renderForm(form, recentMatches) {
+      if (!form.length && !recentMatches.length) return;
+      document.getElementById('formSection').style.display = '';
+      document.getElementById('formSection').id = 'form-section';
+
+      var wins = form.filter(function(r) { return r === 'W'; }).length;
+      var draws = form.filter(function(r) { return r === 'D'; }).length;
+      var losses = form.filter(function(r) { return r === 'L'; }).length;
+
+      var pills = form.slice().reverse().map(function(r) {
+        return '<div class="form-pill ' + r + '">' + r + '</div>';
+      });
+      // Pad to 5
+      while (pills.length < 5) pills.unshift('<div class="form-pill empty"></div>');
+
+      var formCopy = 'Based on ' + recentMatches.length + ' recent match' + (recentMatches.length !== 1 ? 'es' : '') + ' for ' + (params.get('teamName') || 'their club') + ' in all competitions.';
+
+      document.getElementById('formContent').innerHTML =
+        '<div class="form-pills" id="form-pills-row">' + pills.join('') + '</div>' +
+        '<div class="form-grid">' +
+        '<div><div class="form-copy">' + escHtml(formCopy) + '</div></div>' +
+        '<div class="form-breakdown">' +
+        '<div class="form-breakdown-row"><span class="form-breakdown-label">Wins</span><span class="form-breakdown-value">' + wins + '</span></div>' +
+        '<div class="form-breakdown-row"><span class="form-breakdown-label">Draws</span><span class="form-breakdown-value">' + draws + '</span></div>' +
+        '<div class="form-breakdown-row"><span class="form-breakdown-label">Losses</span><span class="form-breakdown-value">' + losses + '</span></div>' +
+        '</div></div>';
+    }
+
+    /* ── RENDER MATCH ROW ── */
+    function matchRowHtml(m) {
+      var crestHtml = m.opponent && m.opponent.crest
+        ? '<img class="match-row-crest" src="' + escHtml(m.opponent.crest) + '" alt="" onerror="this.style.display=\'none\'">'
+        : '';
+      var oppName = (m.opponent && m.opponent.name) ? m.opponent.name : 'Opponent';
+      var matchHref = m.id ? 'match.html?id=' + encodeURIComponent(m.id) + '&from=player&teamId=' + encodeURIComponent(teamId) + '&league=' + encodeURIComponent(leagueId) : '#';
+
+      if (m.finished) {
+        return '<a class="match-row" href="' + matchHref + '">' +
+          '<span class="match-row-date">' + escHtml(fmtDate(m.date)) + '</span>' +
+          '<span class="match-row-venue">' + escHtml(m.venue || '') + '</span>' +
+          '<span class="match-row-teams">' + crestHtml + '<span class="match-row-opp">' + escHtml(oppName) + '</span></span>' +
+          '<span class="match-row-score">' + escHtml(m.score || '—') + '</span>' +
+          '<span class="match-row-result ' + escHtml(m.result || '') + '">' + escHtml(m.result || '') + '</span>' +
+          '</a>';
+      } else {
+        return '<a class="match-row" href="' + matchHref + '">' +
+          '<span class="match-row-date">' + escHtml(fmtDate(m.date)) + '</span>' +
+          '<span class="match-row-venue">' + escHtml(m.venue || '') + '</span>' +
+          '<span class="match-row-teams">' + crestHtml + '<span class="match-row-opp">' + escHtml(oppName) + '</span></span>' +
+          '<span class="match-row-time">' + escHtml(fmtTime(m.date)) + '</span>' +
+          '</a>';
+      }
+    }
+
+    /* ── RENDER MATCHES ── */
+    function renderMatches(recentMatches, upcomingFixtures) {
+      if (!recentMatches.length && !upcomingFixtures.length) return;
+      document.getElementById('matchesSection').style.display = '';
+      document.getElementById('matchesSection').id = 'matches-section';
+
+      var resultsHtml = recentMatches.length
+        ? recentMatches.map(matchRowHtml).join('')
+        : '<div class="empty-state">No recent results</div>';
+      var fixturesHtml = upcomingFixtures.length
+        ? upcomingFixtures.map(matchRowHtml).join('')
+        : '<div class="empty-state">No upcoming fixtures</div>';
+
+      document.getElementById('resultsContent').innerHTML = resultsHtml;
+      document.getElementById('fixturesContent').innerHTML = fixturesHtml;
+    }
+
+    /* ── RENDER CLUB LINK ── */
+    function renderClubLink(player) {
+      var teamNameVal = player.teamName || params.get('teamName') || '';
+      var teamCrestVal = player.teamCrest || null;
+      if (!teamNameVal && !teamId) return;
+
+      document.getElementById('clubSection').style.display = '';
+      var clubHref = teamId && leagueId
+        ? 'club.html?id=' + encodeURIComponent(teamId) + '&league=' + encodeURIComponent(leagueId) + '&from=player'
+        : '#';
+      document.getElementById('clubLinkCard').href = clubHref;
+      document.getElementById('clubLinkName').textContent = teamNameVal || 'Club';
+      document.getElementById('clubLinkSub').textContent = leagueName + ' · View full club profile';
+      document.getElementById('clubLinkCrestWrap').outerHTML = teamCrestVal
+        ? '<img class="club-link-crest" id="clubLinkCrestWrap" src="' + escHtml(teamCrestVal) + '" alt="" onerror="this.style.display=\'none\'">'
+        : '<span class="club-link-crest-placeholder" id="clubLinkCrestWrap"></span>';
+    }
+
+    /* ── LOAD ── */
+    if (!playerId || !teamId || !leagueId) {
+      document.getElementById('heroMain').innerHTML = '<div class="error-msg">Missing player, team, or competition data. Return to the <a href="/players.html" style="color:#e84040;">player hub</a>.</div>';
+      document.getElementById('loadingBar').classList.add('done');
+    } else {
+      var url = '/.netlify/functions/player-detail?playerId=' + encodeURIComponent(playerId) +
+        '&teamId=' + encodeURIComponent(teamId) +
+        '&leagueId=' + encodeURIComponent(leagueId);
+      if (seasonId) url += '&seasonId=' + encodeURIComponent(seasonId);
+
+      fetchJson(url).then(function(data) {
+        var player = data.player || {};
+        var recentMatches = data.recentMatches || [];
+        var upcomingFixtures = data.upcomingFixtures || [];
+        var form = data.form || [];
+
+        // Augment player with URL-param fallbacks
+        if (!player.teamName && params.get('teamName')) player.teamName = params.get('teamName');
+        if (!player.teamCrest && params.get('teamCrest')) player.teamCrest = params.get('teamCrest');
+
+        // Stash next fixture for hero card
+        window._nextFixture = upcomingFixtures[0] || null;
+
+        renderHero(player, { goals: goals, assists: assists });
+        renderIntel(player, form);
+        renderForm(form, recentMatches);
+        renderMatches(recentMatches, upcomingFixtures);
+        renderClubLink(player);
+
+        document.getElementById('loadingBar').classList.add('done');
+      }).catch(function() {
+        // Render what we have from URL params
+        renderHero({ name: 'Player profile', photo: null, position: null }, { goals: goals, assists: assists });
+        renderIntel({ name: 'This player', position: null, nationality: null }, []);
+        document.getElementById('loadingBar').classList.add('done');
+        document.getElementById('intelNote').textContent = 'Data unavailable';
+      });
+    }
+  </script>
+</body>
+</html>
