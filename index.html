@@ -337,7 +337,8 @@
     .pod-card { display: flex; gap: 14px; align-items: flex-start; padding: 1.4rem 1.35rem; border-right: 1px solid var(--border); cursor: pointer; transition: background 0.15s, border-color 0.15s; text-decoration: none; }
     .pod-card:last-child { border-right: none; }
     .pod-card:hover { background: #161718; border-color: var(--border-strong); }
-    .pod-art { width: 60px; height: 60px; background: #1e1f20; border: 1px solid var(--border); border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .pod-art { width: 60px; height: 60px; background: #1e1f20; border: 1px solid var(--border); border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .pod-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .pod-ep-tag { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.45rem; }
     .pod-title { font-family: 'Barlow Condensed', sans-serif; font-size: 1.25rem; font-weight: 700; line-height: 1.08; color: var(--text); margin-bottom: 0.55rem; }
     .pod-desc { font-size: 12px; color: var(--text-muted); line-height: 1.6; margin-bottom: 0.6rem; }
@@ -726,6 +727,7 @@
   <script>
     const SANITY_PROJECT_ID = 't11tx9if';
     const SANITY_DATASET = 'production';
+    const ITUNES_NS = 'http://www.itunes.com/dtds/podcast-1.0.dtd';
 
     const fmt = d => new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
     const initials = n => n ? n.split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2) : 'FP';
@@ -752,6 +754,21 @@
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;');
+    }
+
+    function getItunesImage(el) {
+      if (!el) return '';
+      for (const child of el.children) {
+        if (child.localName === 'image' && child.namespaceURI === ITUNES_NS) {
+          return child.getAttribute('href') || '';
+        }
+      }
+      return '';
+    }
+
+    function podcastArt(url, alt) {
+      if (!url) return podArt();
+      return `<div class="pod-art"><img src="${escHtml(url)}" alt="${escHtml(alt || '')}" loading="lazy" onerror="this.parentElement.innerHTML='${podArt().replace(/'/g, '&#39;')}'"></div>`;
     }
 
     function readTime(body) {
@@ -1099,6 +1116,7 @@
         const xml = new DOMParser().parseFromString(await r.text(), 'text/xml');
         const items = xml.querySelectorAll('item');
         if (!items.length) throw new Error();
+        const showThumb = getItunesImage(xml.querySelector('channel'));
         let html = '';
         for (let i=0; i<Math.min(items.length,2); i++) {
           const item = items[i];
@@ -1106,6 +1124,7 @@
           const pubDate = item.querySelector('pubDate')?.textContent||'';
           const dur = item.querySelector('duration')?.textContent||'';
           const link = item.querySelector('link')?.textContent||'#';
+          const thumb = getItunesImage(item) || showThumb;
           const desc = (item.querySelector('description')?.textContent||'').replace(/<[^>]*>/g,'').slice(0,100)+'...';
           const epNum = 'Ep. '+(items.length-i);
           const dateStr = pubDate ? new Date(pubDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '';
@@ -1119,13 +1138,14 @@
               mins = Math.round(parseInt(dur)/60)+' min';
             }
           }
-          html += `<a class="pod-card" href="${link}" target="_blank">${podArt()}<div><div class="pod-ep-tag">Across the Tiers · ${epNum}</div><div class="pod-title">${title}</div><p class="pod-desc">${desc}</p><div class="pod-meta">${mins}${dateStr?' · '+dateStr:''}</div><div class="play-pill">${playIcon()} Listen now</div></div></a>`;
+          html += `<a class="pod-card" href="${link}" target="_blank">${podcastArt(thumb, title)}<div><div class="pod-ep-tag">Across the Tiers · ${epNum}</div><div class="pod-title">${title}</div><p class="pod-desc">${desc}</p><div class="pod-meta">${mins}${dateStr?' · '+dateStr:''}</div><div class="play-pill">${playIcon()} Listen now</div></div></a>`;
         }
         grid.innerHTML = html;
       } catch(e) {
+        const fallbackThumb = 'https://assets.pippa.io/shows/cover/1759559622151-fab6ea24-0d2f-446d-be17-be400d570ee5.jpeg';
         grid.innerHTML = `
-          <a class="pod-card" href="https://feeds.acast.com/public/shows/across-the-tiers" target="_blank">${podArt()}<div><div class="pod-ep-tag">Across the Tiers · Latest</div><div class="pod-title">Old Firm | League Two Title Race | Scotland Friendlies</div><p class="pod-desc">The latest from across the Scottish game.</p><div class="play-pill">${playIcon()} Listen now</div></div></a>
-          <a class="pod-card" href="https://feeds.acast.com/public/shows/across-the-tiers" target="_blank">${podArt()}<div><div class="pod-ep-tag">Across the Tiers · Previous</div><div class="pod-title">SPFL Transfer Window Roundup | Scottish Cup | Joelle Murray</div><p class="pod-desc">A packed episode covering the transfer window.</p><div class="play-pill">${playIcon()} Listen now</div></div></a>`;
+          <a class="pod-card" href="https://feeds.acast.com/public/shows/across-the-tiers" target="_blank">${podcastArt(fallbackThumb, 'Across the Tiers')}<div><div class="pod-ep-tag">Across the Tiers · Latest</div><div class="pod-title">Old Firm | League Two Title Race | Scotland Friendlies</div><p class="pod-desc">The latest from across the Scottish game.</p><div class="play-pill">${playIcon()} Listen now</div></div></a>
+          <a class="pod-card" href="https://feeds.acast.com/public/shows/across-the-tiers" target="_blank">${podcastArt(fallbackThumb, 'Across the Tiers')}<div><div class="pod-ep-tag">Across the Tiers · Previous</div><div class="pod-title">SPFL Transfer Window Roundup | Scottish Cup | Joelle Murray</div><p class="pod-desc">A packed episode covering the transfer window.</p><div class="play-pill">${playIcon()} Listen now</div></div></a>`;
       }
     }
 
