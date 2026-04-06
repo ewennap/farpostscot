@@ -11,6 +11,7 @@
   <title>Players — Far Post</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/farpost.css">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #111213; color: #e8e6e1; font-family: 'Barlow', sans-serif; min-height: 100vh; }
@@ -204,7 +205,7 @@
       <a href="results.html">Results</a>
       <a href="fixtures.html">Fixtures</a>
     </div>
-    <button class="nav-hamburger" onclick="document.getElementById('mobile-menu').classList.toggle('open')" aria-label="Menu">
+    <button class="nav-hamburger" data-nav-toggle aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
   </nav>
@@ -301,6 +302,7 @@
     <div class="footer-copy">Scottish football. No filter.</div>
   </footer>
 
+  <script src="/assets/farpost.js"></script>
   <script>
     const LEAGUES = [
       { id: '501', name: 'Premiership', type: 'league' },
@@ -308,27 +310,18 @@
       { id: '516', name: 'League One', type: 'league' }
     ];
     const TABS = [{ id: 'all', name: 'All leagues' }].concat(LEAGUES);
+    const {
+      escHtml,
+      fetchJson,
+      initials,
+      renderState,
+      setHTML
+    } = window.FarPost;
 
     let activeLeague = 'all';
     let playerDirectory = [];
     let overviewCards = [];
     let scorersBoard = [];
-
-    function escHtml(str) {
-      if (str == null) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    }
-
-    function initials(name) {
-      if (!name) return '';
-      const parts = name.trim().split(/\s+/);
-      if (parts.length >= 2) return parts[0][0] + parts[parts.length - 1][0];
-      return parts[0].slice(0, 2);
-    }
 
     function buildPlayerHref(player, leagueId, seasonId) {
       if (!player.playerId) return '';
@@ -346,17 +339,11 @@
       return 'player.html?' + p.toString();
     }
 
-    function fetchJson(url) {
-      return fetch(url).then(function(res) {
-        return res.json();
-      });
-    }
-
     function renderTabs() {
       const tabs = document.getElementById('competition-tabs');
-      tabs.innerHTML = TABS.map(function(t) {
+      setHTML(tabs, TABS.map(function(t) {
         return '<button class="competition-tab' + (t.id === activeLeague ? ' active' : '') + '" data-league="' + t.id + '">' + escHtml(t.name) + '</button>';
-      }).join('');
+      }).join(''));
       tabs.querySelectorAll('.competition-tab').forEach(function(btn) {
         btn.addEventListener('click', function() {
           activeLeague = btn.getAttribute('data-league');
@@ -369,16 +356,21 @@
     function renderOverview() {
       const grid = document.getElementById('overview-grid');
       if (!overviewCards.length) {
-        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-title">Competition data unavailable</div><div class="empty-copy">Player intelligence could not be loaded right now. The directory is still available when data returns.</div></div>';
+        renderState(grid, 'empty', {
+          eyebrow: 'Player hub',
+          title: 'Competition data unavailable',
+          message: 'Player intelligence could not be loaded right now. The directory is still available when data returns.',
+          fullSpan: true
+        });
         return;
       }
-      grid.innerHTML = overviewCards.map(function(card) {
+      setHTML(grid, overviewCards.map(function(card) {
         const leader = card.topScorers && card.topScorers[0];
         const leaderBlock = leader ? (
           '<div class="overview-leader">' +
           '<div style="position:relative;width:32px;height:32px;flex-shrink:0;">' +
           '<div class="overview-leader-photo" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#444;font-family:\'Barlow Condensed\',sans-serif;">' + escHtml(initials(leader.playerName)) + '</div>' +
-          (leader.playerPhoto ? '<img class="overview-leader-photo" src="' + escHtml(leader.playerPhoto) + '" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;" onerror="this.style.display=\'none\'">' : '') +
+          (leader.playerPhoto ? '<img class="overview-leader-photo" src="' + escHtml(leader.playerPhoto) + '" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;" data-fallback="hide">' : '') +
           '</div>' +
           '<div class="overview-leader-info"><div class="overview-leader-name">' + escHtml(leader.playerName) + '</div><div class="overview-leader-sub">' + escHtml(leader.teamName) + '</div></div>' +
           '<div><div class="overview-leader-goals">' + escHtml(leader.goals) + '</div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#555;text-align:right;">goals</div></div>' +
@@ -395,7 +387,7 @@
           '<a class="overview-link" href="#player-directory" data-jump="' + escHtml(card.leagueId) + '">View scorers</a>' +
           '</div>'
         );
-      }).join('');
+      }).join(''));
       grid.querySelectorAll('[data-jump]').forEach(function(link) {
         link.addEventListener('click', function() {
           activeLeague = link.getAttribute('data-jump');
@@ -422,14 +414,19 @@
       note.textContent = filtered.length + ' player' + (filtered.length === 1 ? '' : 's') + ' shown';
 
       if (!filtered.length) {
-        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-title">No players match this view</div><div class="empty-copy">Try adjusting the competition filter or search term. The directory covers top performers across all three league tiers.</div></div>';
+        renderState(grid, 'empty', {
+          eyebrow: 'Player directory',
+          title: 'No players match this view',
+          message: 'Try adjusting the competition filter or search term. The directory covers top performers across all three league tiers.',
+          fullSpan: true
+        });
         return;
       }
 
-      grid.innerHTML = filtered.map(function(p) {
+      setHTML(grid, filtered.map(function(p) {
         const href = buildPlayerHref(p, p.leagueId, p.seasonId);
         const photoEl = '<div class="player-photo-stack"><div class="player-photo-placeholder">' + escHtml(initials(p.playerName)) + '</div>' +
-          (p.playerPhoto ? '<img class="player-photo" src="' + escHtml(p.playerPhoto) + '" alt="" onerror="this.style.display=\'none\'">' : '') +
+          (p.playerPhoto ? '<img class="player-photo" src="' + escHtml(p.playerPhoto) + '" alt="" data-fallback="hide">' : '') +
           '</div>';
         const stats = [
           '<span class="player-stat goals">' + escHtml(p.goals) + ' goals</span>'
@@ -451,13 +448,18 @@
         return href
           ? '<a class="player-card" href="' + href + '">' + inner + '</a>'
           : '<div class="player-card">' + inner + '</div>';
-      }).join('');
+      }).join(''));
     }
 
     function renderScorersBoard() {
       const board = document.getElementById('scorers-board');
       if (!scorersBoard.length) {
-        board.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-title">Scorers board unavailable</div><div class="empty-copy">Player scoring data could not be loaded right now.</div></div>';
+        renderState(board, 'error', {
+          eyebrow: 'Scorers board',
+          title: 'Scoring data unavailable',
+          message: 'Player scoring data could not be loaded right now.',
+          fullSpan: true
+        });
         return;
       }
 
@@ -467,7 +469,7 @@
         { label: 'Championship & League One', players: scorersBoard.filter(function(p) { return p.leagueId === '504' || p.leagueId === '516'; }).slice(0, 5) }
       ];
 
-      board.innerHTML = cols.map(function(col) {
+      setHTML(board, cols.map(function(col) {
         if (!col.players.length) return '';
         return (
           '<div class="radar-col">' +
@@ -475,10 +477,10 @@
           col.players.map(function(p, i) {
             const href = buildPlayerHref(p, p.leagueId, p.seasonId);
             const photoEl = '<div class="scorer-photo-stack"><div class="scorer-photo-placeholder">' + escHtml(initials(p.playerName)) + '</div>' +
-              (p.playerPhoto ? '<img class="scorer-photo" src="' + escHtml(p.playerPhoto) + '" alt="" onerror="this.style.display=\'none\'">' : '') +
+              (p.playerPhoto ? '<img class="scorer-photo" src="' + escHtml(p.playerPhoto) + '" alt="" data-fallback="hide">' : '') +
               '</div>';
             const crestEl = p.teamCrest
-              ? '<img class="scorer-club-crest" src="' + escHtml(p.teamCrest) + '" alt="" onerror="this.style.display=\'none\'">'
+              ? '<img class="scorer-club-crest" src="' + escHtml(p.teamCrest) + '" alt="" data-fallback="hide">'
               : '';
             const inner = (
               '<span class="scorer-rank-num">' + (i + 1) + '</span>' +
@@ -498,11 +500,12 @@
           }).join('') +
           '</div>'
         );
-      }).filter(Boolean).join('');
+      }).filter(Boolean).join(''));
     }
 
-    function loadHub() {
-      fetchJson('/.netlify/functions/players-hub').then(function(data) {
+    async function loadHub() {
+      try {
+        const data = await fetchJson('/.netlify/functions/players-hub');
         const leagues = data.leagues || [];
 
         // Build overview cards
@@ -552,18 +555,30 @@
         renderOverview();
         renderDirectory();
         renderScorersBoard();
-      }).catch(function() {
-        document.getElementById('overview-grid').innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-title">Could not load player hub</div><div class="empty-copy">The layout is in place but player data could not be fetched right now. Please try again in a moment.</div></div>';
-        document.getElementById('directory-grid').innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-title">Directory unavailable</div><div class="empty-copy">Please try again in a moment.</div></div>';
-        document.getElementById('scorers-board').innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-title">Scorers board unavailable</div></div>';
+      } catch (error) {
+        renderState('#overview-grid', 'error', {
+          eyebrow: 'Player hub',
+          title: 'Could not load player hub',
+          message: 'The layout is in place but player data could not be fetched right now. Please try again in a moment.',
+          fullSpan: true
+        });
+        renderState('#directory-grid', 'error', {
+          eyebrow: 'Directory',
+          title: 'Directory unavailable',
+          message: 'Please try again in a moment.',
+          fullSpan: true
+        });
+        renderState('#scorers-board', 'error', {
+          eyebrow: 'Scorers board',
+          title: 'Scorers board unavailable',
+          message: 'Scoring context will return automatically when the feed recovers.',
+          fullSpan: true
+        });
         document.getElementById('directory-note').textContent = 'Unavailable';
-      });
+      }
     }
 
     document.getElementById('player-search').addEventListener('input', renderDirectory);
-    window.addEventListener('scroll', function() {
-      document.getElementById('main-nav').classList.toggle('scrolled', window.scrollY > 10);
-    });
     loadHub();
   </script>
 </body>

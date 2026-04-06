@@ -11,6 +11,7 @@
   <title>Clubs — Far Post</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/farpost.css">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #111213; color: #e8e6e1; font-family: 'Barlow', sans-serif; min-height: 100vh; }
@@ -293,7 +294,7 @@
       <a href="results.html">Results</a>
       <a href="fixtures.html">Fixtures</a>
     </div>
-    <button class="nav-hamburger" onclick="document.getElementById('mobile-menu').classList.toggle('open')" aria-label="Menu">
+    <button class="nav-hamburger" data-nav-toggle aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
   </nav>
@@ -380,6 +381,7 @@
     <div class="footer-logo">FAR POST<span>.</span></div>
     <div class="footer-copy">Scottish football. No filter.</div>
   </footer>
+  <script src="/assets/farpost.js"></script>
   <script>
     const COMPETITIONS = [
       { id: 'all', name: 'All clubs', type: 'hub' },
@@ -390,15 +392,16 @@
       { id: '510', name: 'League Cup', type: 'cup' }
     ];
     const DIRECTORY_COMPETITIONS = COMPETITIONS.filter(c => c.id !== 'all');
+    const {
+      escHtml,
+      fetchJson,
+      renderState,
+      setHTML
+    } = window.FarPost;
     let activeCompetition = 'all';
     let clubDirectory = [];
     let overviewCards = [];
     let radarFixtures = [];
-
-    function escHtml(str) {
-      if (str == null) return '';
-      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    }
 
     function fmtDateTime(iso) {
       if (!iso) return 'Date TBC';
@@ -413,14 +416,6 @@
     function buildClubHref(teamId, competitionId) {
       if (!teamId || !competitionId || competitionId === 'all') return '';
       return 'club.html?id=' + encodeURIComponent(teamId) + '&league=' + encodeURIComponent(competitionId) + '&from=clubs';
-    }
-
-    function fetchJson(url) {
-      return fetch(url).then(async response => {
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || 'Request failed');
-        return data;
-      });
     }
 
     function buildFixtureLookup(fixtures) {
@@ -506,7 +501,7 @@
 
     function renderTabs() {
       const tabs = document.getElementById('competition-tabs');
-      tabs.innerHTML = COMPETITIONS.map(competition => '<button class="competition-tab' + (competition.id === activeCompetition ? ' active' : '') + '" data-competition="' + competition.id + '">' + escHtml(competition.name) + '</button>').join('');
+      setHTML(tabs, COMPETITIONS.map(competition => '<button class="competition-tab' + (competition.id === activeCompetition ? ' active' : '') + '" data-competition="' + competition.id + '">' + escHtml(competition.name) + '</button>').join(''));
       tabs.querySelectorAll('.competition-tab').forEach(button => {
         button.addEventListener('click', () => {
           activeCompetition = button.getAttribute('data-competition');
@@ -519,7 +514,16 @@
 
     function renderOverview() {
       const grid = document.getElementById('overview-grid');
-      grid.innerHTML = overviewCards.map(card => '<div class="overview-card"><div class="overview-eyebrow"><div class="overview-competition">' + escHtml(card.name) + '</div><div class="overview-type">' + escHtml(card.type) + '</div></div><div class="overview-copy">' + escHtml(card.copy) + '</div><div class="overview-stats">' + card.pills.map(pill => '<span class="overview-pill">' + escHtml(pill) + '</span>').join('') + '</div><a class="overview-link" href="#club-directory" data-jump="' + escHtml(card.id) + '">Open directory</a></div>').join('');
+      if (!overviewCards.length) {
+        renderState(grid, 'error', {
+          eyebrow: 'Club hub',
+          title: 'Competition view unavailable',
+          message: 'Live table and fixture context could not be assembled right now.',
+          fullSpan: true
+        });
+        return;
+      }
+      setHTML(grid, overviewCards.map(card => '<div class="overview-card"><div class="overview-eyebrow"><div class="overview-competition">' + escHtml(card.name) + '</div><div class="overview-type">' + escHtml(card.type) + '</div></div><div class="overview-copy">' + escHtml(card.copy) + '</div><div class="overview-stats">' + card.pills.map(pill => '<span class="overview-pill">' + escHtml(pill) + '</span>').join('') + '</div><a class="overview-link" href="#club-directory" data-jump="' + escHtml(card.id) + '">Open directory</a></div>').join(''));
       grid.querySelectorAll('[data-jump]').forEach(link => {
         link.addEventListener('click', () => {
           activeCompetition = link.getAttribute('data-jump');
@@ -550,11 +554,16 @@
       note.textContent = filtered.length + ' club' + (filtered.length === 1 ? '' : 's') + ' shown';
 
       if (!filtered.length) {
-        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-title">No clubs match this view</div><div class="empty-copy">Try a different competition or clear the search term. The hub is set up so more league and cup data can be layered in without changing the basic browsing flow.</div></div>';
+        renderState(grid, 'empty', {
+          eyebrow: 'Club directory',
+          title: 'No clubs match this view',
+          message: 'Try a different competition or clear the search term. The hub is set up so more league and cup data can be layered in without changing the basic browsing flow.',
+          fullSpan: true
+        });
         return;
       }
 
-      grid.innerHTML = filtered.map(card => {
+      setHTML(grid, filtered.map(card => {
         const href = buildClubHref(card.id, card.competitionId);
         const stats = [];
         if (card.position) stats.push('<span class="club-stat">Pos ' + escHtml(card.position) + '</span>');
@@ -564,23 +573,29 @@
         const copy = card.position
           ? 'Position ' + card.position + ' in the ' + card.competitionName + ', with direct access to fixtures, results and table context.'
           : 'Cup route currently discoverable through the upcoming tie list, ready for richer knockout-specific club context later.';
-        const inner = '<div class="club-card-head">' + (card.crest ? '<img class="club-card-crest" src="' + escHtml(card.crest) + '" alt="" onerror="this.style.display=\'none\'">' : '<span class="club-card-crest placeholder"></span>') + '<div style="min-width:0;"><div class="club-card-name">' + escHtml(card.name) + '</div><div class="club-card-competition">' + escHtml(card.competitionName) + '</div></div></div><div class="club-card-body"><div class="club-card-stats">' + stats.join('') + '</div><div class="club-card-copy">' + escHtml(copy) + '</div><div class="club-card-next"><div class="club-card-next-label">Next route in</div><div class="club-card-next-match">' + escHtml(card.next.match) + '</div><div class="club-card-next-meta">' + escHtml(card.next.meta) + '</div></div></div>';
+        const inner = '<div class="club-card-head">' + (card.crest ? '<img class="club-card-crest" src="' + escHtml(card.crest) + '" alt="" data-fallback="hide">' : '<span class="club-card-crest placeholder"></span>') + '<div style="min-width:0;"><div class="club-card-name">' + escHtml(card.name) + '</div><div class="club-card-competition">' + escHtml(card.competitionName) + '</div></div></div><div class="club-card-body"><div class="club-card-stats">' + stats.join('') + '</div><div class="club-card-copy">' + escHtml(copy) + '</div><div class="club-card-next"><div class="club-card-next-label">Next route in</div><div class="club-card-next-match">' + escHtml(card.next.match) + '</div><div class="club-card-next-meta">' + escHtml(card.next.meta) + '</div></div></div>';
         return href ? '<a class="club-card" href="' + href + '">' + inner + '</a>' : '<div class="club-card">' + inner + '</div>';
-      }).join('');
+      }).join(''));
     }
 
     function renderRadar() {
       const grid = document.getElementById('radar-grid');
       if (!radarFixtures.length) {
-        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-title">Fixture radar unavailable</div><div class="empty-copy">The club hub is still usable through its competition directories, but upcoming fixtures could not be loaded right now.</div></div>';
+        renderState(grid, 'error', {
+          eyebrow: 'Fixture radar',
+          title: 'Fixture radar unavailable',
+          message: 'The club hub is still usable through its competition directories, but upcoming fixtures could not be loaded right now.',
+          fullSpan: true
+        });
         return;
       }
       const columns = [radarFixtures.slice(0, 4), radarFixtures.slice(4, 8)];
-      grid.innerHTML = columns.map(column => '<div class="radar-col">' + column.map(fixture => '<a class="radar-row" href="match.html?id=' + encodeURIComponent(fixture.id) + '&from=fixtures&league=' + encodeURIComponent(fixture.leagueId) + '"><div class="radar-time">' + escHtml(fmtTime(fixture.date)) + '</div><div class="radar-match"><div class="radar-teams">' + escHtml(fixture.home.name) + ' v ' + escHtml(fixture.away.name) + '</div><div class="radar-meta">' + escHtml(((COMPETITIONS.find(c => c.id === fixture.leagueId) || {}).name) || 'Competition') + ' • ' + escHtml(fmtDateTime(fixture.date)) + '</div></div></a>').join('') + '</div>').join('');
+      setHTML(grid, columns.map(column => '<div class="radar-col">' + column.map(fixture => '<a class="radar-row" href="match.html?id=' + encodeURIComponent(fixture.id) + '&from=fixtures&league=' + encodeURIComponent(fixture.leagueId) + '"><div class="radar-time">' + escHtml(fmtTime(fixture.date)) + '</div><div class="radar-match"><div class="radar-teams">' + escHtml(fixture.home.name) + ' v ' + escHtml(fixture.away.name) + '</div><div class="radar-meta">' + escHtml(((COMPETITIONS.find(c => c.id === fixture.leagueId) || {}).name) || 'Competition') + ' • ' + escHtml(fmtDateTime(fixture.date)) + '</div></div></a>').join('') + '</div>').join(''));
     }
 
-    function loadHub() {
-      Promise.all(DIRECTORY_COMPETITIONS.map(competition => {
+    async function loadHub() {
+      try {
+        const payloads = await Promise.all(DIRECTORY_COMPETITIONS.map(competition => {
         const fixturesPromise = fetchJson('/.netlify/functions/fixtures?league=' + competition.id);
         const standingsPromise = competition.type === 'league' ? fetchJson('/.netlify/functions/standings?league=' + competition.id) : Promise.resolve({ standings: [] });
         return Promise.all([fixturesPromise, standingsPromise]).then(([fixturesData, standingsData]) => ({
@@ -588,7 +603,7 @@
           fixtures: fixturesData.fixtures || [],
           standings: standingsData.standings || []
         }));
-      })).then(payloads => {
+        }));
         overviewCards = payloads.map(bundle => deriveOverview(bundle.competition, bundle.standings, bundle.fixtures));
         clubDirectory = payloads.flatMap(bundle => bundle.competition.type === 'league' ? buildLeagueCards(bundle.competition, bundle.standings, bundle.fixtures) : buildCupCards(bundle.competition, bundle.fixtures));
         radarFixtures = payloads.flatMap(bundle => bundle.fixtures).sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 8);
@@ -602,18 +617,30 @@
         renderOverview();
         renderDirectory();
         renderRadar();
-      }).catch(() => {
-        document.getElementById('overview-grid').innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-title">Could not load club hub</div><div class="empty-copy">The layout is in place, but the live competition data could not be fetched right now. Existing club routes remain untouched.</div></div>';
-        document.getElementById('directory-grid').innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-title">Club directory unavailable</div><div class="empty-copy">Please try again in a moment.</div></div>';
-        document.getElementById('radar-grid').innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-title">Upcoming club radar unavailable</div><div class="empty-copy">Please try again in a moment.</div></div>';
+      } catch (error) {
+        renderState('#overview-grid', 'error', {
+          eyebrow: 'Club hub',
+          title: 'Could not load club hub',
+          message: 'The layout is in place, but the live competition data could not be fetched right now. Existing club routes remain untouched.',
+          fullSpan: true
+        });
+        renderState('#directory-grid', 'error', {
+          eyebrow: 'Directory',
+          title: 'Club directory unavailable',
+          message: 'Please try again in a moment.',
+          fullSpan: true
+        });
+        renderState('#radar-grid', 'error', {
+          eyebrow: 'Upcoming radar',
+          title: 'Upcoming club radar unavailable',
+          message: 'Please try again in a moment.',
+          fullSpan: true
+        });
         document.getElementById('directory-note').textContent = 'Unavailable';
-      });
+      }
     }
 
     document.getElementById('club-search').addEventListener('input', renderDirectory);
-    window.addEventListener('scroll', () => {
-      document.getElementById('main-nav').classList.toggle('scrolled', window.scrollY > 10);
-    });
     loadHub();
   </script>
 </body>

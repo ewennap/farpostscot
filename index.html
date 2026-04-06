@@ -11,6 +11,7 @@
   <title>Far Post — Scottish Football</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/farpost.css">
   <style>
     :root {
       --bg: #111213;
@@ -609,7 +610,7 @@
         <a href="results.html">Results</a>
         <a href="fixtures.html">Fixtures</a>
       </div>
-      <button class="nav-hamburger" onclick="document.getElementById('mobile-menu').classList.toggle('open')" aria-label="Menu">
+      <button class="nav-hamburger" data-nav-toggle aria-label="Menu">
         <span></span><span></span><span></span>
       </button>
     </div>
@@ -724,16 +725,22 @@
     </div>
   </footer>
 
+  <script src="/assets/farpost.js"></script>
   <script>
     const SANITY_PROJECT_ID = 't11tx9if';
     const SANITY_DATASET = 'production';
-    const ITUNES_NS = 'http://www.itunes.com/dtds/podcast-1.0.dtd';
+    const {
+      escHtml,
+      fetchJson,
+      getItunesImage,
+      initials,
+      podcastArtFrame,
+      renderState,
+      setHTML
+    } = window.FarPost;
 
     const fmt = d => new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
-    const initials = n => n ? n.split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2) : 'FP';
     const catLabel = c => ({opinion:'Opinion',analysis:'Analysis',news:'News',interview:'Interview',feature:'Feature'}[c]||'Article');
-    const podArt = () => `<div class="pod-art"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e84040" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16" fill="#e84040" stroke="none"/></svg></div>`;
-    const podArtInner = () => `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e84040" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16" fill="#e84040" stroke="none"/></svg>`;
     const playIcon = () => `<svg width="9" height="9" viewBox="0 0 12 12" fill="#888"><polygon points="2,1 10,6 2,11"/></svg>`;
     const HIGHLIGHT_LEAGUES = [
       { id: '501', name: 'Premiership' },
@@ -748,50 +755,11 @@
       return `https://cdn.sanity.io/images/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${parts.join('-')}.${ext}`;
     }
 
-    function escHtml(str) {
-      if (str == null) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    }
-
-    function getItunesImage(el) {
-      if (!el) return '';
-      for (const child of el.children) {
-        if (child.localName === 'image' && child.namespaceURI === ITUNES_NS) {
-          return child.getAttribute('href') || '';
-        }
-      }
-      return '';
-    }
-
-    function podcastArt(url, alt) {
-      if (!url) return podArt();
-      return `<div class="pod-art"><img src="${escHtml(url)}" alt="${escHtml(alt || '')}" loading="lazy"></div>`;
-    }
-
-    function wirePodcastArtFallbacks(scope) {
-      (scope || document).querySelectorAll('.pod-art img').forEach(img => {
-        img.addEventListener('error', () => {
-          const frame = img.parentElement;
-          if (!frame) return;
-          frame.innerHTML = podArtInner();
-        }, { once: true });
-      });
-    }
-
     function readTime(body) {
       if (!body?.length) return '';
       const words = body.flatMap(b => (b.children||[]).map(c=>c.text||'')).join(' ').trim().split(/\s+/).length;
       return `${Math.max(1,Math.round(words/200))} min read`;
     }
-
-    // ── STICKY NAV ──
-    window.addEventListener('scroll', () => {
-      document.getElementById('main-nav').classList.toggle('scrolled', window.scrollY > 40);
-    }, {passive:true});
 
     // ── CAROUSEL ──
     let currentSlide = 0;
@@ -824,7 +792,7 @@
       const dotsEl = document.getElementById('carousel-dots');
       const stackEl = document.getElementById('hero-stack');
 
-      slidesEl.innerHTML = posts.map((p,i) => {
+      setHTML(slidesEl, posts.map((p,i) => {
         const imgRef = p.mainImage?.asset?._ref;
         const imgUrl = imgRef ? imageUrl(imgRef) : null;
         const rt = readTime(p.body);
@@ -833,7 +801,7 @@
         const headlineClass = headlineProfile === 'standard' ? '' : ` is-${headlineProfile}`;
         return `<div class="hero-slide">
           <div class="hero-main" onclick="window.location.href='article.html?id=${p._id}'">
-            ${imgUrl?`<img class="hero-image" src="${imgUrl}?w=1200&h=600&fit=crop&auto=format" alt="${p.title}" loading="${i===0?'eager':'lazy'}">` : ''}
+            ${imgUrl?`<img class="hero-image" src="${imgUrl}?w=1200&h=600&fit=crop&auto=format" alt="${escHtml(p.title)}" loading="${i===0?'eager':'lazy'}" data-fallback="hide">` : ''}
             <div class="hero-overlay"></div>
             <div class="hero-content${contentClass}">
               <div class="hero-eyebrow">
@@ -846,19 +814,19 @@
             </div>
           </div>
         </div>`;
-      }).join('');
+      }).join(''));
 
-      stackEl.innerHTML = posts.slice(1,5).map(o =>
+      setHTML(stackEl, posts.slice(1,5).map(o =>
         `<div class="stacked-story" onclick="event.stopPropagation();window.location.href='article.html?id=${o._id}'">
           <div class="stacked-tag">${catLabel(o.category)}</div>
           <div class="stacked-headline">${o.title}</div>
           <div class="stacked-meta">${o.publishedAt?fmt(o.publishedAt):''}</div>
         </div>`
-      ).join('');
+      ).join(''));
 
-      dotsEl.innerHTML = posts.map((_,i) =>
+      setHTML(dotsEl, posts.map((_,i) =>
         `<button class="carousel-dot${i===0?' active':''}" onclick="goToSlide(${i})" aria-label="Slide ${i+1}"></button>`
-      ).join('');
+      ).join(''));
 
       autoTimer = setInterval(() => changeSlide(1), 5000);
     }
@@ -868,19 +836,27 @@
       const grid = document.getElementById('opinions-grid');
       try {
         const q = encodeURIComponent('*[_type=="post"]|order(publishedAt desc)[0...6]{_id,title,category,excerpt,author,publishedAt,mainImage,body}');
-        const res = await fetch(`/.netlify/functions/sanity-fetch?query=${q}`);
-        const posts = (await res.json()).result;
-        if (!posts?.length) { grid.innerHTML='<div class="loading-text" style="grid-column:1/-1;">No articles yet.</div>'; return; }
+        const response = await fetchJson(`/.netlify/functions/sanity-fetch?query=${q}`);
+        const posts = response.result;
+        if (!posts?.length) {
+          renderState(grid, 'empty', {
+            eyebrow: 'Editorial',
+            title: 'No articles yet',
+            message: 'The homepage module is ready, but there are no posts to feature right now.',
+            fullSpan: true
+          });
+          return;
+        }
 
         buildCarousel(posts);
 
-        grid.innerHTML = posts.slice(0,3).map(p => {
+        setHTML(grid, posts.slice(0,3).map(p => {
           const imgRef = p.mainImage?.asset?._ref;
           const imgUrl = imgRef ? imageUrl(imgRef) : null;
           const rt = readTime(p.body);
           const date = p.publishedAt ? fmt(p.publishedAt) : '';
           return `<a class="opinion-card" href="article.html?id=${p._id}">
-            ${imgUrl?`<img class="opinion-card-image" src="${imgUrl}?w=600&h=320&fit=crop&auto=format" alt="${p.title}" loading="lazy">`:'<div class="opinion-card-image-placeholder"></div>'}
+            ${imgUrl?`<img class="opinion-card-image" src="${imgUrl}?w=600&h=320&fit=crop&auto=format" alt="${escHtml(p.title)}" loading="lazy" data-fallback="hide">`:'<div class="opinion-card-image-placeholder"></div>'}
             <div class="opinion-card-body">
               <div class="opinion-label">${catLabel(p.category)}</div>
               <div class="opinion-headline">${p.title}</div>
@@ -891,10 +867,15 @@
               </div>
             </div>
           </a>`;
-        }).join('') + (posts.length < 3 ? '<div class="opinion-card" style="border-right:1px solid var(--border);"></div>'.repeat(3-posts.length) : '');
+        }).join('') + (posts.length < 3 ? '<div class="opinion-card" style="border-right:1px solid var(--border);"></div>'.repeat(3-posts.length) : ''));
 
       } catch(e) {
-        grid.innerHTML = '<div class="loading-text" style="grid-column:1/-1;">Could not load articles.</div>';
+        renderState(grid, 'error', {
+          eyebrow: 'Editorial',
+          title: 'Could not load articles',
+          message: 'The homepage hierarchy remains intact, but the article feed is temporarily unavailable.',
+          fullSpan: true
+        });
       }
     }
 
@@ -960,21 +941,21 @@
           tHtml += `<div class="ticker-item"><span class="ticker-teams">${f.home.short}</span><span class="ticker-score">${f.score.home}–${f.score.away}</span><span class="ticker-teams">${f.away.short}</span>${live?'<span class="ticker-status ticker-live">Live</span>':'<span class="ticker-status">FT</span>'}</div>`;
         });
 
-        if (tHtml) document.getElementById('ticker-items').innerHTML = tHtml;
-        document.getElementById('results-grid').innerHTML = rHtml;
+        if (tHtml) setHTML('#ticker-items', tHtml);
+        setHTML('#results-grid', rHtml);
       } catch(e) { fallbackScores(); }
     }
 
     function fallbackScores() {
-      document.getElementById('ticker-items').innerHTML=`
+      setHTML('#ticker-items', `
         <div class="ticker-item"><span class="ticker-teams">Hearts</span><span class="ticker-score">2–0</span><span class="ticker-teams">Aberdeen</span><span class="ticker-status">FT</span></div>
-        <div class="ticker-item"><span class="ticker-teams">Celtic</span><span class="ticker-score">3–1</span><span class="ticker-teams">Rangers</span><span class="ticker-status">FT</span></div>`;
-      document.getElementById('results-grid').innerHTML=`
+        <div class="ticker-item"><span class="ticker-teams">Celtic</span><span class="ticker-score">3–1</span><span class="ticker-teams">Rangers</span><span class="ticker-status">FT</span></div>`);
+      setHTML('#results-grid', `
         <div class="result-card"><div class="result-competition">Premiership</div><div class="result-teams"><div class="result-team"><div class="result-team-name"><span class="result-name winner">Hearts</span></div><span class="result-goals winner">2</span></div><div class="result-team"><div class="result-team-name"><span class="result-name">Aberdeen</span></div><span class="result-goals">0</span></div></div></div>
         <div class="result-card"><div class="result-competition">Premiership</div><div class="result-teams"><div class="result-team"><div class="result-team-name"><span class="result-name winner">Celtic</span></div><span class="result-goals winner">3</span></div><div class="result-team"><div class="result-team-name"><span class="result-name">Rangers</span></div><span class="result-goals">1</span></div></div></div>
         <div class="result-card"><div class="result-competition">Championship</div><div class="result-none">No recent results</div></div>
         <div class="result-card"><div class="result-competition">Scottish Cup</div><div class="result-none">No recent results</div></div>
-        <div class="result-card"><div class="result-competition">League Cup</div><div class="result-none">No recent results</div></div>`;
+        <div class="result-card"><div class="result-competition">League Cup</div><div class="result-none">No recent results</div></div>`);
     }
 
     function buildClubHighlight(rows, fixtures, league) {
@@ -1035,13 +1016,18 @@
     function renderClubHighlights(items) {
       const list = document.getElementById('club-highlights-list');
       if (!items.length) {
-        list.innerHTML = '<div class="loading-text">Club highlights unavailable right now.</div>';
+        renderState(list, 'empty', {
+          eyebrow: 'Club highlights',
+          title: 'Club highlights unavailable',
+          message: 'This supporting module will fill back in when live competition data returns.',
+          compact: true
+        });
         return;
       }
-      list.innerHTML = items.map(item => `
+      setHTML(list, items.map(item => `
         <a class="spotlight-item" href="${item.href}">
           <div class="spotlight-media club">
-            ${item.badge ? `<img class="spotlight-badge" src="${escHtml(item.badge)}" alt="" onerror="this.style.display='none'">` : ''}
+            ${item.badge ? `<img class="spotlight-badge" src="${escHtml(item.badge)}" alt="" data-fallback="hide">` : ''}
           </div>
           <div class="spotlight-body">
             <div class="spotlight-name">${escHtml(item.name)}</div>
@@ -1053,20 +1039,25 @@
             <div class="spotlight-label">${escHtml(item.label)}</div>
           </div>
         </a>
-      `).join('');
+      `).join(''));
     }
 
     function renderPlayerHighlights(items) {
       const list = document.getElementById('player-highlights-list');
       if (!items.length) {
-        list.innerHTML = '<div class="loading-text">Player highlights unavailable right now.</div>';
+        renderState(list, 'empty', {
+          eyebrow: 'Player highlights',
+          title: 'Player highlights unavailable',
+          message: 'This supporting module will fill back in when player data returns.',
+          compact: true
+        });
         return;
       }
-      list.innerHTML = items.map(item => `
+      setHTML(list, items.map(item => `
         <a class="spotlight-item" href="${item.href}">
           <div class="spotlight-media player">
             <div class="spotlight-player-fallback">${escHtml(initials(item.name))}</div>
-            ${item.photo ? `<img class="spotlight-player-image" src="${escHtml(item.photo)}" alt="" onerror="this.style.display='none'">` : ''}
+            ${item.photo ? `<img class="spotlight-player-image" src="${escHtml(item.photo)}" alt="" data-fallback="hide">` : ''}
           </div>
           <div class="spotlight-body">
             <div class="spotlight-name">${escHtml(item.name)}</div>
@@ -1078,7 +1069,7 @@
             <div class="spotlight-label">${escHtml(item.label)}</div>
           </div>
         </a>
-      `).join('');
+      `).join(''));
     }
 
     async function loadLeagueHighlights() {
@@ -1124,6 +1115,7 @@
       const grid = document.getElementById('podcast-grid');
       try {
         const r = await fetch('/.netlify/functions/podcast');
+        if (!r.ok) throw new Error('Podcast feed unavailable');
         const xml = new DOMParser().parseFromString(await r.text(), 'text/xml');
         const items = xml.querySelectorAll('item');
         if (!items.length) throw new Error();
@@ -1149,16 +1141,14 @@
               mins = Math.round(parseInt(dur)/60)+' min';
             }
           }
-          html += `<a class="pod-card" href="${link}" target="_blank">${podcastArt(thumb, title)}<div><div class="pod-ep-tag">Across the Tiers · ${epNum}</div><div class="pod-title">${title}</div><p class="pod-desc">${desc}</p><div class="pod-meta">${mins}${dateStr?' · '+dateStr:''}</div><div class="play-pill">${playIcon()} Listen now</div></div></a>`;
+          html += `<a class="pod-card" href="${link}" target="_blank" rel="noreferrer">${podcastArtFrame(thumb, title)}<div><div class="pod-ep-tag">Across the Tiers · ${epNum}</div><div class="pod-title">${title}</div><p class="pod-desc">${desc}</p><div class="pod-meta">${mins}${dateStr?' · '+dateStr:''}</div><div class="play-pill">${playIcon()} Listen now</div></div></a>`;
         }
-        grid.innerHTML = html;
-        wirePodcastArtFallbacks(grid);
+        setHTML(grid, html);
       } catch(e) {
         const fallbackThumb = 'https://assets.pippa.io/shows/cover/1759559622151-fab6ea24-0d2f-446d-be17-be400d570ee5.jpeg';
-        grid.innerHTML = `
-          <a class="pod-card" href="https://feeds.acast.com/public/shows/across-the-tiers" target="_blank">${podcastArt(fallbackThumb, 'Across the Tiers')}<div><div class="pod-ep-tag">Across the Tiers · Latest</div><div class="pod-title">Old Firm | League Two Title Race | Scotland Friendlies</div><p class="pod-desc">The latest from across the Scottish game.</p><div class="play-pill">${playIcon()} Listen now</div></div></a>
-          <a class="pod-card" href="https://feeds.acast.com/public/shows/across-the-tiers" target="_blank">${podcastArt(fallbackThumb, 'Across the Tiers')}<div><div class="pod-ep-tag">Across the Tiers · Previous</div><div class="pod-title">SPFL Transfer Window Roundup | Scottish Cup | Joelle Murray</div><p class="pod-desc">A packed episode covering the transfer window.</p><div class="play-pill">${playIcon()} Listen now</div></div></a>`;
-        wirePodcastArtFallbacks(grid);
+        setHTML(grid, `
+          <a class="pod-card" href="https://feeds.acast.com/public/shows/across-the-tiers" target="_blank" rel="noreferrer">${podcastArtFrame(fallbackThumb, 'Across the Tiers')}<div><div class="pod-ep-tag">Across the Tiers · Latest</div><div class="pod-title">Old Firm | League Two Title Race | Scotland Friendlies</div><p class="pod-desc">The latest from across the Scottish game.</p><div class="play-pill">${playIcon()} Listen now</div></div></a>
+          <a class="pod-card" href="https://feeds.acast.com/public/shows/across-the-tiers" target="_blank" rel="noreferrer">${podcastArtFrame(fallbackThumb, 'Across the Tiers')}<div><div class="pod-ep-tag">Across the Tiers · Previous</div><div class="pod-title">SPFL Transfer Window Roundup | Scottish Cup | Joelle Murray</div><p class="pod-desc">A packed episode covering the transfer window.</p><div class="play-pill">${playIcon()} Listen now</div></div></a>`);
       }
     }
 

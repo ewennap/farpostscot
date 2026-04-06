@@ -11,6 +11,7 @@
   <title>Match — Far Post</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/farpost.css">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
@@ -250,7 +251,7 @@
       <a href="results.html" class="active">Results</a>
       <a href="fixtures.html">Fixtures</a>
     </div>
-    <button class="nav-hamburger" onclick="document.getElementById('mobile-menu').classList.toggle('open')" aria-label="Menu">
+    <button class="nav-hamburger" data-nav-toggle aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
   </nav>
@@ -331,10 +332,12 @@
     <div class="footer-copy">Scottish football. No filter.</div>
   </footer>
 
+  <script src="/assets/farpost.js"></script>
   <script>
     var RELEVANT_TYPES = [14, 15, 18, 19, 20];
     var LIVE_STATES = ['LIVE', '1H', '2H', 'HT', 'PEN'];
     var currentMatchLeagueId = '';
+    var FarPostUI = window.FarPost;
 
     function buildClubHref(teamId, leagueId) {
       if (!teamId || !leagueId) return '';
@@ -383,11 +386,16 @@
       var id = params.get('id');
 
       if (!id) {
-        document.getElementById('match-hero').innerHTML = '<div class="empty-state">No match ID specified.</div>';
-        document.getElementById('summary-container').innerHTML = '';
-        document.getElementById('timeline-container').innerHTML = '';
-        document.getElementById('lineups-container').innerHTML = '';
-        document.getElementById('form-container').innerHTML = '';
+        FarPostUI.renderState('#match-hero', 'empty', {
+          eyebrow: 'Match centre',
+          title: 'No match selected',
+          message: 'Choose a fixture or result to open the live match centre.',
+          compact: true
+        });
+        FarPostUI.setHTML('#summary-container', '');
+        FarPostUI.setHTML('#timeline-container', '');
+        FarPostUI.setHTML('#lineups-container', '');
+        FarPostUI.setHTML('#form-container', '');
         return;
       }
 
@@ -407,13 +415,18 @@
         var home = participants.find(function(p) { return p.meta && p.meta.location === 'home'; }) || participants[0] || {};
         var away = participants.find(function(p) { return p.meta && p.meta.location === 'away'; }) || participants[1] || {};
         if (home.id && away.id) loadForm(home, away);
-        else document.getElementById('form-container').innerHTML = '';
+        else FarPostUI.setHTML('#form-container', '');
       } catch (e) {
-        document.getElementById('match-hero').innerHTML = '<div class="empty-state">Could not load match data. Please try again later.</div>';
-        document.getElementById('summary-container').innerHTML = '';
-        document.getElementById('timeline-container').innerHTML = '';
-        document.getElementById('lineups-container').innerHTML = '';
-        document.getElementById('form-container').innerHTML = '';
+        FarPostUI.renderState('#match-hero', 'error', {
+          eyebrow: 'Match centre',
+          title: 'Could not load match data',
+          message: 'Please try again later.',
+          compact: true
+        });
+        FarPostUI.setHTML('#summary-container', '');
+        FarPostUI.setHTML('#timeline-container', '');
+        FarPostUI.setHTML('#lineups-container', '');
+        FarPostUI.setHTML('#form-container', '');
       }
     }
 
@@ -436,13 +449,13 @@
       var leagueId   = currentMatchLeagueId;
 
       var homeCrest = home.image_path
-        ? '<img class="team-crest-hero" src="' + home.image_path + '" alt="" onerror="this.style.display=\'none\'">'
+        ? '<img class="team-crest-hero" src="' + home.image_path + '" alt="" data-fallback="hide">'
         : '';
       var awayCrest = away.image_path
-        ? '<img class="team-crest-hero" src="' + away.image_path + '" alt="" onerror="this.style.display=\'none\'">'
+        ? '<img class="team-crest-hero" src="' + away.image_path + '" alt="" data-fallback="hide">'
         : '';
 
-      document.getElementById('match-hero').innerHTML =
+      FarPostUI.setHTML('#match-hero',
         '<div class="match-teams-header">'
         + '<div class="team-side">'
         + (buildClubHref(home.id, leagueId)
@@ -462,7 +475,7 @@
           ? '<a class="team-side-link" href="' + buildClubHref(away.id, leagueId) + '" aria-label="View ' + (away.name || 'Away') + ' club page">' + awayCrest + '<div class="team-name-hero">' + (away.name || 'Away') + '</div></a>'
           : awayCrest + '<div class="team-name-hero">' + (away.name || 'Away') + '</div>')
         + '</div>'
-        + '</div>';
+        + '</div>');
 
       document.title = (home.name || 'Home') + ' vs ' + (away.name || 'Away') + ' \u2014 Far Post';
     }
@@ -496,12 +509,12 @@
       var homeName = home.name || 'Home';
       var awayName = away.name || 'Away';
 
-      el.innerHTML = '<p class="summary-lede">Everything in one place for ' + homeName + ' vs ' + awayName + ', with the key moments, confirmed lineups and each side&#39;s recent form in a single match-centre view.</p>'
+      FarPostUI.setHTML(el, '<p class="summary-lede">Everything in one place for ' + homeName + ' vs ' + awayName + ', with the key moments, confirmed lineups and each side&#39;s recent form in a single match-centre view.</p>'
         + '<div class="summary-grid">'
         + '<div class="summary-card"><span class="summary-label">Kick-off</span><span class="summary-value">' + kickoff + '</span></div>'
         + '<div class="summary-card"><span class="summary-label">Status</span><span class="summary-value' + (isLive ? '' : ' muted') + '">' + stateName + '</span></div>'
         + '<div class="summary-card"><span class="summary-label">Coverage</span><span class="summary-value muted">Timeline, lineups and form guide</span></div>'
-        + '</div>';
+        + '</div>');
     }
 
     function renderTimeline(fixture) {
@@ -520,7 +533,12 @@
         });
 
       if (!events.length) {
-        el.innerHTML = '<div class="empty-state">No timeline events available.</div>';
+        FarPostUI.renderState(el, 'empty', {
+          eyebrow: 'Timeline',
+          title: 'No timeline events available',
+          message: 'This fixture does not have confirmed incident data yet.',
+          compact: true
+        });
         return;
       }
 
@@ -555,7 +573,7 @@
       });
 
       html += '</div>';
-      el.innerHTML = html;
+      FarPostUI.setHTML(el, html);
     }
 
     function renderLineups(fixture) {
@@ -566,7 +584,12 @@
 
       var lineups = fixture.lineups || [];
       if (!lineups.length) {
-        el.innerHTML = '<div class="empty-state">Lineups not available.</div>';
+        FarPostUI.renderState(el, 'empty', {
+          eyebrow: 'Lineups',
+          title: 'Lineups not available',
+          message: 'Confirmed teams will appear here once the feed provides them.',
+          compact: true
+        });
         return;
       }
 
@@ -601,7 +624,10 @@
         }
 
         if (!starters.length && !subs.length) {
-          html += '<div class="empty-state" style="padding:1rem 0">Not available.</div>';
+          html += FarPostUI.stateMarkup('empty', {
+            title: 'Not available',
+            compact: true
+          });
         }
 
         return html;
@@ -612,13 +638,13 @@
         away: buildCol(away.id, away.name || 'Away')
       };
 
-      el.innerHTML = '<div class="lineup-switcher">'
+      FarPostUI.setHTML(el, '<div class="lineup-switcher">'
         + '<button class="lineup-switch-btn active" type="button" data-lineup-team="home">' + (home.short_code || home.name || 'Home') + '</button>'
         + '<button class="lineup-switch-btn" type="button" data-lineup-team="away">' + (away.short_code || away.name || 'Away') + '</button>'
         + '</div>'
         + '<div class="lineups-grid">'
         + '<div class="lineup-col" id="lineup-team-panel">' + teamViews.home + '</div>'
-        + '</div>';
+        + '</div>');
 
       el.querySelectorAll('.lineup-switch-btn').forEach(function(button) {
         button.addEventListener('click', function() {
@@ -626,7 +652,7 @@
           el.querySelectorAll('.lineup-switch-btn').forEach(function(btn) {
             btn.classList.toggle('active', btn === button);
           });
-          document.getElementById('lineup-team-panel').innerHTML = teamViews[teamKey] || '';
+          FarPostUI.setHTML('#lineup-team-panel', teamViews[teamKey] || '');
         });
       });
     }
@@ -648,7 +674,12 @@
         renderForm(Array.isArray(homeData) ? homeData : [], home, Array.isArray(awayData) ? awayData : [], away);
       } catch (e) {
         console.error('[form-guide] failed to load', e);
-        el.innerHTML = '<div class="empty-state">Form guide not available.</div>';
+        FarPostUI.renderState(el, 'error', {
+          eyebrow: 'Form guide',
+          title: 'Form guide not available',
+          message: 'Recent results for one or both clubs could not be loaded.',
+          compact: true
+        });
       }
     }
 
@@ -667,7 +698,7 @@
             var scoreStr  = teamScore + '-' + oppScore;
             var crest     = (isHomeTeam ? r.awayTeamCrest : r.homeTeamCrest);
             var crestHtml = crest
-              ? '<img class="form-crest" src="' + crest + '" alt="" onerror="this.style.display=\'none\'">'
+              ? '<img class="form-crest" src="' + crest + '" alt="" data-fallback="hide">'
               : '<div class="form-crest-blank"></div>';
             html += '<div class="form-item">'
               + crestHtml
@@ -681,10 +712,10 @@
         return html;
       }
 
-      el.innerHTML = '<div class="form-grid">'
+      FarPostUI.setHTML(el, '<div class="form-grid">'
         + '<div class="form-col">' + buildCol(homeResults, home) + '</div>'
         + '<div class="form-col">' + buildCol(awayResults, away) + '</div>'
-        + '</div>';
+        + '</div>');
     }
 
     function getBackDestination() {
@@ -750,14 +781,6 @@
         observer.observe(section);
       });
     }
-
-    (function() {
-      var nav = document.querySelector('.nav');
-      if (!nav) return;
-      window.addEventListener('scroll', function() {
-        nav.classList.toggle('scrolled', window.scrollY > 24);
-      }, { passive: true });
-    })();
 
     initBackLink();
     initJumpNav();

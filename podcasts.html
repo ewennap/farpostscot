@@ -6,6 +6,7 @@
   <title>Podcasts — Far Post</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/farpost.css">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #111213; color: #e8e6e1; font-family: 'Barlow', sans-serif; min-height: 100vh; }
@@ -91,7 +92,7 @@
       <a href="results.html">Results</a>
       <a href="fixtures.html">Fixtures</a>
     </div>
-    <button class="nav-hamburger" onclick="document.getElementById('mobile-menu').classList.toggle('open')" aria-label="Menu">
+    <button class="nav-hamburger" data-nav-toggle aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
   </nav>
@@ -139,51 +140,28 @@
     <div class="footer-copy">Scottish football. No filter.</div>
   </footer>
 
+  <script src="/assets/farpost.js"></script>
   <script>
+    const FEED_URL = 'https://feeds.acast.com/public/shows/across-the-tiers';
+    const { escHtml, formatDuration, getItunesImage, setHTML } = window.FarPost;
+
     function formatDate(dateStr) {
       if (!dateStr) return '';
       return new Date(dateStr).toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'});
-    }
-
-    function formatDuration(raw) {
-      if (!raw) return '';
-      let total;
-      if (String(raw).includes(':')) {
-        const parts = String(raw).split(':').map(Number);
-        total = parts.length === 3
-          ? parts[0] * 3600 + parts[1] * 60 + parts[2]
-          : parts[0] * 60 + parts[1];
-      } else {
-        total = parseInt(raw);
-      }
-      if (!total) return '';
-      const h = Math.floor(total / 3600);
-      const m = Math.floor((total % 3600) / 60);
-      return h > 0 ? `${h}h ${m}m` : `${m} min`;
-    }
-
-    const ITUNES_NS = 'http://www.itunes.com/dtds/podcast-1.0.dtd';
-
-    function getItunesImage(el) {
-      for (const child of el.children) {
-        if (child.localName === 'image' && child.namespaceURI === ITUNES_NS) {
-          return child.getAttribute('href') || '';
-        }
-      }
-      return '';
     }
 
     async function loadEpisodes() {
       const list = document.getElementById('episodes-list');
       try {
         const r = await fetch('/.netlify/functions/podcast');
+        if (!r.ok) throw new Error('Podcast feed unavailable');
         const xml = new DOMParser().parseFromString(await r.text(), 'text/xml');
         const items = xml.querySelectorAll('item');
         if (!items.length) throw new Error();
 
         const showThumb = getItunesImage(xml.querySelector('channel'));
         if (showThumb) {
-          document.querySelector('.show-art').innerHTML = `<img src="${showThumb}" alt="Across the Tiers">`;
+          setHTML('.show-art', `<img src="${escHtml(showThumb)}" alt="Across the Tiers" data-fallback="hide">`);
         }
 
         let html = '';
@@ -199,56 +177,48 @@
           const dur = formatDuration(duration);
           const thumb = getItunesImage(item) || showThumb;
 
-          html += `<a class="episode-row" href="${link}" target="_blank">
+          html += `<a class="episode-row" href="${escHtml(link)}" target="_blank" rel="noreferrer">
             <div class="ep-number">${epNum}</div>
             <div class="ep-play">
               <svg viewBox="0 0 12 12"><polygon points="2,1 10,6 2,11"/></svg>
             </div>
-            ${thumb ? `<img class="ep-thumb" src="${thumb}" alt="" loading="lazy">` : ''}
+            ${thumb ? `<img class="ep-thumb" src="${escHtml(thumb)}" alt="" loading="lazy" data-fallback="hide">` : ''}
             <div class="ep-info">
               <div class="ep-tag">Across the Tiers · Ep. ${epNum}</div>
-              <div class="ep-title">${title}</div>
-              <p class="ep-desc">${desc}</p>
-              <div class="ep-meta">${dur}${dateStr ? ' &nbsp;·&nbsp; ' + dateStr : ''}</div>
+              <div class="ep-title">${escHtml(title)}</div>
+              <p class="ep-desc">${escHtml(desc)}</p>
+              <div class="ep-meta">${escHtml(dur)}${dateStr ? ' &nbsp;·&nbsp; ' + escHtml(dateStr) : ''}</div>
             </div>
           </a>`;
         });
 
-        list.innerHTML = html;
+        setHTML(list, html);
       } catch(e) {
         const fallbackThumb = 'https://assets.pippa.io/shows/cover/1759559622151-fab6ea24-0d2f-446d-be17-be400d570ee5.jpeg';
-        document.querySelector('.show-art').innerHTML = `<img src="${fallbackThumb}" alt="Across the Tiers">`;
-        list.innerHTML = `
-          <a class="episode-row" href="https://feeds.acast.com/public/shows/across-the-tiers" target="_blank">
+        setHTML('.show-art', `<img src="${fallbackThumb}" alt="Across the Tiers" data-fallback="hide">`);
+        setHTML(list, `
+          <a class="episode-row" href="${FEED_URL}" target="_blank" rel="noreferrer">
             <div class="ep-number">6</div>
             <div class="ep-play"><svg viewBox="0 0 12 12"><polygon points="2,1 10,6 2,11"/></svg></div>
-            <img class="ep-thumb" src="${fallbackThumb}" alt="" loading="lazy">
+            <img class="ep-thumb" src="${fallbackThumb}" alt="" loading="lazy" data-fallback="hide">
             <div class="ep-info">
               <div class="ep-tag">Across the Tiers · Ep. 6</div>
               <div class="ep-title">Old Firm | League Two Title Race | Scotland Friendlies</div>
               <p class="ep-desc">The latest from across the Scottish game.</p>
             </div>
           </a>
-          <a class="episode-row" href="https://feeds.acast.com/public/shows/across-the-tiers" target="_blank">
+          <a class="episode-row" href="${FEED_URL}" target="_blank" rel="noreferrer">
             <div class="ep-number">5</div>
             <div class="ep-play"><svg viewBox="0 0 12 12"><polygon points="2,1 10,6 2,11"/></svg></div>
-            <img class="ep-thumb" src="${fallbackThumb}" alt="" loading="lazy">
+            <img class="ep-thumb" src="${fallbackThumb}" alt="" loading="lazy" data-fallback="hide">
             <div class="ep-info">
               <div class="ep-tag">Across the Tiers · Ep. 5</div>
               <div class="ep-title">SPFL Transfer Window Roundup | Scottish Cup | Interview With Joelle Murray</div>
               <p class="ep-desc">A packed episode covering the transfer window and cup action.</p>
             </div>
-          </a>`;
+          </a>`);
       }
     }
-
-    (function() {
-      var nav = document.querySelector('.nav');
-      if (!nav) return;
-      window.addEventListener('scroll', function() {
-        nav.classList.toggle('scrolled', window.scrollY > 24);
-      }, { passive: true });
-    })();
 
     loadEpisodes();
   </script>

@@ -1,0 +1,10 @@
+{
+  "name": "farpostscot",
+  "private": true,
+  "scripts": {
+    "test:regression": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.54.2"
+  }
+}
