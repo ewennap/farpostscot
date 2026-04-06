@@ -95,6 +95,8 @@
     .tl-mid { display: flex; align-items: center; justify-content: center; }
     .tl-dot { width: 34px; height: 34px; border-radius: 50%; background: #161718; border: 1px solid #2a2b2d; display: flex; align-items: center; justify-content: center; position: relative; z-index: 1; }
     .tl-dot svg { width: 20px; height: 20px; display: block; }
+    .tl-dot.goal { background: #1c1d1f; border-color: #4a4c50; box-shadow: 0 0 0 4px rgba(255,255,255,0.03); }
+    .tl-dot.own-goal { background: rgba(204,0,0,0.12); border-color: rgba(204,0,0,0.32); box-shadow: 0 0 0 4px rgba(204,0,0,0.08); }
     .tl-content { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
     .tl-player { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600; color: #e8e6e1; line-height: 1.15; overflow-wrap: anywhere; }
     .tl-sub-extra { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; color: #777; line-height: 1.1; }
@@ -364,10 +366,10 @@
 
     function getEventIcon(typeId) {
       if (typeId === 14) {
-        return '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.6" fill="none" stroke="#e8e6e1" stroke-width="1.7"/><path d="M12 7.1 14.85 9.15 13.75 12.45 10.25 12.45 9.15 9.15Z" fill="#e8e6e1"/><path d="M9.15 9.15 6.55 10.8 7.35 14.15 10.25 12.45M14.85 9.15 17.45 10.8 16.65 14.15 13.75 12.45M7.35 14.15 10 16.95 12 15.45 14 16.95 16.65 14.15" fill="none" stroke="#e8e6e1" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        return '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.25" fill="#f4f1eb" stroke="#f4f1eb" stroke-width="1.2"/><path d="M12 7.3 14.65 9.2 13.65 12.2 10.35 12.2 9.35 9.2Z" fill="#111213"/><path d="M9.35 9.2 6.95 10.7 7.7 13.8 10.35 12.2M14.65 9.2 17.05 10.7 16.3 13.8 13.65 12.2M7.7 13.8 10.05 16.35 12 14.95 13.95 16.35 16.3 13.8" fill="none" stroke="#111213" stroke-width="1.05" stroke-linecap="round" stroke-linejoin="round"/></svg>';
       }
       if (typeId === 15) {
-        return '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.6" fill="none" stroke="#CC0000" stroke-width="1.7"/><path d="M12 7.1 14.85 9.15 13.75 12.45 10.25 12.45 9.15 9.15Z" fill="#CC0000"/><path d="M9.15 9.15 6.55 10.8 7.35 14.15 10.25 12.45M14.85 9.15 17.45 10.8 16.65 14.15 13.75 12.45M7.35 14.15 10 16.95 12 15.45 14 16.95 16.65 14.15" fill="none" stroke="#CC0000" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        return '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.25" fill="#cc0000" stroke="#cc0000" stroke-width="1.2"/><path d="M12 7.3 14.65 9.2 13.65 12.2 10.35 12.2 9.35 9.2Z" fill="#fff4f4"/><path d="M9.35 9.2 6.95 10.7 7.7 13.8 10.35 12.2M14.65 9.2 17.05 10.7 16.3 13.8 13.65 12.2M7.7 13.8 10.05 16.35 12 14.95 13.95 16.35 16.3 13.8" fill="none" stroke="#fff4f4" stroke-width="1.05" stroke-linecap="round" stroke-linejoin="round"/></svg>';
       }
       if (typeId === 19) {
         return '<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="5" y="3.5" width="10" height="13" rx="1.7" fill="#f5c842"/></svg>';
@@ -552,6 +554,9 @@
       events.forEach(function(e) {
         var isHome  = e.participant_id === homeId;
         var icon    = getEventIcon(e.type_id);
+        var dotClass = 'tl-dot';
+        if (e.type_id === 14) dotClass += ' goal';
+        if (e.type_id === 15) dotClass += ' own-goal';
         var minStr  = (e.minute || 0) + (e.minute_extra ? '+' + e.minute_extra : '') + '\'';
         var player  = e.player_name || '';
         var related = e.related_player_name || '';
@@ -567,7 +572,7 @@
 
         html += '<div class="tl-row">'
           + '<div class="tl-home">' + homeContent + '</div>'
-          + '<div class="tl-mid"><div class="tl-dot">' + icon + '</div></div>'
+          + '<div class="tl-mid"><div class="' + dotClass + '">' + icon + '</div></div>'
           + '<div class="tl-away">' + awayContent + '</div>'
           + '</div>';
       });
