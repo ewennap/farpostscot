@@ -63,6 +63,20 @@
     .overview-pill { display: inline-flex; align-items: center; padding: 0.28rem 0.55rem; border: 1px solid #2a2b2d; background: #111213; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #b8b3aa; }
     .overview-link { display: inline-flex; align-items: center; margin-top: 1rem; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #aaa; text-decoration: none; }
     .overview-link:hover { color: #fff; }
+    .watchlist-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-bottom: 1px solid #2a2b2d; }
+    .watch-card { padding: 1.1rem 1.25rem 1.2rem; border-right: 1px solid #2a2b2d; background: linear-gradient(180deg, #121314 0%, #101112 100%); }
+    .watch-card:last-child { border-right: none; }
+    .watch-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.8rem; margin-bottom: 0.7rem; }
+    .watch-card-league { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #e84040; }
+    .watch-card-status { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #666; }
+    .watch-card-name { font-family: 'Barlow Condensed', sans-serif; font-size: 29px; font-weight: 700; line-height: 0.96; color: #f5f2eb; }
+    .watch-card-copy { font-size: 13px; line-height: 1.6; color: #8a857d; margin-top: 0.65rem; min-height: 62px; }
+    .watch-card-meta { display: flex; gap: 0.55rem; flex-wrap: wrap; margin-top: 0.8rem; }
+    .watch-card-pill { display: inline-flex; align-items: center; padding: 0.24rem 0.5rem; border: 1px solid #262729; background: #0d0e0f; font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #bbb; }
+    .watch-card-actions { display: flex; gap: 0.55rem; flex-wrap: wrap; margin-top: 0.95rem; }
+    .watch-card-link { display: inline-flex; align-items: center; justify-content: center; min-height: 34px; padding: 0.55rem 0.8rem; border: 1px solid #2a2b2d; background: #141516; text-decoration: none; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #ddd; }
+    .watch-card-link:hover { background: #1a1b1d; }
+    .watch-card-link.primary { border-color: #3b3d41; color: #fff; }
     .directory-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 1.25rem; border-bottom: 1px solid #2a2b2d; background: #111213; }
     .competition-tabs { display: flex; overflow-x: auto; border: 1px solid #2a2b2d; }
     .competition-tab { border: none; border-right: 1px solid #2a2b2d; background: #0d0e0f; color: #666; padding: 0.7rem 1rem; cursor: pointer; font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; transition: color 0.15s, background 0.15s; }
@@ -167,12 +181,18 @@
       }
       .section-title { font-size: 10px; letter-spacing: 0.16em; }
       .section-note { font-size: 9px; }
-      .overview-grid, .directory-grid, .radar-grid { grid-template-columns: 1fr; }
-      .overview-card, .radar-col, .club-card { border-left: none; border-right: none; }
+      .overview-grid, .watchlist-grid, .directory-grid, .radar-grid { grid-template-columns: 1fr; }
+      .overview-card, .watch-card, .radar-col, .club-card { border-left: none; border-right: none; }
       .overview-card {
         padding: 0.95rem 1rem 1rem;
         border-bottom: 1px solid #232426;
       }
+      .watch-card {
+        padding: 0.95rem 1rem 1rem;
+        border-bottom: 1px solid #232426;
+      }
+      .watch-card-name { font-size: 24px; }
+      .watch-card-copy { min-height: 0; font-size: 12px; line-height: 1.45; }
       .overview-eyebrow { margin-bottom: 0.55rem; gap: 0.6rem; }
       .overview-competition { font-size: 16px; }
       .overview-type { font-size: 9px; }
@@ -352,6 +372,15 @@
       <div class="loading-state" style="grid-column:1/-1;"><div class="loading-dots"><span></span><span></span><span></span></div></div>
     </div>
   </section>
+  <section>
+    <div class="section-header">
+      <div class="section-title"><span>//</span>Club watchlist</div>
+      <div class="section-note">Featured routes into teams and leading scorers</div>
+    </div>
+    <div class="watchlist-grid" id="watchlist-grid">
+      <div class="loading-state" style="grid-column:1/-1;"><div class="loading-dots"><span></span><span></span><span></span></div></div>
+    </div>
+  </section>
   <section id="club-directory">
     <div class="section-header">
       <div class="section-title"><span>//</span>Club directory</div>
@@ -402,6 +431,8 @@
     let clubDirectory = [];
     let overviewCards = [];
     let radarFixtures = [];
+    let clubWatchlist = [];
+    let topScorerByTeam = {};
 
     function fmtDateTime(iso) {
       if (!iso) return 'Date TBC';
@@ -416,6 +447,22 @@
     function buildClubHref(teamId, competitionId) {
       if (!teamId || !competitionId || competitionId === 'all') return '';
       return 'club.html?id=' + encodeURIComponent(teamId) + '&league=' + encodeURIComponent(competitionId) + '&from=clubs';
+    }
+
+    function buildPlayerHref(player, leagueId, seasonId) {
+      if (!player || !player.playerId) return '';
+      const params = new URLSearchParams({
+        id: player.playerId,
+        teamId: player.teamId || '',
+        teamName: player.teamName || '',
+        leagueId: leagueId || '',
+        seasonId: seasonId || '',
+        goals: player.goals || 0,
+        assists: player.assists || 0,
+        rank: player.rank || '',
+        from: 'clubs'
+      });
+      return 'player.html?' + params.toString();
     }
 
     function buildFixtureLookup(fixtures) {
@@ -534,6 +581,20 @@
       });
     }
 
+    function renderWatchlist() {
+      const grid = document.getElementById('watchlist-grid');
+      if (!clubWatchlist.length) {
+        renderState(grid, 'empty', {
+          eyebrow: 'Club watchlist',
+          title: 'Featured club routes unavailable',
+          message: 'The directory remains available while the featured layer reloads.',
+          fullSpan: true
+        });
+        return;
+      }
+      setHTML(grid, clubWatchlist.map(card => '<div class="watch-card"><div class="watch-card-top"><div class="watch-card-league">' + escHtml(card.league) + '</div><div class="watch-card-status">' + escHtml(card.status) + '</div></div><div class="watch-card-name">' + escHtml(card.name) + '</div><div class="watch-card-copy">' + escHtml(card.copy) + '</div><div class="watch-card-meta">' + card.pills.map(pill => '<span class="watch-card-pill">' + escHtml(pill) + '</span>').join('') + '</div><div class="watch-card-actions"><a class="watch-card-link primary" href="' + escHtml(card.clubHref) + '">Club page</a>' + (card.playerHref ? '<a class="watch-card-link" href="' + escHtml(card.playerHref) + '">Leading scorer</a>' : '') + '</div></div>').join(''));
+    }
+
     function renderDirectory() {
       const grid = document.getElementById('directory-grid');
       const note = document.getElementById('directory-note');
@@ -570,8 +631,9 @@
         if (typeof card.points === 'number') stats.push('<span class="club-stat">' + escHtml(card.points) + ' pts</span>');
         if (typeof card.played === 'number') stats.push('<span class="club-stat">' + escHtml(card.played) + ' played</span>');
         if (typeof card.gd === 'number') stats.push('<span class="club-stat">GD ' + (card.gd > 0 ? '+' : '') + escHtml(card.gd) + '</span>');
+        const scorer = topScorerByTeam[card.id];
         const copy = card.position
-          ? 'Position ' + card.position + ' in the ' + card.competitionName + ', with direct access to fixtures, results and table context.'
+          ? 'Position ' + card.position + ' in the ' + card.competitionName + ', with direct access to fixtures, results and table context.' + (scorer ? ' Leading scorer: ' + scorer.playerName + '.' : '')
           : 'Cup route currently discoverable through the upcoming tie list, ready for richer knockout-specific club context later.';
         const inner = '<div class="club-card-head">' + (card.crest ? '<img class="club-card-crest" src="' + escHtml(card.crest) + '" alt="" data-fallback="hide">' : '<span class="club-card-crest placeholder"></span>') + '<div style="min-width:0;"><div class="club-card-name">' + escHtml(card.name) + '</div><div class="club-card-competition">' + escHtml(card.competitionName) + '</div></div></div><div class="club-card-body"><div class="club-card-stats">' + stats.join('') + '</div><div class="club-card-copy">' + escHtml(copy) + '</div><div class="club-card-next"><div class="club-card-next-label">Next route in</div><div class="club-card-next-match">' + escHtml(card.next.match) + '</div><div class="club-card-next-meta">' + escHtml(card.next.meta) + '</div></div></div>';
         return href ? '<a class="club-card" href="' + href + '">' + inner + '</a>' : '<div class="club-card">' + inner + '</div>';
@@ -595,18 +657,50 @@
 
     async function loadHub() {
       try {
-        const payloads = await Promise.all(DIRECTORY_COMPETITIONS.map(competition => {
-        const fixturesPromise = fetchJson('/.netlify/functions/fixtures?league=' + competition.id);
-        const standingsPromise = competition.type === 'league' ? fetchJson('/.netlify/functions/standings?league=' + competition.id) : Promise.resolve({ standings: [] });
-        return Promise.all([fixturesPromise, standingsPromise]).then(([fixturesData, standingsData]) => ({
-          competition: competition,
-          fixtures: fixturesData.fixtures || [],
-          standings: standingsData.standings || []
-        }));
-        }));
+        const [payloads, playerHub] = await Promise.all([
+          Promise.all(DIRECTORY_COMPETITIONS.map(competition => {
+            const fixturesPromise = fetchJson('/.netlify/functions/fixtures?league=' + competition.id);
+            const standingsPromise = competition.type === 'league' ? fetchJson('/.netlify/functions/standings?league=' + competition.id) : Promise.resolve({ standings: [] });
+            return Promise.all([fixturesPromise, standingsPromise]).then(([fixturesData, standingsData]) => ({
+              competition: competition,
+              fixtures: fixturesData.fixtures || [],
+              standings: standingsData.standings || []
+            }));
+          })),
+          fetchJson('/.netlify/functions/players-hub').catch(() => ({ leagues: [] }))
+        ]);
         overviewCards = payloads.map(bundle => deriveOverview(bundle.competition, bundle.standings, bundle.fixtures));
         clubDirectory = payloads.flatMap(bundle => bundle.competition.type === 'league' ? buildLeagueCards(bundle.competition, bundle.standings, bundle.fixtures) : buildCupCards(bundle.competition, bundle.fixtures));
         radarFixtures = payloads.flatMap(bundle => bundle.fixtures).sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 8);
+        topScorerByTeam = (playerHub.leagues || []).reduce((lookup, league) => {
+          (league.topScorers || []).forEach(player => {
+            if (!player.teamId || lookup[player.teamId]) return;
+            lookup[player.teamId] = Object.assign({}, player, {
+              leagueId: league.leagueId,
+              seasonId: league.seasonId
+            });
+          });
+          return lookup;
+        }, {});
+        clubWatchlist = payloads
+          .filter(bundle => bundle.competition.type === 'league' && bundle.standings.length)
+          .slice(0, 3)
+          .map(bundle => {
+            const leader = bundle.standings[0];
+            const next = summariseNextFixture(buildFixtureLookup(bundle.fixtures)[leader.teamId], leader.teamId);
+            const scorer = topScorerByTeam[leader.teamId];
+            return {
+              name: leader.team,
+              league: bundle.competition.name,
+              status: 'Featured',
+              copy: scorer
+                ? leader.team + ' are setting the pace, with ' + scorer.playerName + ' giving this club page an immediate player route as well.'
+                : leader.team + ' are setting the pace and remain the cleanest live route into the wider league picture.',
+              pills: ['#' + leader.position, leader.points + ' pts', next.match],
+              clubHref: buildClubHref(leader.teamId, bundle.competition.id),
+              playerHref: scorer ? buildPlayerHref(scorer, scorer.leagueId, scorer.seasonId) : '',
+            };
+          });
 
         const leagueClubCount = payloads.filter(bundle => bundle.competition.type === 'league').reduce((sum, bundle) => sum + bundle.standings.length, 0);
         const fixtureCount = payloads.reduce((sum, bundle) => sum + bundle.fixtures.length, 0);
@@ -615,6 +709,7 @@
 
         renderTabs();
         renderOverview();
+        renderWatchlist();
         renderDirectory();
         renderRadar();
       } catch (error) {
@@ -627,6 +722,12 @@
         renderState('#directory-grid', 'error', {
           eyebrow: 'Directory',
           title: 'Club directory unavailable',
+          message: 'Please try again in a moment.',
+          fullSpan: true
+        });
+        renderState('#watchlist-grid', 'error', {
+          eyebrow: 'Club watchlist',
+          title: 'Featured club routes unavailable',
           message: 'Please try again in a moment.',
           fullSpan: true
         });

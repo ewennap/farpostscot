@@ -35,8 +35,8 @@ function playersHubPayload() {
             playerId: 'p1',
             playerName: 'Mara Boyd',
             playerPhoto: 'https://images.example.com/player-1.jpg',
-            teamId: 'c1',
-            teamName: 'Caledonia FC',
+            teamId: '501-club-1',
+            teamName: '501 Leaders',
             teamCrest: 'https://images.example.com/crest-1.png',
             goals: 14,
             assists: 6,
@@ -46,8 +46,8 @@ function playersHubPayload() {
             playerId: 'p2',
             playerName: 'Iain Kerr',
             playerPhoto: 'https://images.example.com/player-2.jpg',
-            teamId: 'c2',
-            teamName: 'Forth Athletic',
+            teamId: '501-club-2',
+            teamName: '501 Challengers',
             teamCrest: 'https://images.example.com/crest-2.png',
             goals: 11,
             assists: 2,
@@ -64,8 +64,8 @@ function playersHubPayload() {
             playerId: 'p3',
             playerName: 'Ross Muir',
             playerPhoto: 'https://images.example.com/player-3.jpg',
-            teamId: 'c3',
-            teamName: 'Tay United',
+            teamId: '504-club-1',
+            teamName: '504 Leaders',
             teamCrest: 'https://images.example.com/crest-3.png',
             goals: 10,
             assists: 3,
@@ -82,8 +82,8 @@ function playersHubPayload() {
             playerId: 'p4',
             playerName: 'Lewis Craig',
             playerPhoto: 'https://images.example.com/player-4.jpg',
-            teamId: 'c4',
-            teamName: 'Borders Thistle',
+            teamId: '516-club-1',
+            teamName: '516 Leaders',
             teamCrest: 'https://images.example.com/crest-4.png',
             goals: 9,
             assists: 4,
@@ -210,6 +210,30 @@ function podcastXml(imageUrl = 'https://images.example.com/podcast-cover.jpg') {
       </item>
     </channel>
   </rss>`;
+}
+
+function articleWithClubMention(id = 'club-story') {
+  return {
+    result: {
+      _id: id,
+      title: '501 Leaders are setting the pace',
+      category: 'news',
+      excerpt: 'A closer look at how 501 Leaders and 504 Leaders are shaping the week.',
+      author: 'Far Post',
+      publishedAt: '2026-04-05T12:00:00Z',
+      mainImage: {
+        asset: {
+          _ref: 'image-sample-image-jpg'
+        }
+      },
+      body: [
+        {
+          _type: 'block',
+          children: [{ text: '501 Leaders remain in control while 504 Leaders continue to apply pressure.' }]
+        }
+      ]
+    }
+  };
 }
 
 function matchDetailPayload() {
@@ -363,11 +387,13 @@ test('homepage loads core modules and nav links work', async ({ page }) => {
 
   await expect(page.locator('#hero-slides .hero-slide')).toHaveCount(6);
   await expect(page.locator('#results-grid .result-card')).toHaveCount(5);
+  await expect(page.locator('#editors-picks-list .identity-item')).toHaveCount(3);
+  await expect(page.locator('#week-briefing-list .identity-item')).toHaveCount(3);
   await expect(page.locator('#club-highlights-list .spotlight-item')).toHaveCount(3);
   await expect(page.locator('#player-highlights-list .spotlight-item')).toHaveCount(3);
   await expect(page.locator('#podcast-grid .pod-card')).toHaveCount(2);
 
-  await page.getByRole('link', { name: 'Players' }).click();
+  await page.getByRole('navigation').getByRole('link', { name: 'Players', exact: true }).click();
   await expect(page).toHaveURL(/players\.html$/);
   await expect(page.locator('#directory-grid .player-card')).toHaveCount(4);
 });
@@ -377,10 +403,12 @@ test('players hub renders and links to player pages', async ({ page }) => {
   await page.goto('/players.html');
 
   await expect(page.locator('#overview-grid .overview-card')).toHaveCount(3);
+  await expect(page.locator('#watchlist-grid .watch-card')).toHaveCount(3);
   await expect(page.locator('#directory-grid .player-card')).toHaveCount(4);
 
   const href = await page.locator('#directory-grid .player-card').first().getAttribute('href');
   expect(href).toContain('player.html?id=p1');
+  await expect(page.locator('#watchlist-grid .watch-card').first().getByRole('link', { name: 'Club page' })).toHaveAttribute('href', /club\.html/);
 });
 
 test('clubs hub renders and links correctly', async ({ page }) => {
@@ -388,24 +416,81 @@ test('clubs hub renders and links correctly', async ({ page }) => {
   await page.goto('/clubs.html');
 
   await expect(page.locator('#overview-grid .overview-card')).toHaveCount(5);
+  await expect(page.locator('#watchlist-grid .watch-card')).toHaveCount(3);
   await expect(page.locator('#directory-grid .club-card')).toHaveCount(14);
 
   const href = await page.locator('#directory-grid .club-card').first().getAttribute('href');
   expect(href).toContain('club.html?id=');
   expect(href).toContain('&league=501');
+  await expect(page.locator('#watchlist-grid .watch-card').first().getByRole('link', { name: 'Leading scorer' })).toHaveAttribute('href', /player\.html\?id=p1/);
 });
 
 test('match page renders essential match content', async ({ page }) => {
   await mockSuccessfulData(page);
+  await page.route('**/.netlify/functions/players-hub', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        leagues: [
+          {
+            leagueId: '501',
+            leagueName: 'Premiership',
+            seasonId: '1001',
+            topScorers: [
+              { playerId: 'p1', playerName: 'Mara Boyd', teamId: 'club-home', teamName: 'Caledonia FC', goals: 14, assists: 6, rank: 1 },
+              { playerId: 'p3', playerName: 'Ross Muir', teamId: 'club-away', teamName: 'Forth Athletic', goals: 10, assists: 3, rank: 2 },
+              { playerId: 'p4', playerName: 'Lewis Craig', teamId: 'club-away', teamName: 'Forth Athletic', goals: 9, assists: 4, rank: 3 }
+            ]
+          }
+        ]
+      })
+    });
+  });
   await page.goto('/match.html?id=fixture-100&league=501');
 
   await expect(page.locator('#match-hero .score-num').first()).toHaveText('2');
   await expect(page.locator('#summary-container .summary-card')).toHaveCount(3);
   await expect(page.locator('#timeline-container .tl-row')).toHaveCount(2);
   await expect(page.locator('#lineups-container .lineup-player')).toHaveCount(2);
+  await expect(page.locator('#timeline-container .tl-player a').first()).toHaveAttribute('href', /player\.html\?id=p1/);
   await page.getByRole('button', { name: 'FOR' }).click();
   await expect(page.locator('#lineups-container .lineup-player')).toHaveCount(2);
+  await expect(page.locator('#lineups-container .lineup-name a').first()).toHaveAttribute('href', /player\.html\?id=p3/);
   await expect(page.locator('#form-container .form-item')).toHaveCount(2);
+});
+
+test('article page surfaces related club links when story mentions tracked sides', async ({ page }) => {
+  await mockSuccessfulData(page);
+  await page.route('**/.netlify/functions/sanity-fetch**', async route => {
+    const url = new URL(route.request().url());
+    const query = decodeURIComponent(url.searchParams.get('query') || '');
+    if (query.includes('_id=="club-story"')) {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(articleWithClubMention())
+      });
+      return;
+    }
+    if (query.includes('_id!="club-story"')) {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(articleFeed(2))
+      });
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(articleFeed())
+    });
+  });
+
+  await page.goto('/article.html?id=club-story');
+  await expect(page.locator('.club-links-section .club-link-card')).toHaveCount(2);
+  await expect(page.locator('.club-links-section .club-link-card').first()).toHaveAttribute('href', /club\.html\?id=501-club-1&league=501/);
 });
 
 test('podcast cards survive artwork failures', async ({ page }) => {

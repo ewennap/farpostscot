@@ -170,11 +170,16 @@ exports.handler = async function (event) {
             const player      = row.player      || {};
             const participant = row.participant  || row.team || {};
             return {
+              playerId:   player.id || null,
               playerName: player.display_name || player.common_name || player.name || 'Unnamed scorer',
+              playerPhoto: player.image_path || null,
               teamName:   participant.name        || '',
               teamId:     participant.id,
               teamCrest:  participant.image_path  || null,
-              goals:      Number(row.total || 0)
+              goals:      Number(row.total || 0),
+              rank:       row.position || null,
+              leagueId,
+              seasonId
             };
           })
           .filter(row => row.goals > 0 && (row.playerName || row.teamName));

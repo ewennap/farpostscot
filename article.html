@@ -11,6 +11,7 @@
   <title>Far Post — Scottish Football</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/farpost.css">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #111213; color: #e8e6e1; font-family: 'Barlow', sans-serif; min-height: 100vh; }
@@ -49,6 +50,17 @@
     .article-body p:last-child { margin-bottom: 0; }
     .article-loading { font-size: 14px; color: #555; padding: 4rem 0; text-align: center; }
     .article-error { font-size: 14px; color: #e84040; padding: 4rem 0; text-align: center; }
+    .club-links-section { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #2a2b2d; }
+    .club-links-label { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #666; margin-bottom: 0.9rem; }
+    .club-links-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border: 1px solid #2a2b2d; }
+    .club-link-card { display: flex; align-items: center; justify-content: space-between; gap: 0.9rem; padding: 0.95rem 1rem; text-decoration: none; color: inherit; border-right: 1px solid #2a2b2d; border-bottom: 1px solid #2a2b2d; background: linear-gradient(180deg, #131415 0%, #101112 100%); transition: background 0.15s; }
+    .club-link-card:nth-child(2n) { border-right: none; }
+    .club-link-card:hover { background: #171819; }
+    .club-link-card:nth-last-child(-n+2) { border-bottom: none; }
+    .club-link-copy { min-width: 0; }
+    .club-link-name { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; line-height: 1; color: #f1eee8; }
+    .club-link-meta { font-size: 12px; color: #777; margin-top: 0.25rem; }
+    .club-link-arrow { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #e84040; }
 
     .related-section { border-top: 1px solid #2a2b2d; padding: 2rem 1.5rem; max-width: 740px; margin: 0 auto; }
     .related-title { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #555; margin-bottom: 1.25rem; }
@@ -78,6 +90,10 @@
       .article-title { font-size: 32px; }
       .article-body { font-size: 16px; }
       .back-link { margin-bottom: 1.25rem; }
+      .club-links-grid { grid-template-columns: 1fr; }
+      .club-link-card { border-right: none; }
+      .club-link-card:nth-last-child(-n+2) { border-bottom: 1px solid #2a2b2d; }
+      .club-link-card:last-child { border-bottom: none; }
       .related-grid { grid-template-columns: 1fr; }
       .related-card { border-right: none; border-bottom: 1px solid #2a2b2d; }
       .related-card:last-child { border-bottom: none; }
@@ -137,67 +153,151 @@
     <div class="footer-copy">Scottish football. No filter.</div>
   </footer>
 
+  <script src="/assets/farpost.js"></script>
   <script>
-    const SANITY_PROJECT_ID = 't11tx9if';
-    const SANITY_DATASET = 'production';
-
+    const {
+      categoryLabel,
+      escHtml,
+      fetchJson,
+      formatDate,
+      initials,
+      renderState,
+      sanityImageUrl,
+      setHTML,
+      storyCardMarkup
+    } = window.FarPost;
     const getParam = k => new URLSearchParams(window.location.search).get(k);
-    const fmt = d => d ? new Date(d).toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'}) : '';
-    const initials = n => n ? n.split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2) : 'FP';
-    const catLabel = c => ({opinion:'Opinion',analysis:'Analysis',news:'News',interview:'Interview',feature:'Feature'}[c]||'Article');
-
-    function imageUrl(ref) {
-      if (!ref) return null;
-      const parts = ref.replace('image-','').split('-');
-      const ext = parts.pop();
-      const id = parts.join('-');
-      return `https://cdn.sanity.io/images/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${id}.${ext}`;
-    }
+    const CLUB_LEAGUES = [
+      { id: '501', name: 'Premiership' },
+      { id: '504', name: 'Championship' },
+      { id: '516', name: 'League One' }
+    ];
 
     function renderBody(blocks) {
       if (!blocks?.length) return '';
       return blocks.map(b => {
         if (b._type !== 'block') return '';
-        const text = (b.children||[]).map(c=>c.text||'').join('');
+        const text = (b.children||[]).map(c => escHtml(c.text||'')).join('');
         return text.trim() ? `<p>${text}</p>` : '';
       }).join('');
+    }
+
+    function extractText(post) {
+      const bodyText = (post.body || []).map(block => (block.children || []).map(child => child.text || '').join(' ')).join(' ');
+      return [post.title, post.excerpt, bodyText].filter(Boolean).join(' ').toLowerCase();
+    }
+
+    async function loadRelatedClubs(post) {
+      const text = extractText(post);
+      if (!text) return [];
+
+      const payloads = await Promise.all(CLUB_LEAGUES.map(async league => {
+        const data = await fetchJson(`/.netlify/functions/standings?league=${league.id}`);
+        return (data.standings || []).map(row => ({
+          teamId: row.teamId,
+          team: row.team,
+          leagueId: league.id,
+          leagueName: league.name
+        }));
+      }));
+
+      const seen = new Set();
+      return payloads.flat()
+        .filter(club => {
+          const name = (club.team || '').toLowerCase().trim();
+          if (!name || seen.has(name)) return false;
+          if (!text.includes(name)) return false;
+          seen.add(name);
+          return true;
+        })
+        .slice(0, 4);
+    }
+
+    function renderClubLinks(clubs) {
+      if (!clubs.length) return '';
+      return `
+        <div class="club-links-section">
+          <div class="club-links-label">Relevant clubs</div>
+          <div class="club-links-grid">
+            ${clubs.map(club => `
+              <a class="club-link-card" href="club.html?id=${encodeURIComponent(club.teamId)}&league=${encodeURIComponent(club.leagueId)}&from=article">
+                <div class="club-link-copy">
+                  <div class="club-link-name">${escHtml(club.team)}</div>
+                  <div class="club-link-meta">${escHtml(club.leagueName)} club page</div>
+                </div>
+                <div class="club-link-arrow">Open</div>
+              </a>
+            `).join('')}
+          </div>
+        </div>`;
     }
 
     async function loadArticle() {
       const id = getParam('id');
       const el = document.getElementById('article-content');
       const heroEl = document.getElementById('article-hero');
-      if (!id) { el.innerHTML='<div class="article-error">No article specified.</div>'; return; }
+      if (!id) {
+        renderState(el, 'empty', {
+          eyebrow: 'Article',
+          title: 'No article specified',
+          message: 'Open a story from the homepage, news desk or opinion pages.',
+          fullSpan: true
+        });
+        return;
+      }
       try {
         const q = encodeURIComponent(`*[_type=="post"&&_id=="${id}"][0]{title,category,excerpt,body,author,publishedAt,mainImage}`);
-        const res = await fetch(`/.netlify/functions/sanity-fetch?query=${q}`);
-        const post = (await res.json()).result;
-        if (!post) { el.innerHTML='<div class="article-error">Article not found.</div>'; return; }
+        const post = (await fetchJson(`/.netlify/functions/sanity-fetch?query=${q}`)).result;
+        if (!post) {
+          renderState(el, 'empty', {
+            eyebrow: 'Article',
+            title: 'Article not found',
+            message: 'The story may have moved or been removed from the current publication feed.',
+            fullSpan: true
+          });
+          return;
+        }
         document.title = `${post.title} — Far Post`;
 
         const imgRef = post.mainImage?.asset?._ref;
-        const imgUrl = imgRef ? imageUrl(imgRef) : null;
+        const imgUrl = imgRef ? sanityImageUrl(imgRef) : null;
 
         if (imgUrl) {
           heroEl.className = 'article-hero';
-          heroEl.innerHTML = `<img class="article-hero-img" src="${imgUrl}?w=1400&h=600&fit=crop&auto=format" alt="${post.title}"><div class="article-hero-overlay"></div>`;
+          heroEl.innerHTML = `<img class="article-hero-img" src="${imgUrl}?w=1400&h=600&fit=crop&auto=format" alt="${escHtml(post.title)}" data-fallback="hide"><div class="article-hero-overlay"></div>`;
+        } else {
+          heroEl.className = 'article-hero-empty';
+          heroEl.innerHTML = '';
+        }
+
+        let relatedClubs = [];
+        try {
+          relatedClubs = await loadRelatedClubs(post);
+        } catch (clubError) {
+          relatedClubs = [];
         }
 
         el.innerHTML = `
-          <div class="article-tag">${catLabel(post.category)}</div>
-          <h1 class="article-title">${post.title}</h1>
+          <div class="article-tag">${escHtml(categoryLabel(post.category))}</div>
+          <h1 class="article-title">${escHtml(post.title)}</h1>
           <div class="article-meta">
-            <div class="meta-avatar">${initials(post.author)}</div>
-            <div class="meta-details"><strong>${post.author||'Ewen Napier'}</strong>${post.publishedAt?' &nbsp;·&nbsp; '+fmt(post.publishedAt):''}</div>
+            <div class="meta-avatar">${escHtml(initials(post.author))}</div>
+            <div class="meta-details"><strong>${escHtml(post.author||'Ewen Napier')}</strong>${post.publishedAt?' &nbsp;·&nbsp; '+escHtml(formatDate(post.publishedAt, { day:'numeric', month:'long', year:'numeric' })) :''}</div>
           </div>
           <div class="article-body">
-            ${post.excerpt?`<p><em style="color:#aaa;">${post.excerpt}</em></p>`:''}
+            ${post.excerpt?`<p><em style="color:#aaa;">${escHtml(post.excerpt)}</em></p>`:''}
             ${renderBody(post.body)||'<p>Full article coming soon.</p>'}
-          </div>`;
+          </div>
+          ${renderClubLinks(relatedClubs)}`;
 
         loadRelated(id);
       } catch(e) {
-        el.innerHTML='<div class="article-error">Could not load article.</div>';
+        renderState(el, 'error', {
+          eyebrow: 'Article',
+          title: 'Could not load article',
+          message: 'Please try again in a moment.',
+          fullSpan: true
+        });
       }
     }
 
@@ -206,20 +306,19 @@
       const section = document.getElementById('related-section');
       try {
         const q = encodeURIComponent(`*[_type=="post"&&_id!="${currentId}"]|order(publishedAt desc)[0...2]{_id,title,category,mainImage}`);
-        const res = await fetch(`/.netlify/functions/sanity-fetch?query=${q}`);
-        const posts = (await res.json()).result;
+        const posts = (await fetchJson(`/.netlify/functions/sanity-fetch?query=${q}`)).result;
         if (!posts?.length) { section.style.display='none'; return; }
-        grid.innerHTML = posts.map(p => {
-          const imgRef = p.mainImage?.asset?._ref;
-          const imgUrl = imgRef ? imageUrl(imgRef) : null;
-          return `<a class="related-card" href="article.html?id=${p._id}">
-            ${imgUrl ? `<img class="related-card-img" src="${imgUrl}?w=600&h=240&fit=crop&auto=format" alt="${p.title}" loading="lazy">` : '<div class="related-card-img-placeholder"></div>'}
-            <div class="related-card-body">
-              <div class="related-card-tag">${catLabel(p.category)}</div>
-              <div class="related-card-title">${p.title}</div>
-            </div>
-          </a>`;
-        }).join('');
+        setHTML(grid, posts.map(post => storyCardMarkup(post, {
+          cardClass: 'related-card',
+          imageClass: 'related-card-img',
+          placeholderClass: 'related-card-img-placeholder',
+          bodyClass: 'related-card-body',
+          labelClass: 'related-card-tag',
+          titleClass: 'related-card-title',
+          imageParams: '?w=600&h=240&fit=crop&auto=format',
+          showExcerpt: false,
+          showMeta: false
+        })).join(''));
       } catch(e) { section.style.display='none'; }
     }
 

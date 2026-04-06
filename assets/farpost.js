@@ -1,5 +1,7 @@
 (function() {
   var ITUNES_NS = 'http://www.itunes.com/dtds/podcast-1.0.dtd';
+  var SANITY_PROJECT_ID = 't11tx9if';
+  var SANITY_DATASET = 'production';
 
   function resolveElement(target) {
     if (!target) return null;
@@ -22,6 +24,92 @@
     if (!parts.length) return fallback || 'FP';
     if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+
+  function formatDate(value, options) {
+    if (!value) return '';
+    var date = new Date(value);
+    if (isNaN(date.getTime())) return '';
+    return date.toLocaleDateString('en-GB', options || {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  }
+
+  function categoryLabel(category) {
+    return ({
+      opinion: 'Opinion',
+      analysis: 'Analysis',
+      news: 'News',
+      interview: 'Interview',
+      feature: 'Feature'
+    }[category] || 'Article');
+  }
+
+  function sanityImageUrl(ref) {
+    if (!ref) return null;
+    var parts = String(ref).replace('image-', '').split('-');
+    var ext = parts.pop();
+    var id = parts.join('-');
+    return 'https://cdn.sanity.io/images/' + SANITY_PROJECT_ID + '/' + SANITY_DATASET + '/' + id + '.' + ext;
+  }
+
+  function readTime(blocks) {
+    if (!Array.isArray(blocks) || !blocks.length) return '';
+    var words = blocks
+      .flatMap(function(block) { return (block && block.children) || []; })
+      .map(function(child) { return child && child.text ? child.text : ''; })
+      .join(' ')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean).length;
+    if (!words) return '';
+    return Math.max(1, Math.round(words / 200)) + ' min read';
+  }
+
+  function storyCardMarkup(post, options) {
+    var config = options || {};
+    var classes = {
+      card: config.cardClass || 'news-card',
+      image: config.imageClass || 'news-card-image',
+      placeholder: config.placeholderClass || 'news-card-image-placeholder',
+      body: config.bodyClass || 'news-card-body',
+      label: config.labelClass || 'news-label',
+      title: config.titleClass || 'news-headline',
+      excerpt: config.excerptClass || 'news-excerpt',
+      author: config.authorClass || 'news-author',
+      avatar: config.avatarClass || 'author-avatar',
+      name: config.nameClass || 'author-name'
+    };
+
+    var href = config.href || ('article.html?id=' + encodeURIComponent(post._id || ''));
+    var imgRef = post && post.mainImage && post.mainImage.asset ? post.mainImage.asset._ref : null;
+    var imgUrl = imgRef ? sanityImageUrl(imgRef) : null;
+    var imageParams = config.imageParams || '?w=600&h=400&fit=crop&auto=format';
+    var showExcerpt = config.showExcerpt !== false;
+    var showMeta = config.showMeta !== false;
+    var excerpt = showExcerpt && post && post.excerpt ? '<p class="' + classes.excerpt + '">' + escHtml(post.excerpt) + '</p>' : '';
+    var date = formatDate(post && post.publishedAt);
+    var extraMeta = config.metaSuffix ? ' · ' + escHtml(config.metaSuffix) : '';
+    var metaHtml = showMeta
+      ? '<div class="' + classes.author + '">'
+        + '<div class="' + classes.avatar + '">' + escHtml(initials(post && post.author, 'FP')) + '</div>'
+        + '<div class="' + classes.name + '">' + escHtml((post && post.author) || 'Far Post') + (date ? ' · ' + escHtml(date) : '') + extraMeta + '</div>'
+        + '</div>'
+      : '';
+
+    return '<a class="' + classes.card + '" href="' + href + '">'
+      + (imgUrl
+        ? '<img class="' + classes.image + '" src="' + escHtml(imgUrl + imageParams) + '" alt="' + escHtml((post && post.title) || '') + '" loading="lazy" data-fallback="hide">'
+        : '<div class="' + classes.placeholder + '"></div>')
+      + '<div class="' + classes.body + '">'
+      + '<div class="' + classes.label + '">' + escHtml(categoryLabel(post && post.category)) + '</div>'
+      + '<div class="' + classes.title + '">' + escHtml((post && post.title) || 'Untitled') + '</div>'
+      + excerpt
+      + metaHtml
+      + '</div>'
+      + '</a>';
   }
 
   function formatDuration(raw) {
@@ -190,16 +278,21 @@
   }
 
   window.FarPost = {
+    categoryLabel: categoryLabel,
     bindImageFallbacks: bindImageFallbacks,
     escHtml: escHtml,
     fetchJson: fetchJson,
+    formatDate: formatDate,
     formatDuration: formatDuration,
     getItunesImage: getItunesImage,
     initials: initials,
     podcastArtFrame: podcastArtFrame,
+    readTime: readTime,
     renderState: renderState,
+    sanityImageUrl: sanityImageUrl,
     setHTML: setHTML,
-    stateMarkup: stateMarkup
+    stateMarkup: stateMarkup,
+    storyCardMarkup: storyCardMarkup
   };
 
   if (document.readyState === 'loading') {

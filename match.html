@@ -343,10 +343,37 @@
     var LIVE_STATES = ['LIVE', '1H', '2H', 'HT', 'PEN'];
     var currentMatchLeagueId = '';
     var FarPostUI = window.FarPost;
+    var playerRouteLookup = {};
 
     function buildClubHref(teamId, leagueId) {
       if (!teamId || !leagueId) return '';
       return 'club.html?id=' + encodeURIComponent(teamId) + '&league=' + encodeURIComponent(leagueId);
+    }
+
+    function normalizeName(name) {
+      return String(name || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+    }
+
+    function buildPlayerHref(player, leagueId, seasonId) {
+      if (!player || !player.playerId || !player.teamId) return '';
+      var params = new URLSearchParams({
+        id: player.playerId,
+        teamId: player.teamId,
+        teamName: player.teamName || '',
+        leagueId: leagueId || '',
+        seasonId: seasonId || '',
+        goals: player.goals || 0,
+        assists: player.assists || 0,
+        rank: player.rank || '',
+        from: 'match'
+      });
+      return 'player.html?' + params.toString();
+    }
+
+    function wrapPlayerLink(name, teamId) {
+      var route = playerRouteLookup[String(teamId) + '::' + normalizeName(name)];
+      if (!route) return FarPostUI.escHtml(name || '');
+      return '<a class="section-team-link" href="' + route + '">' + FarPostUI.escHtml(name || '') + '</a>';
     }
 
     function getFixtureLeagueId(fixture) {
@@ -433,6 +460,10 @@
         renderSummary(fixture);
         renderTimeline(fixture);
         renderLineups(fixture);
+        loadPlayerRoutes(fixture).then(function() {
+          renderTimeline(fixture);
+          renderLineups(fixture);
+        }).catch(function() {});
 
         var participants = fixture.participants || [];
         var home = participants.find(function(p) { return p.meta && p.meta.location === 'home'; }) || participants[0] || {};
@@ -581,8 +612,8 @@
         var related = e.related_player_name || '';
 
         var contentHtml = '<div class="tl-content">'
-          + (player ? '<span class="tl-player">' + player + '</span>' : '')
-          + (e.type_id === 18 && related ? '<span class="tl-sub-extra">\u2191 ' + related + '</span>' : '')
+          + (player ? '<span class="tl-player">' + wrapPlayerLink(player, e.participant_id) + '</span>' : '')
+          + (e.type_id === 18 && related ? '<span class="tl-sub-extra">\u2191 ' + wrapPlayerLink(related, e.participant_id) + '</span>' : '')
           + '</div>'
           + '<span class="tl-min">' + minStr + '</span>';
 
@@ -631,7 +662,7 @@
           starters.forEach(function(p) {
             html += '<div class="lineup-player">'
               + '<span class="lineup-jersey">' + (p.jersey_number || '') + '</span>'
-              + '<span class="lineup-name">' + (p.player_name || '') + '</span>'
+              + '<span class="lineup-name">' + wrapPlayerLink(p.player_name || '', teamId) + '</span>'
               + '</div>';
           });
         }
@@ -641,7 +672,7 @@
           subs.forEach(function(p) {
             html += '<div class="lineup-player">'
               + '<span class="lineup-jersey">' + (p.jersey_number || '') + '</span>'
-              + '<span class="lineup-name">' + (p.player_name || '') + '</span>'
+              + '<span class="lineup-name">' + wrapPlayerLink(p.player_name || '', teamId) + '</span>'
               + '</div>';
           });
           html += '</div>';
@@ -705,6 +736,20 @@
           compact: true
         });
       }
+    }
+
+    async function loadPlayerRoutes(fixture) {
+      var data = await FarPostUI.fetchJson('/.netlify/functions/players-hub').catch(function() { return { leagues: [] }; });
+      playerRouteLookup = {};
+      (data.leagues || []).forEach(function(league) {
+        (league.topScorers || []).forEach(function(player) {
+          var key = String(player.teamId) + '::' + normalizeName(player.playerName);
+          var href = buildPlayerHref(player, league.leagueId, league.seasonId);
+          if (key && href && !playerRouteLookup[key]) {
+            playerRouteLookup[key] = href;
+          }
+        });
+      });
     }
 
     function renderForm(homeResults, home, awayResults, away) {

@@ -177,8 +177,9 @@
 
     /* ── TOP SCORERS ── */
     .scorers-list { }
-    .scorer-row { display: flex; align-items: center; gap: 0.875rem; padding: 0.7rem 1.25rem; border-bottom: 1px solid #1a1b1d; }
+    .scorer-row { display: flex; align-items: center; gap: 0.875rem; padding: 0.7rem 1.25rem; border-bottom: 1px solid #1a1b1d; text-decoration: none; color: inherit; transition: background 0.15s; }
     .scorer-row:last-child { border-bottom: none; }
+    .scorer-row:hover { background: #161718; }
     .scorer-rank { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; color: #444; min-width: 20px; text-align: center; }
     .scorer-crest { width: 20px; height: 20px; object-fit: contain; object-position: center; flex-shrink: 0; }
     .scorer-name { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; color: #e8e6e1; flex: 1; }
@@ -514,6 +515,21 @@
       } catch { return null; }
     }
 
+    function buildPlayerHref(player) {
+      if (!player || !player.playerId || !player.teamId || !player.leagueId) return '';
+      const params = new URLSearchParams({
+        id: player.playerId,
+        teamId: player.teamId,
+        teamName: player.teamName || '',
+        leagueId: player.leagueId,
+        seasonId: player.seasonId || '',
+        goals: player.goals || 0,
+        rank: player.rank || '',
+        from: 'club'
+      });
+      return '/player.html?' + params.toString();
+    }
+
     // ── URL Params ─────────────────────────────────────────────────────────────
     const urlParams  = new URLSearchParams(window.location.search);
     const teamId     = urlParams.get('id');
@@ -801,16 +817,20 @@
 
       intro.textContent = `A quick read on who is driving the goal output for ${team.name || 'this club'}, giving extra context for the results and table picture above.`;
 
-      list.innerHTML = scorers.map((s, i) => `
-        <div class="scorer-row">
+      list.innerHTML = scorers.map((s, i) => {
+        const playerHref = buildPlayerHref(s);
+        const row = `
           <span class="scorer-rank">${i + 1}</span>
           ${s.teamCrest ? `<img class="scorer-crest" src="${escHtml(s.teamCrest)}" alt="" onerror="this.style.visibility='hidden'">` : `<span style="width:20px;flex-shrink:0;"></span>`}
           <div style="flex:1;min-width:0;">
             <div class="scorer-name">${escHtml(s.playerName || 'Unnamed scorer')}</div>
             <div class="scorer-team">${escHtml(s.teamName || team.name || '')}</div>
           </div>
-          <span class="scorer-goals">${s.goals}</span>
-        </div>`).join('');
+          <span class="scorer-goals">${s.goals}</span>`;
+        return playerHref
+          ? `<a class="scorer-row" href="${playerHref}">${row}</a>`
+          : `<div class="scorer-row">${row}</div>`;
+      }).join('');
     }
 
     // ── Render: Related Articles ───────────────────────────────────────────────

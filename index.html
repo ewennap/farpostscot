@@ -516,6 +516,105 @@
       text-transform: uppercase;
       color: var(--text-faint);
     }
+    .identity-band {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(18,19,21,0.96) 0%, rgba(12,13,14,0.96) 100%);
+      overflow: hidden;
+    }
+    .identity-panel { min-width: 0; border-right: 1px solid var(--border); }
+    .identity-panel:last-child { border-right: none; }
+    .identity-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.95rem 1.15rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(11,12,13,0.78);
+    }
+    .identity-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+    .identity-link {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      text-decoration: none;
+    }
+    .identity-link:hover { color: var(--text); }
+    .identity-list { display: grid; grid-template-columns: 1fr; }
+    .identity-item {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.9rem;
+      padding: 1rem 1.15rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      text-decoration: none;
+      color: inherit;
+      transition: background 0.15s ease;
+    }
+    .identity-item:last-child { border-bottom: none; }
+    .identity-item:hover { background: #161718; }
+    .identity-copy { min-width: 0; flex: 1; }
+    .identity-kicker {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.35rem;
+    }
+    .identity-name {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.45rem;
+      font-weight: 700;
+      line-height: 0.98;
+      color: var(--text);
+    }
+    .identity-note {
+      margin-top: 0.45rem;
+      font-size: 12px;
+      line-height: 1.55;
+      color: var(--text-soft);
+    }
+    .identity-meta {
+      margin-top: 0.45rem;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+    }
+    .identity-aside { flex-shrink: 0; min-width: 72px; text-align: right; }
+    .identity-value {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 800;
+      line-height: 0.95;
+      color: var(--text);
+    }
+    .identity-label {
+      margin-top: 0.2rem;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+    }
 
     /* ── FOOTER ── */
     .footer { margin-top: var(--section-gap); border-top: 1px solid var(--border); background: rgba(11,12,13,0.96); }
@@ -543,6 +642,9 @@
       .results-grid { grid-template-columns: repeat(3,1fr); }
       .result-card:nth-child(3n) { border-right: none; }
       .result-card:nth-child(n+4) { border-top: 1px solid var(--border); }
+      .identity-band { grid-template-columns: 1fr; }
+      .identity-panel { border-right: none; border-bottom: 1px solid var(--border); }
+      .identity-panel:last-child { border-bottom: none; }
       .league-spotlight { grid-template-columns: 1fr; }
       .spotlight-column { border-right: none; border-bottom: 1px solid var(--border); }
       .spotlight-column:last-child { border-bottom: none; }
@@ -570,6 +672,11 @@
       .opinion-card { border-right: none; border-bottom: 1px solid var(--border); }
       .opinion-card:last-child { border-bottom: none; }
       .opinion-excerpt { display: none; }
+      .identity-head,
+      .identity-item { padding-left: 1rem; padding-right: 1rem; }
+      .identity-name { font-size: 1.2rem; }
+      .identity-note { font-size: 11px; }
+      .identity-aside { min-width: 60px; }
       .pod-grid { grid-template-columns: 1fr; }
       .pod-card { border-right: none; border-bottom: 1px solid var(--border); }
       .pod-card:last-child { border-bottom: none; }
@@ -672,6 +779,29 @@
   </section>
 
   <section class="home-section page-shell">
+    <div class="identity-band">
+      <div class="identity-panel">
+        <div class="identity-head">
+          <div class="identity-title">Editor&rsquo;s picks</div>
+          <a class="identity-link" href="news.html">News desk</a>
+        </div>
+        <div class="identity-list" id="editors-picks-list">
+          <div class="loading-text">Loading picks...</div>
+        </div>
+      </div>
+      <div class="identity-panel">
+        <div class="identity-head">
+          <div class="identity-title">What matters this week</div>
+          <a class="identity-link" href="fixtures.html">Fixtures</a>
+        </div>
+        <div class="identity-list" id="week-briefing-list">
+          <div class="loading-text">Loading briefing...</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="home-section page-shell">
     <div class="section-header">
       <div class="section-title"><span>//</span>Opinions & features</div>
       <a href="opinions.html" class="see-all">All opinions</a>
@@ -687,19 +817,19 @@
       <div class="see-all" aria-hidden="true">Curated snapshot</div>
     </div>
     <div class="league-spotlight">
-      <div class="spotlight-column">
-        <div class="spotlight-column-head">
-          <div class="spotlight-heading">Club highlights</div>
-          <div class="spotlight-note">Three live leaders</div>
-        </div>
-        <div class="spotlight-list" id="club-highlights-list">
-          <div class="loading-text">Loading club highlights...</div>
+        <div class="spotlight-column">
+          <div class="spotlight-column-head">
+            <div class="spotlight-heading">Club highlights</div>
+            <a class="spotlight-note" href="clubs.html">Explore clubs</a>
+          </div>
+          <div class="spotlight-list" id="club-highlights-list">
+            <div class="loading-text">Loading club highlights...</div>
         </div>
       </div>
       <div class="spotlight-column">
         <div class="spotlight-column-head">
           <div class="spotlight-heading">Player highlights</div>
-          <div class="spotlight-note">Three standout scorers</div>
+          <a class="spotlight-note" href="players.html">Explore players</a>
         </div>
         <div class="spotlight-list" id="player-highlights-list">
           <div class="loading-text">Loading player highlights...</div>
@@ -831,6 +961,68 @@
       autoTimer = setInterval(() => changeSlide(1), 5000);
     }
 
+    function renderEditorsPicks(posts) {
+      const list = document.getElementById('editors-picks-list');
+      const picks = posts.slice(3, 6).length ? posts.slice(3, 6) : posts.slice(0, 3);
+      if (!picks.length) {
+        renderState(list, 'empty', {
+          eyebrow: 'Editor’s picks',
+          title: 'Picks unavailable',
+          message: 'The latest editorial will appear here when the feed returns.',
+          compact: true
+        });
+        return;
+      }
+
+      setHTML(list, picks.map((post, index) => {
+        const read = readTime(post.body);
+        return `<a class="identity-item" href="article.html?id=${post._id}">
+          <div class="identity-copy">
+            <div class="identity-kicker">${catLabel(post.category)}</div>
+            <div class="identity-name">${escHtml(post.title)}</div>
+            <div class="identity-note">${escHtml(post.excerpt || 'A hand-picked route back into the wider Far Post editorial mix.')}</div>
+            <div class="identity-meta">${escHtml(post.author || 'Far Post')}${post.publishedAt ? ' · ' + escHtml(fmt(post.publishedAt)) : ''}${read ? ' · ' + escHtml(read) : ''}</div>
+          </div>
+          <div class="identity-aside">
+            <div class="identity-value">${String(index + 1).padStart(2, '0')}</div>
+            <div class="identity-label">Pick</div>
+          </div>
+        </a>`;
+      }).join(''));
+    }
+
+    function renderWeekBriefing(fixtures) {
+      const list = document.getElementById('week-briefing-list');
+      if (!fixtures.length) {
+        renderState(list, 'empty', {
+          eyebrow: 'What matters this week',
+          title: 'Briefing unavailable',
+          message: 'Key fixtures will appear here when the live schedule returns.',
+          compact: true
+        });
+        return;
+      }
+
+      setHTML(list, fixtures.map((fixture, index) => {
+        const competition = LEAGUE_NAMES[fixture.leagueId] || 'Scottish football';
+        const kickoff = fixture.date ? new Date(fixture.date).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) : 'Date TBC';
+        const time = fixture.date ? new Date(fixture.date).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : 'TBC';
+        const round = fixture.round ? fixture.round : competition;
+        return `<a class="identity-item" href="match.html?id=${encodeURIComponent(fixture.id)}&league=${encodeURIComponent(fixture.leagueId)}&from=home">
+          <div class="identity-copy">
+            <div class="identity-kicker">${escHtml(competition)}</div>
+            <div class="identity-name">${escHtml(fixture.home.name)} v ${escHtml(fixture.away.name)}</div>
+            <div class="identity-note">${escHtml(round)} · The next useful route from the homepage into club, player and match detail.</div>
+            <div class="identity-meta">${escHtml(kickoff)} · ${escHtml(time)}</div>
+          </div>
+          <div class="identity-aside">
+            <div class="identity-value">${String(index + 1).padStart(2, '0')}</div>
+            <div class="identity-label">Watch</div>
+          </div>
+        </a>`;
+      }).join(''));
+    }
+
     // ── ARTICLES ──
     async function loadArticles() {
       const grid = document.getElementById('opinions-grid');
@@ -845,10 +1037,12 @@
             message: 'The homepage module is ready, but there are no posts to feature right now.',
             fullSpan: true
           });
+          renderEditorsPicks([]);
           return;
         }
 
         buildCarousel(posts);
+        renderEditorsPicks(posts);
 
         setHTML(grid, posts.slice(0,3).map(p => {
           const imgRef = p.mainImage?.asset?._ref;
@@ -870,6 +1064,7 @@
         }).join('') + (posts.length < 3 ? '<div class="opinion-card" style="border-right:1px solid var(--border);"></div>'.repeat(3-posts.length) : ''));
 
       } catch(e) {
+        renderEditorsPicks([]);
         renderState(grid, 'error', {
           eyebrow: 'Editorial',
           title: 'Could not load articles',
@@ -1110,6 +1305,22 @@
       }
     }
 
+    async function loadWeekBriefing() {
+      try {
+        const payloads = await Promise.all(
+          LEAGUE_IDS.map(id => fetchJson(`/.netlify/functions/fixtures?league=${id}`).catch(() => ({ fixtures: [] })))
+        );
+        const fixtures = payloads
+          .flatMap((payload, index) => (payload.fixtures || []).map(fixture => Object.assign({ leagueId: LEAGUE_IDS[index] }, fixture)))
+          .filter(fixture => fixture.date && new Date(fixture.date) > new Date())
+          .sort((a, b) => new Date(a.date) - new Date(b.date))
+          .slice(0, 3);
+        renderWeekBriefing(fixtures);
+      } catch (e) {
+        renderWeekBriefing([]);
+      }
+    }
+
     // ── PODCASTS ──
     async function loadPodcasts() {
       const grid = document.getElementById('podcast-grid');
@@ -1154,6 +1365,7 @@
 
     loadArticles();
     loadScores();
+    loadWeekBriefing();
     loadLeagueHighlights();
     loadPodcasts();
   </script>

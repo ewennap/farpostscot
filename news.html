@@ -11,6 +11,7 @@
   <title>News — Far Post</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/farpost.css">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #111213; color: #e8e6e1; font-family: 'Barlow', sans-serif; min-height: 100vh; }
@@ -126,83 +127,63 @@
     <div class="footer-copy">Scottish football. No filter.</div>
   </footer>
 
+  <script src="/assets/farpost.js"></script>
   <script>
-    const SANITY_PROJECT_ID = 't11tx9if';
-    const SANITY_DATASET = 'production';
-
-    const fmt = d => new Date(d).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'});
-    const initials = n => n ? n.split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2) : 'FP';
-    const catLabel = c => ({opinion:'Opinion',analysis:'Analysis',news:'News',interview:'Interview',feature:'Feature'}[c]||'Article');
-
-    function imageUrl(ref) {
-      if (!ref) return null;
-      const parts = ref.replace('image-','').split('-');
-      const ext = parts.pop();
-      const id = parts.join('-');
-      return `https://cdn.sanity.io/images/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${id}.${ext}`;
-    }
+    const { fetchJson, renderState, setHTML, storyCardMarkup } = window.FarPost;
 
     let offset = 0;
     const PAGE_SIZE = 9;
     let total = 0;
 
     function renderCards(posts) {
-      return posts.map(p => {
-        const date = p.publishedAt ? fmt(p.publishedAt) : '';
-        const imgRef = p.mainImage?.asset?._ref;
-        const imgUrl = imgRef ? imageUrl(imgRef) : null;
-        const imgHtml = imgUrl
-          ? `<img class="news-card-image" src="${imgUrl}?w=600&h=400&fit=crop&auto=format" alt="${p.title}" loading="lazy">`
-          : `<div class="news-card-image-placeholder"></div>`;
-        return `<a class="news-card" href="article.html?id=${p._id}">
-          ${imgHtml}
-          <div class="news-card-body">
-            <div class="news-label">${catLabel(p.category)}</div>
-            <div class="news-headline">${p.title}</div>
-            ${p.excerpt ? `<p class="news-excerpt">${p.excerpt}</p>` : ''}
-            <div class="news-author">
-              <div class="author-avatar">${initials(p.author)}</div>
-              <div class="author-name">${p.author||'Far Post'}${date?' · '+date:''}</div>
-            </div>
-          </div>
-        </a>`;
-      }).join('');
+      return posts.map(post => storyCardMarkup(post)).join('');
     }
 
     async function loadArticles() {
       const grid = document.getElementById('news-grid');
       try {
         const countQ = encodeURIComponent('count(*[_type=="post"])');
-        const countRes = await fetch(`/.netlify/functions/sanity-fetch?query=${countQ}`, );
-        total = (await countRes.json()).result || 0;
+        total = (await fetchJson(`/.netlify/functions/sanity-fetch?query=${countQ}`)).result || 0;
 
         const q = encodeURIComponent(`*[_type=="post"]|order(publishedAt desc)[0...${PAGE_SIZE}]{_id,title,category,excerpt,author,publishedAt,mainImage}`);
-        const res = await fetch(`/.netlify/functions/sanity-fetch?query=${q}`, );
-        const posts = (await res.json()).result;
+        const posts = (await fetchJson(`/.netlify/functions/sanity-fetch?query=${q}`)).result;
 
-        if (!posts?.length) { grid.innerHTML='<div class="loading-text">No articles yet.</div>'; return; }
+        if (!posts?.length) {
+          renderState(grid, 'empty', {
+            eyebrow: 'News',
+            title: 'No articles yet',
+            message: 'The page is ready, but there is no editorial copy to show right now.',
+            fullSpan: true
+          });
+          return;
+        }
 
-        grid.innerHTML = renderCards(posts);
+        setHTML(grid, renderCards(posts));
         offset = posts.length;
 
         if (total > offset) {
           document.getElementById('load-more').style.display = 'flex';
         }
       } catch(e) {
-        grid.innerHTML='<div class="loading-text">Could not load articles.</div>';
+        renderState(grid, 'error', {
+          eyebrow: 'News',
+          title: 'Could not load articles',
+          message: 'Please try again in a moment.',
+          fullSpan: true
+        });
       }
     }
 
     async function loadMore() {
       const btn = document.getElementById('load-more-btn');
+      const grid = document.getElementById('news-grid');
       btn.disabled = true;
       btn.textContent = 'Loading...';
       try {
         const q = encodeURIComponent(`*[_type=="post"]|order(publishedAt desc)[${offset}...${offset+PAGE_SIZE}]{_id,title,category,excerpt,author,publishedAt,mainImage}`);
-        const res = await fetch(`/.netlify/functions/sanity-fetch?query=${q}`, );
-        const posts = (await res.json()).result;
+        const posts = (await fetchJson(`/.netlify/functions/sanity-fetch?query=${q}`)).result;
         if (!posts?.length) { document.getElementById('load-more').style.display='none'; return; }
-        document.getElementById('news-grid').innerHTML += renderCards(posts);
+        grid.insertAdjacentHTML('beforeend', renderCards(posts));
         offset += posts.length;
         if (offset >= total) document.getElementById('load-more').style.display='none';
       } catch(e) {}
