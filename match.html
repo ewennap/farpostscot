@@ -94,7 +94,7 @@
     .tl-away { display: flex; align-items: center; gap: 8px; padding-left: 10px; min-width: 0; }
     .tl-mid { display: flex; align-items: center; justify-content: center; }
     .tl-dot { width: 34px; height: 34px; border-radius: 50%; background: #161718; border: 1px solid #2a2b2d; display: flex; align-items: center; justify-content: center; position: relative; z-index: 1; }
-    .tl-dot svg { width: 18px; height: 18px; display: block; }
+    .tl-dot svg { width: 20px; height: 20px; display: block; }
     .tl-content { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
     .tl-player { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600; color: #e8e6e1; line-height: 1.15; overflow-wrap: anywhere; }
     .tl-sub-extra { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; color: #777; line-height: 1.1; }
@@ -226,7 +226,7 @@
       .timeline-teams-header { padding-top: 0.6rem; padding-bottom: 0.6rem; }
       .tl-home, .tl-away { gap: 7px; }
       .tl-dot { width: 30px; height: 30px; }
-      .tl-dot svg { width: 16px; height: 16px; }
+      .tl-dot svg { width: 18px; height: 18px; }
       .tl-player { font-size: 13px; }
       .tl-sub-extra { font-size: 11px; }
       .tl-min { min-width: 34px; padding: 0.14rem 0.35rem; font-size: 10px; }
@@ -364,10 +364,10 @@
 
     function getEventIcon(typeId) {
       if (typeId === 14) {
-        return '<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="none" stroke="#e8e6e1" stroke-width="1.6"/><path d="M10 4.9 12.8 6.8 11.7 10.1 8.3 10.1 7.2 6.8Z" fill="#e8e6e1"/><path d="M7.2 6.8 4.8 8.2 5.4 11.3 8.3 10.1M12.8 6.8 15.2 8.2 14.6 11.3 11.7 10.1M5.4 11.3 7.5 14.5 10 12.9 12.5 14.5 14.6 11.3" fill="none" stroke="#e8e6e1" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        return '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.6" fill="none" stroke="#e8e6e1" stroke-width="1.7"/><path d="M12 7.1 14.85 9.15 13.75 12.45 10.25 12.45 9.15 9.15Z" fill="#e8e6e1"/><path d="M9.15 9.15 6.55 10.8 7.35 14.15 10.25 12.45M14.85 9.15 17.45 10.8 16.65 14.15 13.75 12.45M7.35 14.15 10 16.95 12 15.45 14 16.95 16.65 14.15" fill="none" stroke="#e8e6e1" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round"/></svg>';
       }
       if (typeId === 15) {
-        return '<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="none" stroke="#CC0000" stroke-width="1.6"/><path d="M10 4.9 12.8 6.8 11.7 10.1 8.3 10.1 7.2 6.8Z" fill="#CC0000"/><path d="M7.2 6.8 4.8 8.2 5.4 11.3 8.3 10.1M12.8 6.8 15.2 8.2 14.6 11.3 11.7 10.1M5.4 11.3 7.5 14.5 10 12.9 12.5 14.5 14.6 11.3" fill="none" stroke="#CC0000" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        return '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.6" fill="none" stroke="#CC0000" stroke-width="1.7"/><path d="M12 7.1 14.85 9.15 13.75 12.45 10.25 12.45 9.15 9.15Z" fill="#CC0000"/><path d="M9.15 9.15 6.55 10.8 7.35 14.15 10.25 12.45M14.85 9.15 17.45 10.8 16.65 14.15 13.75 12.45M7.35 14.15 10 16.95 12 15.45 14 16.95 16.65 14.15" fill="none" stroke="#CC0000" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round"/></svg>';
       }
       if (typeId === 19) {
         return '<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="5" y="3.5" width="10" height="13" rx="1.7" fill="#f5c842"/></svg>';
