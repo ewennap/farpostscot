@@ -407,10 +407,6 @@
       return new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
     }
 
-    function fetchJson(url) {
-      return fetch(url).then(function(res) { return res.json(); });
-    }
-
     /* ── URL PARAMS ── */
     var params = new URLSearchParams(window.location.search);
     var playerId   = params.get('id') || '';
@@ -451,7 +447,8 @@
     });
 
     /* ── RENDER HERO ── */
-    function renderHero(player, stats) {
+    function renderHero(player, stats, options) {
+      var view = options || {};
       var name = player.name || 'Unknown Player';
       var photo = player.photo || null;
       var position = player.position || null;
@@ -483,6 +480,10 @@
       var clubHref = teamId && leagueId ? 'club.html?id=' + encodeURIComponent(teamId) + '&league=' + encodeURIComponent(leagueId) + '&from=player' : '#';
       var teamName = player.teamName || params.get('teamName') || '';
       var teamCrest = player.teamCrest || null;
+      var jumpLinks = [];
+      if (view.hasForm) jumpLinks.push('<a href="#form-section">Form</a>');
+      if (view.hasMatches) jumpLinks.push('<a href="#matches-section">Fixtures</a>');
+      if (teamName && view.hasClubLink !== false) jumpLinks.push('<a href="' + clubHref + '">Club page</a>');
 
       var clubLinkInner = (teamCrest ? '<img class="player-club-crest" src="' + escHtml(teamCrest) + '" alt="" onerror="this.style.display=\'none\'">' : '') +
         (teamName || 'Club');
@@ -498,11 +499,7 @@
         '<span class="player-comp">' + escHtml(leagueName) + '</span>' +
         (positionBadge ? '<span class="player-league-dot"></span>' + positionBadge : '') +
         '</div>' +
-        '<div class="player-jump">' +
-        '<a href="#form-section">Form</a>' +
-        '<a href="#matches-section">Fixtures</a>' +
-        (teamName ? '<a href="' + clubHref + '">Club page</a>' : '') +
-        '</div>' +
+        (jumpLinks.length ? '<div class="player-jump">' + jumpLinks.join('') + '</div>' : '') +
         '</div></div>';
 
       // Stat cards
@@ -539,7 +536,8 @@
     }
 
     /* ── RENDER INTEL ── */
-    function renderIntel(player, form) {
+    function renderIntel(player, form, options) {
+      var view = options || {};
       var name = player.name || 'This player';
       var teamName = player.teamName || params.get('teamName') || 'their club';
       var goalsVal = goals;
@@ -553,30 +551,37 @@
         ? wins + 'W · ' + draws + 'D · ' + losses + 'L from the last ' + form.length + ' matches'
         : 'Recent form data loading';
 
-      var copy = name + ' currently has ' + goalsVal + ' goal' + (goalsVal !== 1 ? 's' : '') +
-        (assistsVal > 0 ? ' and ' + assistsVal + ' assist' + (assistsVal !== 1 ? 's' : '') : '') +
-        ' in the ' + leagueName + ' this season.' +
-        ' Their club, ' + teamName + ', has recorded ' + formSummary.toLowerCase() + '.';
+      var copy;
+      if (view.dataUnavailable) {
+        copy = 'Live player-detail data could not be loaded right now. Season goal and assist totals from the player hub are still shown here, and the club route remains available when team context is known.';
+      } else {
+        copy = name + ' currently has ' + goalsVal + ' goal' + (goalsVal !== 1 ? 's' : '') +
+          (assistsVal > 0 ? ' and ' + assistsVal + ' assist' + (assistsVal !== 1 ? 's' : '') : '') +
+          ' in the ' + leagueName + ' this season.' +
+          ' Their club, ' + teamName + ', has recorded ' + formSummary.toLowerCase() + '.';
 
-      var rankNote = rank ? 'Ranked #' + rank + ' in the ' + leagueName + ' scoring charts.' : '';
-      if (rankNote) copy += ' ' + rankNote;
+        var rankNote = rank ? 'Ranked #' + rank + ' in the ' + leagueName + ' scoring charts.' : '';
+        if (rankNote) copy += ' ' + rankNote;
+      }
 
-      document.getElementById('intelTitle').textContent = name + ' · ' + leagueName + ' ' + new Date().getFullYear();
+      document.getElementById('intelTitle').textContent = view.dataUnavailable ? 'Player detail currently unavailable' : (name + ' · ' + leagueName + ' ' + new Date().getFullYear());
       document.getElementById('intelCopy').textContent = copy;
-      document.getElementById('intelNote').textContent = leagueName;
+      document.getElementById('intelNote').textContent = view.dataUnavailable ? 'Limited detail' : leagueName;
 
       var clubHref = teamId && leagueId ? 'club.html?id=' + encodeURIComponent(teamId) + '&league=' + encodeURIComponent(leagueId) + '&from=player' : '#';
-      document.getElementById('intelLinks').innerHTML =
-        '<a class="intel-link" href="' + clubHref + '">Club page</a>' +
-        '<a class="intel-link" href="/results.html">Results</a>' +
-        '<a class="intel-link" href="/fixtures.html">Fixtures</a>';
+      var links = [];
+      if ((player.teamName || params.get('teamName')) && view.hasClubLink !== false) links.push('<a class="intel-link" href="' + clubHref + '">Club page</a>');
+      links.push('<a class="intel-link" href="/results.html">Results</a>');
+      links.push('<a class="intel-link" href="/fixtures.html">Fixtures</a>');
+      document.getElementById('intelLinks').innerHTML = links.join('');
 
       var notePosition = player.position ? ('<div class="intel-note"><div class="intel-note-label">Position</div><div class="intel-note-value">' + escHtml(player.position) + '</div></div>') : '';
       var noteNationality = player.nationality ? ('<div class="intel-note"><div class="intel-note-label">Nationality</div><div class="intel-note-value">' + escHtml(player.nationality) + '</div></div>') : '';
       var noteGoals = '<div class="intel-note"><div class="intel-note-label">Season goals</div><div class="intel-note-value">' + escHtml(goalsVal) + '</div><div class="intel-note-copy">In the current ' + escHtml(leagueName) + ' campaign.</div></div>';
       var noteAssists = assistsVal > 0 ? ('<div class="intel-note"><div class="intel-note-label">Season assists</div><div class="intel-note-value">' + escHtml(assistsVal) + '</div></div>') : '';
+      var noteStatus = view.dataUnavailable ? '<div class="intel-note"><div class="intel-note-label">Status</div><div class="intel-note-value">Limited</div><div class="intel-note-copy">Profile-specific data is temporarily unavailable.</div></div>' : '';
 
-      document.getElementById('intelSide').innerHTML = noteGoals + noteAssists + notePosition + noteNationality;
+      document.getElementById('intelSide').innerHTML = noteStatus + noteGoals + noteAssists + notePosition + noteNationality;
     }
 
     /* ── RENDER FORM ── */
@@ -669,6 +674,15 @@
         : '<span class="club-link-crest-placeholder" id="clubLinkCrestWrap"></span>';
     }
 
+    function hasUsableDetail(player, recentMatches, upcomingFixtures, form) {
+      return Boolean(
+        (player && (player.name || player.position || player.nationality || player.photo)) ||
+        (recentMatches && recentMatches.length) ||
+        (upcomingFixtures && upcomingFixtures.length) ||
+        (form && form.length)
+      );
+    }
+
     /* ── LOAD ── */
     if (!playerId || !teamId || !leagueId) {
       document.getElementById('heroMain').innerHTML = '<div class="error-msg">Missing player, team, or competition data. Return to the <a href="/players.html" style="color:#e84040;">player hub</a>.</div>';
@@ -679,7 +693,7 @@
         '&leagueId=' + encodeURIComponent(leagueId);
       if (seasonId) url += '&seasonId=' + encodeURIComponent(seasonId);
 
-      fetchJson(url).then(function(data) {
+      FarPostShared.fetchJson(url).then(function(data) {
         var player = data.player || {};
         var recentMatches = data.recentMatches || [];
         var upcomingFixtures = data.upcomingFixtures || [];
@@ -692,8 +706,18 @@
         // Stash next fixture for hero card
         window._nextFixture = upcomingFixtures[0] || null;
 
-        renderHero(player, { goals: goals, assists: assists });
-        renderIntel(player, form);
+        if (!hasUsableDetail(player, recentMatches, upcomingFixtures, form)) {
+          throw new Error('Empty player detail payload');
+        }
+
+        renderHero(player, { goals: goals, assists: assists }, {
+          hasForm: form.length || recentMatches.length,
+          hasMatches: recentMatches.length || upcomingFixtures.length,
+          hasClubLink: Boolean(player.teamName || params.get('teamName'))
+        });
+        renderIntel(player, form, {
+          hasClubLink: Boolean(player.teamName || params.get('teamName'))
+        });
         renderForm(form, recentMatches);
         renderMatches(recentMatches, upcomingFixtures);
         renderClubLink(player);
@@ -701,10 +725,25 @@
         document.getElementById('loadingBar').classList.add('done');
       }).catch(function() {
         // Render what we have from URL params
-        renderHero({ name: 'Player profile', photo: null, position: null }, { goals: goals, assists: assists });
-        renderIntel({ name: 'This player', position: null, nationality: null }, []);
+        var fallbackPlayer = {
+          name: params.get('teamName') ? 'Player profile' : 'Player profile',
+          photo: null,
+          position: null,
+          nationality: null,
+          teamName: params.get('teamName') || '',
+          teamCrest: params.get('teamCrest') || null
+        };
+        renderHero(fallbackPlayer, { goals: goals, assists: assists }, {
+          hasForm: false,
+          hasMatches: false,
+          hasClubLink: Boolean(fallbackPlayer.teamName)
+        });
+        renderIntel(fallbackPlayer, [], {
+          dataUnavailable: true,
+          hasClubLink: Boolean(fallbackPlayer.teamName)
+        });
+        if (fallbackPlayer.teamName) renderClubLink(fallbackPlayer);
         document.getElementById('loadingBar').classList.add('done');
-        document.getElementById('intelNote').textContent = 'Data unavailable';
       });
     }
   </script>

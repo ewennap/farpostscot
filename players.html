@@ -79,6 +79,10 @@
     .overview-link { display: inline-flex; align-items: center; margin-top: 1rem; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #aaa; text-decoration: none; }
     .overview-link:hover { color: #fff; }
     .overview-leader { margin-top: 0.9rem; padding-top: 0.85rem; border-top: 1px solid #1e2022; display: flex; align-items: center; gap: 0.65rem; }
+    .overview-leader-link { display: block; margin-top: 0.9rem; text-decoration: none; color: inherit; border-radius: 4px; }
+    .overview-leader-link:hover .overview-leader-name,
+    .overview-leader-link:hover .overview-leader-goals { color: #fff; }
+    .overview-leader-link:focus-visible { outline: 2px solid rgba(232,64,64,0.5); outline-offset: 3px; }
     .overview-leader-photo { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: #1a1b1d; border: 1px solid #2a2b2d; }
     .overview-leader-info { min-width: 0; flex: 1; }
     .overview-leader-name { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; color: #e8e6e1; line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -426,7 +430,8 @@
       }
       setHTML(grid, overviewCards.map(function(card) {
         const leader = card.topScorers && card.topScorers[0];
-        const leaderBlock = leader ? (
+        const leaderHref = leader ? buildPlayerHref(leader, card.leagueId, card.seasonId) : '';
+        const leaderInner = leader ? (
           '<div class="overview-leader">' +
           '<div style="position:relative;width:32px;height:32px;flex-shrink:0;">' +
           '<div class="overview-leader-photo" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#444;font-family:\'Barlow Condensed\',sans-serif;">' + escHtml(initials(leader.playerName)) + '</div>' +
@@ -436,6 +441,11 @@
           '<div><div class="overview-leader-goals">' + escHtml(leader.goals) + '</div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#555;text-align:right;">goals</div></div>' +
           '</div>'
         ) : '';
+        const leaderBlock = leaderInner
+          ? (leaderHref
+            ? '<a class="overview-leader-link" href="' + escHtml(leaderHref) + '" aria-label="Open ' + escHtml(leader.playerName) + ' player page">' + leaderInner + '</a>'
+            : leaderInner)
+          : '';
         return (
           '<div class="overview-card">' +
           '<div class="overview-eyebrow"><div class="overview-competition">' + escHtml(card.leagueName) + '</div><div class="overview-type">League</div></div>' +

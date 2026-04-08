@@ -476,7 +476,37 @@ test('players hub renders and links to player pages', async ({ page }) => {
 
   const href = await page.locator('#directory-grid .player-card').first().getAttribute('href');
   expect(href).toContain('player.html?id=p1');
+  await expect(page.locator('#overview-grid .overview-card').first().getByRole('link', { name: /open mara boyd player page/i })).toHaveAttribute('href', /player\.html\?id=p1/);
   await expect(page.locator('#watchlist-grid .watch-card').first().getByRole('link', { name: 'Club page' })).toHaveAttribute('href', /club\.html/);
+});
+
+test('players hub overview routes filter the directory and survive per-league fixture failures', async ({ page }) => {
+  await mockSuccessfulData(page);
+  await page.unroute('**/.netlify/functions/fixtures?league=*');
+  await page.route('**/.netlify/functions/fixtures?league=*', async route => {
+    const leagueId = new URL(route.request().url()).searchParams.get('league');
+    if (leagueId === '504') {
+      await route.fulfill({
+        status: 500,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'Fixture feed unavailable' })
+      });
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(fixturesPayload(leagueId))
+    });
+  });
+
+  await page.goto('/players.html');
+
+  await page.locator('#overview-grid .overview-card').nth(1).getByRole('link', { name: 'View scorers' }).click();
+  await expect(page.locator('#directory-note')).toHaveText('1 player shown');
+  await expect(page.locator('#directory-grid .player-card')).toHaveCount(1);
+  await expect(page.locator('#directory-grid .player-card').first()).toHaveAttribute('href', /player\.html\?id=p3/);
+  await expect(page.locator('#directory-grid .player-card .player-card-next')).toContainText('Next fixture to be confirmed');
 });
 
 test('clubs hub renders and links correctly', async ({ page }) => {
@@ -597,6 +627,22 @@ test('critical pages fail gracefully on bad or missing data', async ({ page }) =
   await expect(page.locator('#overview-grid .fp-state__title')).toHaveText('Could not load player hub');
 
   await page.unroute('**/.netlify/functions/players-hub');
+
+  await page.route('**/.netlify/functions/player-detail?playerId=*', async route => {
+    await route.fulfill({
+      status: 500,
+      contentType: 'application/json',
+      body: JSON.stringify({ error: 'No player detail' })
+    });
+  });
+
+  await page.goto('/player.html?id=p1&teamId=501-club-1&teamName=501%20Leaders&leagueId=501&goals=14&assists=6&rank=1');
+  await expect(page.locator('#intelTitle')).toHaveText('Player detail currently unavailable');
+  await expect(page.locator('#intelNote')).toHaveText('Limited detail');
+  await expect(page.locator('#heroMain .player-jump')).not.toContainText('Form');
+  await expect(page.locator('#heroMain .player-jump')).not.toContainText('Fixtures');
+  await expect(page.locator('#heroMain .player-jump a')).toHaveCount(1);
+  await expect(page.locator('#heroMain .player-jump a').first()).toHaveAttribute('href', /club\.html\?id=501-club-1&league=501/);
 
   await page.route('**/.netlify/functions/match-detail?fixtureId=*', async route => {
     await route.fulfill({
