@@ -523,6 +523,111 @@ test('clubs hub renders and links correctly', async ({ page }) => {
   await expect(page.locator('#watchlist-grid .watch-card').first().getByRole('link', { name: 'Leading scorer' })).toHaveAttribute('href', /player\.html\?id=p1/);
 });
 
+test('clubs hub all-directory search keeps deduped clubs discoverable across cup memberships', async ({ page }) => {
+  await page.route('**/.netlify/functions/players-hub', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ leagues: [] })
+    });
+  });
+
+  await page.route('**/.netlify/functions/standings?league=*', async route => {
+    const leagueId = new URL(route.request().url()).searchParams.get('league');
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(
+        ['501', '504', '516'].includes(leagueId)
+          ? standingsPayload(leagueId)
+          : { standings: [] }
+      )
+    });
+  });
+
+  await page.route('**/.netlify/functions/fixtures?league=*', async route => {
+    const leagueId = new URL(route.request().url()).searchParams.get('league');
+    const fixturesByLeague = {
+      '501': fixturesPayload('501'),
+      '504': fixturesPayload('504'),
+      '516': fixturesPayload('516'),
+      '507': {
+        fixtures: [
+          {
+            id: '507-fixture-1',
+            leagueId: '507',
+            date: '2026-04-11T15:00:00Z',
+            round: 'Quarter-final',
+            home: {
+              id: '501-club-1',
+              name: '501 Leaders',
+              crest: 'https://images.example.com/501-crest-1.png'
+            },
+            away: {
+              id: '507-club-3',
+              name: '507 Town',
+              crest: 'https://images.example.com/507-crest-3.png'
+            }
+          },
+          {
+            id: '507-fixture-2',
+            leagueId: '507',
+            date: '2026-04-12T15:00:00Z',
+            round: 'Quarter-final',
+            home: {
+              id: '501-club-2',
+              name: '501 Challengers',
+              crest: 'https://images.example.com/501-crest-2.png'
+            },
+            away: {
+              id: '507-club-4',
+              name: '507 County',
+              crest: 'https://images.example.com/507-crest-4.png'
+            }
+          }
+        ]
+      },
+      '510': {
+        fixtures: [
+          {
+            id: '510-fixture-1',
+            leagueId: '510',
+            date: '2026-04-13T19:45:00Z',
+            round: 'Semi-final',
+            home: {
+              id: '504-club-1',
+              name: '504 Leaders',
+              crest: 'https://images.example.com/504-crest-1.png'
+            },
+            away: {
+              id: '510-club-3',
+              name: '510 Town',
+              crest: 'https://images.example.com/510-crest-3.png'
+            }
+          }
+        ]
+      }
+    };
+
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(fixturesByLeague[leagueId] || { fixtures: [] })
+    });
+  });
+
+  await page.goto('/clubs.html');
+
+  await page.locator('#club-search').fill('Scottish Cup');
+  const leadersCard = page.locator('#directory-grid .club-card', {
+    has: page.locator('.club-card-name', { hasText: /^501 Leaders$/ })
+  });
+  await expect(page.locator('#directory-note')).toHaveText('4 clubs shown');
+  await expect(page.locator('#directory-grid .club-card')).toHaveCount(4);
+  await expect(leadersCard).toHaveCount(1);
+  await expect(leadersCard).toHaveAttribute('href', /club\.html\?id=501-club-1&league=501/);
+});
+
 test('match page renders essential match content', async ({ page }) => {
   await mockSuccessfulData(page);
   await page.route('**/.netlify/functions/players-hub', async route => {

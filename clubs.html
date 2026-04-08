@@ -553,6 +553,34 @@
       return Array.from(seen.values()).sort((a, b) => a.name.localeCompare(b.name));
     }
 
+    function buildDirectorySearchTerms(card) {
+      return [card.name, card.competitionName]
+        .concat(card.searchCompetitionNames || [])
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+    }
+
+    function buildAllDirectoryCards(cards) {
+      return Array.from(cards.reduce((map, card) => {
+        const key = String(card.id || '');
+        if (!key) return map;
+        const existing = map.get(key);
+        if (!existing) {
+          const competitionNames = [card.competitionName].filter(Boolean);
+          map.set(key, Object.assign({}, card, { searchCompetitionNames: competitionNames }));
+          return map;
+        }
+        if ((!existing.position && card.position) || (!existing.competitionId && card.competitionId)) {
+          Object.assign(existing, card);
+        }
+        if (card.competitionName && existing.searchCompetitionNames.indexOf(card.competitionName) === -1) {
+          existing.searchCompetitionNames.push(card.competitionName);
+        }
+        return map;
+      }, new Map()).values()).sort((a, b) => a.name.localeCompare(b.name));
+    }
+
     function renderTabs() {
       const tabs = document.getElementById('competition-tabs');
       setHTML(tabs, COMPETITIONS.map(competition => '<button class="competition-tab' + (competition.id === activeCompetition ? ' active' : '') + '" data-competition="' + competition.id + '">' + escHtml(competition.name) + '</button>').join(''));
@@ -607,15 +635,11 @@
       const note = document.getElementById('directory-note');
       const query = document.getElementById('club-search').value.trim().toLowerCase();
       const directorySource = activeCompetition === 'all'
-        ? Array.from(clubDirectory.reduce((map, card) => {
-            const existing = map.get(card.id);
-            if (!existing || (!existing.position && card.position)) map.set(card.id, card);
-            return map;
-          }, new Map()).values()).sort((a, b) => a.name.localeCompare(b.name))
+        ? buildAllDirectoryCards(clubDirectory)
         : clubDirectory;
       const filtered = directorySource.filter(card => {
         const competitionMatch = activeCompetition === 'all' || card.competitionId === activeCompetition;
-        const searchMatch = !query || card.name.toLowerCase().includes(query) || card.competitionName.toLowerCase().includes(query);
+        const searchMatch = !query || buildDirectorySearchTerms(card).includes(query);
         return competitionMatch && searchMatch;
       });
 
