@@ -174,13 +174,13 @@
   </div>
 
   <div class="stay-section" id="stay-section" style="display:none;">
-    <div class="stay-shell">
-      <div class="stay-head">
-        <div class="stay-label">Stay with Far Post this week</div>
-        <div class="stay-copy">A restrained route into the next story and the latest podcast without turning the article page into a widget stack.</div>
+      <div class="stay-shell">
+        <div class="stay-head">
+          <div class="stay-label">Stay with Far Post this week</div>
+          <div class="stay-copy">One more read and the latest episode from Far Post.</div>
+        </div>
+        <div class="stay-grid" id="stay-grid"></div>
       </div>
-      <div class="stay-grid" id="stay-grid"></div>
-    </div>
   </div>
 
   <footer class="footer">
@@ -366,8 +366,8 @@
         if (!latestArticle && !latestEpisode) return;
         section.style.display = '';
         setHTML(grid, `
-          ${latestArticle ? `<a class="stay-card" href="article.html?id=${encodeURIComponent(latestArticle._id)}"><div class="stay-kicker">${escHtml(storyLabel(latestArticle))}</div><div class="stay-title">${escHtml(latestArticle.title)}</div><div class="stay-meta">${latestArticle.publishedAt ? escHtml(formatDate(latestArticle.publishedAt, { day:'numeric', month:'long', year:'numeric' })) + ' · ' : ''}The next useful route back into the Far Post news desk.</div></a>` : ''}
-          ${latestEpisode ? `<a class="stay-card" href="${escHtml(latestEpisode.querySelector('link')?.textContent || 'podcasts.html')}" target="_blank" rel="noreferrer"><div class="stay-kicker">Across the Tiers</div><div class="stay-title">${escHtml(latestEpisode.querySelector('title')?.textContent || 'Latest episode')}</div><div class="stay-meta">Podcast cross-promotion with a light footprint so the article still feels editorial-first.</div></a>` : ''}
+          ${latestArticle ? `<a class="stay-card" href="article.html?id=${encodeURIComponent(latestArticle._id)}"><div class="stay-kicker">${escHtml(storyLabel(latestArticle))}</div><div class="stay-title">${escHtml(latestArticle.title)}</div><div class="stay-meta">${latestArticle.publishedAt ? escHtml(formatDate(latestArticle.publishedAt, { day:'numeric', month:'long', year:'numeric' })) + ' · ' : ''}A recommended read from the Far Post desk.</div></a>` : ''}
+          ${latestEpisode ? `<a class="stay-card" href="${escHtml(latestEpisode.querySelector('link')?.textContent || 'podcasts.html')}" target="_blank" rel="noreferrer"><div class="stay-kicker">Across the Tiers</div><div class="stay-title">${escHtml(latestEpisode.querySelector('title')?.textContent || 'Latest episode')}</div><div class="stay-meta">The latest Across the Tiers episode.</div></a>` : ''}
         `);
       } catch (error) {
         section.style.display = 'none';
