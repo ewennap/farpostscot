@@ -509,6 +509,81 @@ test('players hub overview routes filter the directory and survive per-league fi
   await expect(page.locator('#directory-grid .player-card .player-card-next')).toContainText('Next fixture to be confirmed');
 });
 
+test('players hub avoids creative-watch copy when assist data is not meaningful', async ({ page }) => {
+  await page.route('**/.netlify/functions/players-hub', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        leagues: [
+          {
+            leagueId: '501',
+            leagueName: 'Premiership',
+            seasonId: '1001',
+            topScorers: [
+              {
+                playerId: 'p1',
+                playerName: 'Mara Boyd',
+                playerPhoto: 'https://images.example.com/player-1.jpg',
+                teamId: '501-club-1',
+                teamName: '501 Leaders',
+                teamCrest: 'https://images.example.com/crest-1.png',
+                goals: 14,
+                assists: 0,
+                rank: 1
+              },
+              {
+                playerId: 'p2',
+                playerName: 'Iain Kerr',
+                playerPhoto: 'https://images.example.com/player-2.jpg',
+                teamId: '501-club-2',
+                teamName: '501 Challengers',
+                teamCrest: 'https://images.example.com/crest-2.png',
+                goals: 11,
+                assists: 0,
+                rank: 2
+              }
+            ]
+          },
+          {
+            leagueId: '504',
+            leagueName: 'Championship',
+            seasonId: '1002',
+            topScorers: [
+              {
+                playerId: 'p3',
+                playerName: 'Ross Muir',
+                playerPhoto: 'https://images.example.com/player-3.jpg',
+                teamId: '504-club-1',
+                teamName: '504 Leaders',
+                teamCrest: 'https://images.example.com/crest-3.png',
+                goals: 10,
+                assists: 0,
+                rank: 1
+              }
+            ]
+          }
+        ]
+      })
+    });
+  });
+
+  await page.route('**/.netlify/functions/fixtures?league=*', async route => {
+    const leagueId = new URL(route.request().url()).searchParams.get('league');
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(fixturesPayload(leagueId))
+    });
+  });
+
+  await page.goto('/players.html');
+
+  await expect(page.locator('#watchlist-grid')).toContainText('Secondary scorer');
+  await expect(page.locator('#watchlist-grid')).not.toContainText('Creative watch');
+  await expect(page.locator('#watchlist-grid')).not.toContainText('0 assists');
+});
+
 test('clubs hub renders and links correctly', async ({ page }) => {
   await mockSuccessfulData(page);
   await page.goto('/clubs.html');

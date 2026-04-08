@@ -592,6 +592,38 @@
       }).filter(Boolean).join(''));
     }
 
+    function buildSecondaryWatch(sortedByGoals, sortedByAssists) {
+      const assistLeader = sortedByAssists[0];
+      if (assistLeader && assistLeader.assists > 0) {
+        return {
+          kicker: 'Creative watch',
+          name: assistLeader.playerName,
+          sub: assistLeader.teamName + ' · ' + assistLeader.leagueName,
+          copy: assistLeader.playerName + ' is creating as well as scoring, making this a strong all-round profile to revisit.',
+          pills: [assistLeader.assists + ' assists', summariseNextFixture(assistLeader)],
+          playerHref: buildPlayerHref(assistLeader, assistLeader.leagueId, assistLeader.seasonId),
+          clubHref: buildClubHref(assistLeader.teamId, assistLeader.leagueId)
+        };
+      }
+
+      const primaryLeader = sortedByGoals[0];
+      const secondaryScorer = sortedByGoals.find(function(player) {
+        return player.playerId !== (primaryLeader && primaryLeader.playerId);
+      }) || primaryLeader;
+
+      if (!secondaryScorer) return null;
+
+      return {
+        kicker: 'Secondary scorer',
+        name: secondaryScorer.playerName,
+        sub: secondaryScorer.teamName + ' · ' + secondaryScorer.leagueName,
+        copy: secondaryScorer.playerName + ' keeps the scoring picture moving beyond the headline leader, with a direct route back into club context.',
+        pills: [secondaryScorer.goals + ' goals', summariseNextFixture(secondaryScorer)],
+        playerHref: buildPlayerHref(secondaryScorer, secondaryScorer.leagueId, secondaryScorer.seasonId),
+        clubHref: buildClubHref(secondaryScorer.teamId, secondaryScorer.leagueId)
+      };
+    }
+
     async function loadHub() {
       try {
         const [data, fixturesPayloads] = await Promise.all([
@@ -637,6 +669,7 @@
         const sortedByGoals = playerDirectory.slice().sort(function(a, b) { return (b.goals || 0) - (a.goals || 0); });
         const sortedByAssists = playerDirectory.slice().sort(function(a, b) { return (b.assists || 0) - (a.assists || 0); });
         const lowerLeagueSpotlight = playerDirectory.find(function(player) { return player.leagueId !== '501'; }) || sortedByGoals[0];
+        const secondaryWatch = buildSecondaryWatch(sortedByGoals, sortedByAssists);
         playerWatchlist = [
           sortedByGoals[0] ? {
             kicker: 'Leading scorer',
@@ -647,17 +680,7 @@
             playerHref: buildPlayerHref(sortedByGoals[0], sortedByGoals[0].leagueId, sortedByGoals[0].seasonId),
             clubHref: buildClubHref(sortedByGoals[0].teamId, sortedByGoals[0].leagueId)
           } : null,
-          sortedByAssists[0] ? {
-            kicker: 'Creative watch',
-            name: sortedByAssists[0].playerName,
-            sub: sortedByAssists[0].teamName + ' · ' + sortedByAssists[0].leagueName,
-            copy: sortedByAssists[0].assists > 0
-              ? sortedByAssists[0].playerName + ' is creating as well as scoring, making this a strong all-round profile to revisit.'
-              : sortedByAssists[0].playerName + ' remains one of the most rounded attacking profiles in the current feed.',
-            pills: [sortedByAssists[0].assists + ' assists', summariseNextFixture(sortedByAssists[0])],
-            playerHref: buildPlayerHref(sortedByAssists[0], sortedByAssists[0].leagueId, sortedByAssists[0].seasonId),
-            clubHref: buildClubHref(sortedByAssists[0].teamId, sortedByAssists[0].leagueId)
-          } : null,
+          secondaryWatch,
           lowerLeagueSpotlight ? {
             kicker: 'Lower-league spotlight',
             name: lowerLeagueSpotlight.playerName,
