@@ -9,6 +9,13 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
   <title>Far Post — Scottish Football</title>
+  <meta name="description" content="Far Post brings premium Scottish football editorial with club, player and match context on every story.">
+  <meta property="og:title" content="Far Post — Scottish Football">
+  <meta property="og:description" content="Far Post brings premium Scottish football editorial with club, player and match context on every story.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="/android-chrome-512x512.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="/article.html">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/farpost.css">
@@ -51,7 +58,8 @@
     .article-loading { font-size: 14px; color: #555; padding: 4rem 0; text-align: center; }
     .article-error { font-size: 14px; color: #e84040; padding: 4rem 0; text-align: center; }
     .club-links-section { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #2a2b2d; }
-    .club-links-label { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #666; margin-bottom: 0.9rem; }
+    .club-links-label { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #666; margin-bottom: 0.45rem; }
+    .club-links-copy { font-size: 13px; line-height: 1.65; color: #7d7871; margin-bottom: 0.9rem; }
     .club-links-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border: 1px solid #2a2b2d; }
     .club-link-card { display: flex; align-items: center; justify-content: space-between; gap: 0.9rem; padding: 0.95rem 1rem; text-decoration: none; color: inherit; border-right: 1px solid #2a2b2d; border-bottom: 1px solid #2a2b2d; background: linear-gradient(180deg, #131415 0%, #101112 100%); transition: background 0.15s; }
     .club-link-card:nth-child(2n) { border-right: none; }
@@ -61,6 +69,8 @@
     .club-link-name { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; line-height: 1; color: #f1eee8; }
     .club-link-meta { font-size: 12px; color: #777; margin-top: 0.25rem; }
     .club-link-arrow { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #e84040; }
+    .article-topics { display: flex; flex-wrap: wrap; gap: 0.45rem; margin: -0.4rem 0 1.2rem; }
+    .article-topic { display: inline-flex; align-items: center; padding: 0.32rem 0.55rem; border: 1px solid #2a2b2d; background: #111213; font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #aaa; }
 
     .related-section { border-top: 1px solid #2a2b2d; padding: 2rem 1.5rem; max-width: 740px; margin: 0 auto; }
     .related-title { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #555; margin-bottom: 1.25rem; }
@@ -74,6 +84,18 @@
     .related-card-body { padding: 0.875rem 1.25rem; }
     .related-card-tag { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #e84040; margin-bottom: 5px; }
     .related-card-title { font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 700; line-height: 1.1; color: #e8e6e1; }
+    .stay-section { border-top: 1px solid #2a2b2d; padding: 2rem 1.5rem 2.5rem; max-width: 740px; margin: 0 auto; }
+    .stay-shell { border: 1px solid #2a2b2d; background: linear-gradient(180deg, #131415 0%, #101112 100%); }
+    .stay-head { padding: 1rem 1.25rem; border-bottom: 1px solid #2a2b2d; }
+    .stay-label { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #e84040; }
+    .stay-copy { margin-top: 0.45rem; font-size: 13px; line-height: 1.65; color: #8a857d; }
+    .stay-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .stay-card { display: block; padding: 1rem 1.25rem 1.15rem; text-decoration: none; color: inherit; border-right: 1px solid #2a2b2d; }
+    .stay-card:last-child { border-right: none; }
+    .stay-card:hover { background: #161718; }
+    .stay-kicker { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #aaa; margin-bottom: 0.4rem; }
+    .stay-title { font-family: 'Barlow Condensed', sans-serif; font-size: 24px; font-weight: 700; line-height: 1; color: #f2efe8; }
+    .stay-meta { margin-top: 0.55rem; font-size: 12px; color: #706b64; line-height: 1.55; }
 
     .footer { padding: 1.25rem; border-top: 1px solid #2a2b2d; background: #0d0e0f; display: flex; align-items: center; justify-content: space-between; }
     .footer-logo { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 0.12em; color: #333; }
@@ -97,6 +119,9 @@
       .related-grid { grid-template-columns: 1fr; }
       .related-card { border-right: none; border-bottom: 1px solid #2a2b2d; }
       .related-card:last-child { border-bottom: none; }
+      .stay-grid { grid-template-columns: 1fr; }
+      .stay-card { border-right: none; border-bottom: 1px solid #2a2b2d; }
+      .stay-card:last-child { border-bottom: none; }
       .footer { flex-direction: column; gap: 6px; text-align: center; }
     }
   </style>
@@ -148,6 +173,16 @@
     <div class="related-grid" id="related-grid"></div>
   </div>
 
+  <div class="stay-section" id="stay-section" style="display:none;">
+    <div class="stay-shell">
+      <div class="stay-head">
+        <div class="stay-label">Stay with Far Post this week</div>
+        <div class="stay-copy">A restrained route into the next story and the latest podcast without turning the article page into a widget stack.</div>
+      </div>
+      <div class="stay-grid" id="stay-grid"></div>
+    </div>
+  </div>
+
   <footer class="footer">
     <div class="footer-logo">FAR POST<span>.</span></div>
     <div class="footer-copy">Scottish football. No filter.</div>
@@ -158,13 +193,20 @@
     const {
       categoryLabel,
       escHtml,
+      extractPortableText,
       fetchJson,
       formatDate,
+      getEditorialConfig,
       initials,
       renderState,
+      setJsonLd,
+      setPageMetadata,
       sanityImageUrl,
       setHTML,
-      storyCardMarkup
+      storyCardMarkup,
+      storyLabel,
+      truncateText,
+      uniqueStrings
     } = window.FarPost;
     const getParam = k => new URLSearchParams(window.location.search).get(k);
     const CLUB_LEAGUES = [
@@ -183,12 +225,25 @@
     }
 
     function extractText(post) {
-      const bodyText = (post.body || []).map(block => (block.children || []).map(child => child.text || '').join(' ')).join(' ');
+      const bodyText = extractPortableText(post.body || []);
       return [post.title, post.excerpt, bodyText].filter(Boolean).join(' ').toLowerCase();
     }
 
-    async function loadRelatedClubs(post) {
+    function getStorySignals(post) {
+      const editorial = getEditorialConfig(post);
       const text = extractText(post);
+      return {
+        editorial,
+        text,
+        topics: uniqueStrings([].concat(editorial.topics).concat(editorial.labels)),
+        teams: editorial.teams,
+        players: editorial.players
+      };
+    }
+
+    async function loadRelatedClubs(post) {
+      const signals = getStorySignals(post);
+      const text = signals.text;
       if (!text) return [];
 
       const payloads = await Promise.all(CLUB_LEAGUES.map(async league => {
@@ -206,30 +261,117 @@
         .filter(club => {
           const name = (club.team || '').toLowerCase().trim();
           if (!name || seen.has(name)) return false;
-          if (!text.includes(name)) return false;
+          if (!(signals.teams.map(value => value.toLowerCase()).includes(name) || text.includes(name))) return false;
           seen.add(name);
           return true;
         })
         .slice(0, 4);
     }
 
-    function renderClubLinks(clubs) {
-      if (!clubs.length) return '';
+    async function loadRelatedPlayers(post) {
+      const signals = getStorySignals(post);
+      const data = await fetchJson('/.netlify/functions/players-hub');
+      const players = (data.leagues || []).flatMap(league =>
+        (league.topScorers || []).map(player => Object.assign({}, player, {
+          leagueId: league.leagueId,
+          seasonId: league.seasonId,
+          leagueName: league.leagueName
+        }))
+      );
+      const seen = new Set();
+      return players.filter(player => {
+        const name = String(player.playerName || '').trim();
+        if (!name) return false;
+        const key = name.toLowerCase();
+        if (seen.has(key)) return false;
+        if (!(signals.players.map(value => value.toLowerCase()).includes(key) || signals.text.includes(key))) return false;
+        seen.add(key);
+        return true;
+      }).slice(0, 4);
+    }
+
+    function renderContextLinks(clubs, players) {
+      if (!clubs.length && !players.length) return '';
+      const cards = []
+        .concat(clubs.map(club => `
+          <a class="club-link-card" href="club.html?id=${encodeURIComponent(club.teamId)}&league=${encodeURIComponent(club.leagueId)}&from=article">
+            <div class="club-link-copy">
+              <div class="club-link-name">${escHtml(club.team)}</div>
+              <div class="club-link-meta">${escHtml(club.leagueName)} club page</div>
+            </div>
+            <div class="club-link-arrow">Club</div>
+          </a>
+        `))
+        .concat(players.map(player => `
+          <a class="club-link-card" href="player.html?id=${encodeURIComponent(player.playerId)}&teamId=${encodeURIComponent(player.teamId || '')}&teamName=${encodeURIComponent(player.teamName || '')}&leagueId=${encodeURIComponent(player.leagueId || '')}&seasonId=${encodeURIComponent(player.seasonId || '')}&goals=${encodeURIComponent(player.goals || 0)}&assists=${encodeURIComponent(player.assists || 0)}&rank=${encodeURIComponent(player.rank || '')}&from=article">
+            <div class="club-link-copy">
+              <div class="club-link-name">${escHtml(player.playerName)}</div>
+              <div class="club-link-meta">${escHtml(player.teamName || player.leagueName || 'Player page')}</div>
+            </div>
+            <div class="club-link-arrow">Player</div>
+          </a>
+        `));
       return `
         <div class="club-links-section">
-          <div class="club-links-label">Relevant clubs</div>
+          <div class="club-links-label">Context around this story</div>
+          <div class="club-links-copy">Relevant club and player pages help the article connect back into the wider Far Post product instead of ending as a dead end.</div>
           <div class="club-links-grid">
-            ${clubs.map(club => `
-              <a class="club-link-card" href="club.html?id=${encodeURIComponent(club.teamId)}&league=${encodeURIComponent(club.leagueId)}&from=article">
-                <div class="club-link-copy">
-                  <div class="club-link-name">${escHtml(club.team)}</div>
-                  <div class="club-link-meta">${escHtml(club.leagueName)} club page</div>
-                </div>
-                <div class="club-link-arrow">Open</div>
-              </a>
-            `).join('')}
+            ${cards.join('')}
           </div>
         </div>`;
+    }
+
+    function renderTopics(post) {
+      const editorial = getEditorialConfig(post);
+      const topics = uniqueStrings([].concat(editorial.labels).concat(editorial.topics)).slice(0, 4);
+      if (!topics.length) return '';
+      return `<div class="article-topics">${topics.map(topic => `<span class="article-topic">${escHtml(topic)}</span>`).join('')}</div>`;
+    }
+
+    function scoreRelatedPost(current, candidate) {
+      const currentSignals = getStorySignals(current);
+      const candidateSignals = getStorySignals(candidate);
+      let score = 0;
+      if (current.category && current.category === candidate.category) score += 2;
+      currentSignals.topics.forEach(topic => {
+        if (candidateSignals.topics.map(value => value.toLowerCase()).includes(topic.toLowerCase())) score += 3;
+      });
+      currentSignals.teams.forEach(team => {
+        if (candidateSignals.teams.map(value => value.toLowerCase()).includes(team.toLowerCase())) score += 5;
+      });
+      currentSignals.players.forEach(player => {
+        if (candidateSignals.players.map(value => value.toLowerCase()).includes(player.toLowerCase())) score += 5;
+      });
+      currentSignals.teams.forEach(team => {
+        if (candidateSignals.text.includes(team.toLowerCase())) score += 2;
+      });
+      currentSignals.players.forEach(player => {
+        if (candidateSignals.text.includes(player.toLowerCase())) score += 2;
+      });
+      return score;
+    }
+
+    async function loadStayWithFarPost(currentId) {
+      const section = document.getElementById('stay-section');
+      const grid = document.getElementById('stay-grid');
+      try {
+        const articleQuery = encodeURIComponent(`*[_type=="post"&&_id!="${currentId}"]|order(publishedAt desc)[0...1]{_id,title,category,publishedAt,editorial,labels,topics}`);
+        const [articlesPayload, podcastResponse] = await Promise.all([
+          fetchJson(`/.netlify/functions/sanity-fetch?query=${articleQuery}`),
+          fetch('/.netlify/functions/podcast')
+        ]);
+        const latestArticle = (articlesPayload.result || [])[0];
+        const xml = podcastResponse.ok ? new DOMParser().parseFromString(await podcastResponse.text(), 'text/xml') : null;
+        const latestEpisode = xml ? xml.querySelector('item') : null;
+        if (!latestArticle && !latestEpisode) return;
+        section.style.display = '';
+        setHTML(grid, `
+          ${latestArticle ? `<a class="stay-card" href="article.html?id=${encodeURIComponent(latestArticle._id)}"><div class="stay-kicker">${escHtml(storyLabel(latestArticle))}</div><div class="stay-title">${escHtml(latestArticle.title)}</div><div class="stay-meta">${latestArticle.publishedAt ? escHtml(formatDate(latestArticle.publishedAt, { day:'numeric', month:'long', year:'numeric' })) + ' · ' : ''}The next useful route back into the Far Post news desk.</div></a>` : ''}
+          ${latestEpisode ? `<a class="stay-card" href="${escHtml(latestEpisode.querySelector('link')?.textContent || 'podcasts.html')}" target="_blank" rel="noreferrer"><div class="stay-kicker">Across the Tiers</div><div class="stay-title">${escHtml(latestEpisode.querySelector('title')?.textContent || 'Latest episode')}</div><div class="stay-meta">Podcast cross-promotion with a light footprint so the article still feels editorial-first.</div></a>` : ''}
+        `);
+      } catch (error) {
+        section.style.display = 'none';
+      }
     }
 
     async function loadArticle() {
@@ -246,7 +388,7 @@
         return;
       }
       try {
-        const q = encodeURIComponent(`*[_type=="post"&&_id=="${id}"][0]{title,category,excerpt,body,author,publishedAt,mainImage}`);
+        const q = encodeURIComponent(`*[_type=="post"&&_id=="${id}"][0]{_id,title,category,excerpt,body,author,publishedAt,_updatedAt,mainImage,editorial,labels,topics,tags,seo}`);
         const post = (await fetchJson(`/.netlify/functions/sanity-fetch?query=${q}`)).result;
         if (!post) {
           renderState(el, 'empty', {
@@ -257,10 +399,44 @@
           });
           return;
         }
-        document.title = `${post.title} — Far Post`;
-
         const imgRef = post.mainImage?.asset?._ref;
         const imgUrl = imgRef ? sanityImageUrl(imgRef) : null;
+        const editorial = getEditorialConfig(post);
+        const description = truncateText(editorial.seoDescription || post.excerpt || extractPortableText(post.body), 165);
+        setPageMetadata({
+          title: `${editorial.seoTitle || post.title} — Far Post`,
+          description,
+          path: `/article.html?id=${encodeURIComponent(id)}`,
+          canonicalPath: `/article.html?id=${encodeURIComponent(id)}`,
+          image: imgUrl ? `${imgUrl}?w=1400&h=800&fit=crop&auto=format` : '/android-chrome-512x512.png',
+          type: 'article',
+          section: storyLabel(post),
+          publishedTime: post.publishedAt,
+          modifiedTime: post._updatedAt || post.publishedAt,
+          keywords: uniqueStrings([].concat(editorial.labels).concat(editorial.topics).concat(editorial.teams).concat(editorial.players))
+        });
+        setJsonLd('article', {
+          '@context': 'https://schema.org',
+          '@type': 'NewsArticle',
+          headline: post.title,
+          description: description,
+          image: imgUrl ? [`${imgUrl}?w=1400&h=800&fit=crop&auto=format`] : undefined,
+          datePublished: post.publishedAt,
+          dateModified: post._updatedAt || post.publishedAt,
+          author: {
+            '@type': 'Person',
+            name: post.author || 'Far Post'
+          },
+          publisher: {
+            '@type': 'Organization',
+            name: 'Far Post',
+            logo: {
+              '@type': 'ImageObject',
+              url: `${window.location.origin}/android-chrome-512x512.png`
+            }
+          },
+          mainEntityOfPage: `${window.location.origin}/article.html?id=${encodeURIComponent(id)}`
+        });
 
         if (imgUrl) {
           heroEl.className = 'article-hero';
@@ -271,15 +447,22 @@
         }
 
         let relatedClubs = [];
+        let relatedPlayers = [];
         try {
           relatedClubs = await loadRelatedClubs(post);
         } catch (clubError) {
           relatedClubs = [];
         }
+        try {
+          relatedPlayers = await loadRelatedPlayers(post);
+        } catch (playerError) {
+          relatedPlayers = [];
+        }
 
         el.innerHTML = `
-          <div class="article-tag">${escHtml(categoryLabel(post.category))}</div>
+          <div class="article-tag">${escHtml(storyLabel(post))}</div>
           <h1 class="article-title">${escHtml(post.title)}</h1>
+          ${renderTopics(post)}
           <div class="article-meta">
             <div class="meta-avatar">${escHtml(initials(post.author))}</div>
             <div class="meta-details"><strong>${escHtml(post.author||'Ewen Napier')}</strong>${post.publishedAt?' &nbsp;·&nbsp; '+escHtml(formatDate(post.publishedAt, { day:'numeric', month:'long', year:'numeric' })) :''}</div>
@@ -288,9 +471,10 @@
             ${post.excerpt?`<p><em style="color:#aaa;">${escHtml(post.excerpt)}</em></p>`:''}
             ${renderBody(post.body)||'<p>Full article coming soon.</p>'}
           </div>
-          ${renderClubLinks(relatedClubs)}`;
+          ${renderContextLinks(relatedClubs, relatedPlayers)}`;
 
         loadRelated(id);
+        loadStayWithFarPost(id);
       } catch(e) {
         renderState(el, 'error', {
           eyebrow: 'Article',
@@ -305,10 +489,22 @@
       const grid = document.getElementById('related-grid');
       const section = document.getElementById('related-section');
       try {
-        const q = encodeURIComponent(`*[_type=="post"&&_id!="${currentId}"]|order(publishedAt desc)[0...2]{_id,title,category,mainImage}`);
-        const posts = (await fetchJson(`/.netlify/functions/sanity-fetch?query=${q}`)).result;
-        if (!posts?.length) { section.style.display='none'; return; }
-        setHTML(grid, posts.map(post => storyCardMarkup(post, {
+        const currentQuery = encodeURIComponent(`*[_type=="post"&&_id=="${currentId}"][0]{_id,title,category,excerpt,body,editorial,labels,topics,tags}`);
+        const relatedQuery = encodeURIComponent(`*[_type=="post"&&_id!="${currentId}"]|order(publishedAt desc)[0...10]{_id,title,category,excerpt,body,publishedAt,mainImage,editorial,labels,topics,tags}`);
+        const [currentPost, posts] = await Promise.all([
+          fetchJson(`/.netlify/functions/sanity-fetch?query=${currentQuery}`).then(payload => payload.result),
+          fetchJson(`/.netlify/functions/sanity-fetch?query=${relatedQuery}`).then(payload => payload.result || [])
+        ]);
+        const rankedPosts = posts
+          .map(post => ({ post, score: scoreRelatedPost(currentPost, post) }))
+          .sort((a, b) => {
+            if (b.score !== a.score) return b.score - a.score;
+            return new Date(b.post.publishedAt || 0) - new Date(a.post.publishedAt || 0);
+          })
+          .slice(0, 2)
+          .map(item => item.post);
+        if (!rankedPosts?.length) { section.style.display='none'; return; }
+        setHTML(grid, rankedPosts.map(post => storyCardMarkup(post, {
           cardClass: 'related-card',
           imageClass: 'related-card-img',
           placeholderClass: 'related-card-img-placeholder',

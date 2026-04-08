@@ -9,6 +9,13 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
   <title>Player — Far Post</title>
+  <meta name="description" content="Far Post player pages connect season output, club form, fixtures and results across Scottish football.">
+  <meta property="og:title" content="Player — Far Post">
+  <meta property="og:description" content="Far Post player pages connect season output, club form, fixtures and results across Scottish football.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="/android-chrome-512x512.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="/player.html">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
   <style>
@@ -369,8 +376,11 @@
     <span class="footer-tagline">Scottish football. No filter.</span>
   </footer>
 
+  <script src="/assets/farpost.js"></script>
   <script>
     /* ── UTILS ── */
+    var FarPostShared = window.FarPost;
+
     function escHtml(str) {
       if (str == null) return '';
       return String(str)
@@ -445,8 +455,24 @@
       var name = player.name || 'Unknown Player';
       var photo = player.photo || null;
       var position = player.position || null;
-
-      document.title = name + ' — Far Post';
+      var teamNameForMeta = player.teamName || params.get('teamName') || '';
+      FarPostShared.setPageMetadata({
+        title: name + ' — Far Post',
+        description: name + ' on Far Post: season output, recent club form, fixtures and results in Scottish football.',
+        path: '/player.html?id=' + encodeURIComponent(playerId) + '&teamId=' + encodeURIComponent(teamId) + '&leagueId=' + encodeURIComponent(leagueId),
+        canonicalPath: '/player.html?id=' + encodeURIComponent(playerId) + '&teamId=' + encodeURIComponent(teamId) + '&leagueId=' + encodeURIComponent(leagueId),
+        image: photo || '/android-chrome-512x512.png',
+        type: 'website',
+        keywords: [name, teamNameForMeta, leagueName, 'Scottish football player'].filter(Boolean)
+      });
+      FarPostShared.setJsonLd('player-page', {
+        '@context': 'https://schema.org',
+        '@type': 'Person',
+        name: name,
+        image: photo || undefined,
+        memberOf: teamNameForMeta ? { '@type': 'SportsTeam', name: teamNameForMeta } : undefined,
+        url: window.location.origin + '/player.html?id=' + encodeURIComponent(playerId) + '&teamId=' + encodeURIComponent(teamId) + '&leagueId=' + encodeURIComponent(leagueId)
+      });
 
       var photoEl = '<div class="player-photo-placeholder">' + escHtml(initials(name)) + '</div>' +
         (photo ? '<img class="player-photo" src="' + escHtml(photo) + '" alt="' + escHtml(name) + '" onerror="this.style.display=\'none\'">' : '');

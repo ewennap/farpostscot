@@ -9,6 +9,13 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
   <title>Far Post — Scottish Football</title>
+  <meta name="description" content="Far Post covers Scottish football with premium editorial, match context, clubs, players, results, fixtures and podcasts.">
+  <meta property="og:title" content="Far Post — Scottish Football">
+  <meta property="og:description" content="Premium Scottish football editorial with deeper routes into clubs, players, matches and podcasts.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="/android-chrome-512x512.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="/">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/farpost.css">
@@ -861,12 +868,17 @@
     const SANITY_DATASET = 'production';
     const {
       escHtml,
+      extractPortableText,
       fetchJson,
+      getEditorialConfig,
       getItunesImage,
       initials,
       podcastArtFrame,
       renderState,
-      setHTML
+      setHTML,
+      setPageMetadata,
+      storyLabel,
+      truncateText
     } = window.FarPost;
 
     const fmt = d => new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
@@ -877,6 +889,15 @@
       { id: '504', name: 'Championship' },
       { id: '516', name: 'League One' }
     ];
+
+    setPageMetadata({
+      title: 'Far Post — Scottish Football',
+      description: 'Far Post covers Scottish football with premium editorial, match context, clubs, players, results, fixtures and podcasts.',
+      canonicalPath: '/',
+      path: '/',
+      type: 'website',
+      keywords: ['Scottish football', 'Far Post', 'SPFL', 'football news', 'Scottish Premiership']
+    });
 
     function imageUrl(ref) {
       if (!ref) return null;
@@ -936,6 +957,7 @@
             <div class="hero-content${contentClass}">
               <div class="hero-eyebrow">
                 <span class="tag-pill">${catLabel(p.category)}</span>
+                ${getEditorialConfig(p).primaryLabel && normalizeLabel(getEditorialConfig(p).primaryLabel) !== normalizeLabel(catLabel(p.category)) ? `<span class="tag-pill" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.12);color:#f1eee8;">${escHtml(getEditorialConfig(p).primaryLabel)}</span>` : ''}
                 <span class="hero-date">${p.publishedAt?fmt(p.publishedAt):''}</span>
               </div>
               <h1 class="hero-headline${headlineClass}">${p.title}</h1>
@@ -948,7 +970,7 @@
 
       setHTML(stackEl, posts.slice(1,5).map(o =>
         `<div class="stacked-story" onclick="event.stopPropagation();window.location.href='article.html?id=${o._id}'">
-          <div class="stacked-tag">${catLabel(o.category)}</div>
+          <div class="stacked-tag">${escHtml(storyLabel(o))}</div>
           <div class="stacked-headline">${o.title}</div>
           <div class="stacked-meta">${o.publishedAt?fmt(o.publishedAt):''}</div>
         </div>`
@@ -963,7 +985,19 @@
 
     function renderEditorsPicks(posts) {
       const list = document.getElementById('editors-picks-list');
-      const picks = posts.slice(3, 6).length ? posts.slice(3, 6) : posts.slice(0, 3);
+      const explicitPicks = posts
+        .filter(post => {
+          const editorial = getEditorialConfig(post);
+          return editorial.editorsPick || editorial.editorsPickRank != null;
+        })
+        .sort((a, b) => {
+          const aRank = getEditorialConfig(a).editorsPickRank;
+          const bRank = getEditorialConfig(b).editorsPickRank;
+          if (aRank != null || bRank != null) return (aRank == null ? 999 : aRank) - (bRank == null ? 999 : bRank);
+          return new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0);
+        });
+      const fallbackPool = posts.filter(post => explicitPicks.indexOf(post) === -1);
+      const picks = explicitPicks.slice(0, 3).concat(fallbackPool.slice(0, Math.max(0, 3 - explicitPicks.length))).slice(0, 3);
       if (!picks.length) {
         renderState(list, 'empty', {
           eyebrow: 'Editor’s picks',
@@ -978,7 +1012,7 @@
         const read = readTime(post.body);
         return `<a class="identity-item" href="article.html?id=${post._id}">
           <div class="identity-copy">
-            <div class="identity-kicker">${catLabel(post.category)}</div>
+            <div class="identity-kicker">${escHtml(storyLabel(post))}</div>
             <div class="identity-name">${escHtml(post.title)}</div>
             <div class="identity-note">${escHtml(post.excerpt || 'A hand-picked route back into the wider Far Post editorial mix.')}</div>
             <div class="identity-meta">${escHtml(post.author || 'Far Post')}${post.publishedAt ? ' · ' + escHtml(fmt(post.publishedAt)) : ''}${read ? ' · ' + escHtml(read) : ''}</div>
@@ -1027,9 +1061,22 @@
     async function loadArticles() {
       const grid = document.getElementById('opinions-grid');
       try {
-        const q = encodeURIComponent('*[_type=="post"]|order(publishedAt desc)[0...6]{_id,title,category,excerpt,author,publishedAt,mainImage,body}');
+        const q = encodeURIComponent('*[_type=="post"]|order(publishedAt desc)[0...12]{_id,title,category,excerpt,author,publishedAt,_updatedAt,mainImage,body,editorial,labels,topics,tags,seo}');
         const response = await fetchJson(`/.netlify/functions/sanity-fetch?query=${q}`);
-        const posts = response.result;
+        const posts = (response.result || [])
+          .filter(post => !getEditorialConfig(post).suppressHomepage)
+          .sort((a, b) => {
+            const editorialA = getEditorialConfig(a);
+            const editorialB = getEditorialConfig(b);
+            const heroBucketA = editorialA.homeHero ? 0 : 1;
+            const heroBucketB = editorialB.homeHero ? 0 : 1;
+            if (heroBucketA !== heroBucketB) return heroBucketA - heroBucketB;
+            const heroRankA = editorialA.homeHeroRank != null ? editorialA.homeHeroRank : 999;
+            const heroRankB = editorialB.homeHeroRank != null ? editorialB.homeHeroRank : 999;
+            if (heroRankA !== heroRankB) return heroRankA - heroRankB;
+            return new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0);
+          })
+          .slice(0, 6);
         if (!posts?.length) {
           renderState(grid, 'empty', {
             eyebrow: 'Editorial',
@@ -1052,7 +1099,7 @@
           return `<a class="opinion-card" href="article.html?id=${p._id}">
             ${imgUrl?`<img class="opinion-card-image" src="${imgUrl}?w=600&h=320&fit=crop&auto=format" alt="${escHtml(p.title)}" loading="lazy" data-fallback="hide">`:'<div class="opinion-card-image-placeholder"></div>'}
             <div class="opinion-card-body">
-              <div class="opinion-label">${catLabel(p.category)}</div>
+              <div class="opinion-label">${escHtml(storyLabel(p))}</div>
               <div class="opinion-headline">${p.title}</div>
               ${p.excerpt?`<p class="opinion-excerpt">${p.excerpt}</p>`:''}
               <div class="opinion-author">
@@ -1072,6 +1119,10 @@
           fullSpan: true
         });
       }
+    }
+
+    function normalizeLabel(value) {
+      return String(value || '').trim().toLowerCase();
     }
 
     // ── SCORES ──

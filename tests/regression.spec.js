@@ -23,6 +23,52 @@ function articleFeed(count = 6) {
   };
 }
 
+function editorialHomepageFeed() {
+  return {
+    result: [
+      {
+        _id: 'override-story',
+        title: 'Homepage override story',
+        category: 'news',
+        excerpt: 'Pinned to the hero.',
+        author: 'Far Post',
+        publishedAt: '2026-04-02T12:00:00Z',
+        editorial: { homeHero: true, homeHeroRank: 1 },
+        body: [{ children: [{ text: 'Pinned hero copy.' }] }]
+      },
+      {
+        _id: 'pick-story',
+        title: 'Editor pick story',
+        category: 'analysis',
+        excerpt: 'Explicit editor pick.',
+        author: 'Far Post',
+        publishedAt: '2026-04-04T12:00:00Z',
+        editorial: { editorsPick: true, editorsPickRank: 1, labels: ['Must Read'] },
+        body: [{ children: [{ text: 'Pick copy.' }] }]
+      },
+      {
+        _id: 'suppressed-story',
+        title: 'Suppressed homepage story',
+        category: 'news',
+        excerpt: 'Should not appear.',
+        author: 'Far Post',
+        publishedAt: '2026-04-06T12:00:00Z',
+        editorial: { suppressHomepage: true },
+        body: [{ children: [{ text: 'Suppressed copy.' }] }]
+      },
+      ...Array.from({ length: 4 }, (_, index) => ({
+        _id: `regular-${index + 1}`,
+        title: `Regular story ${index + 1}`,
+        category: index % 2 === 0 ? 'news' : 'feature',
+        excerpt: `Regular deck ${index + 1}`,
+        author: 'Far Post',
+        publishedAt: `2026-04-0${index + 1}T12:00:00Z`,
+        body: [{ children: [{ text: 'Regular copy.' }] }]
+      }))
+    ]
+  };
+}
+
 function playersHubPayload() {
   return {
     leagues: [
@@ -219,8 +265,13 @@ function articleWithClubMention(id = 'club-story') {
       title: '501 Leaders are setting the pace',
       category: 'news',
       excerpt: 'A closer look at how 501 Leaders and 504 Leaders are shaping the week.',
+      editorial: {
+        labels: ['Must Read'],
+        relatedTeams: ['501 Leaders', '504 Leaders']
+      },
       author: 'Far Post',
       publishedAt: '2026-04-05T12:00:00Z',
+      _updatedAt: '2026-04-06T12:00:00Z',
       mainImage: {
         asset: {
           _ref: 'image-sample-image-jpg'
@@ -398,6 +449,23 @@ test('homepage loads core modules and nav links work', async ({ page }) => {
   await expect(page.locator('#directory-grid .player-card')).toHaveCount(4);
 });
 
+test('homepage honours editorial hero and picks overrides', async ({ page }) => {
+  await mockSuccessfulData(page);
+  await page.route('**/.netlify/functions/sanity-fetch**', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(editorialHomepageFeed())
+    });
+  });
+
+  await page.goto('/index.html');
+
+  await expect(page.locator('#hero-slides .hero-slide').first().locator('.hero-headline')).toHaveText('Homepage override story');
+  await expect(page.locator('#editors-picks-list .identity-item').first().locator('.identity-name')).toHaveText('Editor pick story');
+  await expect(page.locator('#hero-slides')).not.toContainText('Suppressed homepage story');
+});
+
 test('players hub renders and links to player pages', async ({ page }) => {
   await mockSuccessfulData(page);
   await page.goto('/players.html');
@@ -458,6 +526,8 @@ test('match page renders essential match content', async ({ page }) => {
   await expect(page.locator('#lineups-container .lineup-player')).toHaveCount(2);
   await expect(page.locator('#lineups-container .lineup-name a').first()).toHaveAttribute('href', /player\.html\?id=p3/);
   await expect(page.locator('#form-container .form-item')).toHaveCount(2);
+  await expect(page).toHaveTitle(/Caledonia FC vs Forth Athletic — Far Post/);
+  await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', /Caledonia FC vs Forth Athletic/);
 });
 
 test('article page surfaces related club links when story mentions tracked sides', async ({ page }) => {
@@ -491,6 +561,9 @@ test('article page surfaces related club links when story mentions tracked sides
   await page.goto('/article.html?id=club-story');
   await expect(page.locator('.club-links-section .club-link-card')).toHaveCount(2);
   await expect(page.locator('.club-links-section .club-link-card').first()).toHaveAttribute('href', /club\.html\?id=501-club-1&league=501/);
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /A closer look/);
+  await expect(page.locator('meta[property="og:type"]')).toHaveAttribute('content', 'article');
+  await expect(page.locator('#stay-grid .stay-card')).toHaveCount(2);
 });
 
 test('podcast cards survive artwork failures', async ({ page }) => {

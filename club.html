@@ -9,6 +9,13 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
   <title>Club — Far Post</title>
+  <meta name="description" content="Far Post club pages combine form, fixtures, results, standings and editorial context for Scottish football clubs.">
+  <meta property="og:title" content="Club — Far Post">
+  <meta property="og:description" content="Far Post club pages combine form, fixtures, results, standings and editorial context for Scottish football clubs.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="/android-chrome-512x512.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="/club.html">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
   <style>
@@ -469,10 +476,12 @@
     <span class="footer-tagline">Scottish football. No filter.</span>
   </footer>
 
+  <script src="/assets/farpost.js"></script>
   <script>
     // ── Helpers ────────────────────────────────────────────────────────────────
     const SANITY_PROJECT = 't11tx9if';
     const SANITY_DATASET = 'production';
+    const FarPostShared = window.FarPost;
 
     function qs(selector) { return document.querySelector(selector); }
     function qsAll(selector) { return document.querySelectorAll(selector); }
@@ -572,7 +581,25 @@
 
     // ── Render: Hero ───────────────────────────────────────────────────────────
     function renderHero(team) {
-      document.title = `${team.name || 'Club'} — Far Post`;
+      const description = `${team.name || 'Club'} on Far Post: live form, fixtures, results, league context and connected editorial coverage.`;
+      FarPostShared.setPageMetadata({
+        title: `${team.name || 'Club'} — Far Post`,
+        description,
+        path: `/club.html?id=${encodeURIComponent(teamId)}&league=${encodeURIComponent(leagueId)}`,
+        canonicalPath: `/club.html?id=${encodeURIComponent(teamId)}&league=${encodeURIComponent(leagueId)}`,
+        image: team.crest || '/android-chrome-512x512.png',
+        type: 'website',
+        keywords: [team.name, team.leagueName, 'Scottish football', 'club page'].filter(Boolean)
+      });
+      FarPostShared.setJsonLd('club-page', {
+        '@context': 'https://schema.org',
+        '@type': 'SportsTeam',
+        name: team.name || 'Club',
+        sport: 'Association Football',
+        memberOf: team.leagueName ? { '@type': 'SportsOrganization', name: team.leagueName } : undefined,
+        logo: team.crest || undefined,
+        url: `${window.location.origin}/club.html?id=${encodeURIComponent(teamId)}&league=${encodeURIComponent(leagueId)}`
+      });
 
       const posTag = team.position
         ? `<span class="club-position">${team.position}${ordinal(team.position)}</span>`
@@ -910,12 +937,17 @@
       const safe = teamName.replace(/['"\\]/g, '').trim();
       if (!safe) return;
 
-      const groq = `*[_type=="post" && title match "${safe}"]|order(publishedAt desc)[0...3]{_id,title,category,author,publishedAt,mainImage}`;
+      const groq = `*[_type=="post"]|order(publishedAt desc)[0...8]{_id,title,category,author,publishedAt,excerpt,body,mainImage,editorial,labels,topics}`;
 
       try {
         const res  = await fetch(`/.netlify/functions/sanity-fetch?query=${encodeURIComponent(groq)}`);
         const data = await res.json();
-        const articles = data?.result || [];
+        const articles = (data?.result || []).filter(article => {
+          const editorial = FarPostShared.getEditorialConfig(article);
+          const bodyText = FarPostShared.extractPortableText(article.body || []).toLowerCase();
+          const haystack = [article.title, article.excerpt, bodyText].join(' ').toLowerCase();
+          return editorial.teams.map(item => item.toLowerCase()).includes(safe.toLowerCase()) || haystack.includes(safe.toLowerCase());
+        }).slice(0, 3);
 
         pageState.articles = articles;
         renderHeroCards();

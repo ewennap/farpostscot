@@ -9,6 +9,13 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
   <title>Match — Far Post</title>
+  <meta name="description" content="Far Post match pages bring scores, timeline, lineups, club links and form guide into one Scottish football match centre.">
+  <meta property="og:title" content="Match — Far Post">
+  <meta property="og:description" content="Far Post match pages bring scores, timeline, lineups, club links and form guide into one Scottish football match centre.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="/android-chrome-512x512.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="/match.html">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/farpost.css">
@@ -531,7 +538,27 @@
         + '</div>'
         + '</div>');
 
-      document.title = (home.name || 'Home') + ' vs ' + (away.name || 'Away') + ' \u2014 Far Post';
+      FarPostUI.setPageMetadata({
+        title: (home.name || 'Home') + ' vs ' + (away.name || 'Away') + ' \u2014 Far Post',
+        description: 'Far Post match centre for ' + (home.name || 'Home') + ' vs ' + (away.name || 'Away') + ': scoreline, timeline, lineups and form guide.',
+        path: '/match.html?id=' + encodeURIComponent(fixture.id || '') + (leagueId ? '&league=' + encodeURIComponent(leagueId) : ''),
+        canonicalPath: '/match.html?id=' + encodeURIComponent(fixture.id || '') + (leagueId ? '&league=' + encodeURIComponent(leagueId) : ''),
+        image: home.image_path || away.image_path || '/android-chrome-512x512.png',
+        type: 'website',
+        keywords: [home.name, away.name, 'match centre', 'Scottish football'].filter(Boolean)
+      });
+      FarPostUI.setJsonLd('match-page', {
+        '@context': 'https://schema.org',
+        '@type': 'SportsEvent',
+        name: (home.name || 'Home') + ' vs ' + (away.name || 'Away'),
+        startDate: fixture.starting_at || undefined,
+        competitor: [
+          { '@type': 'SportsTeam', name: home.name || 'Home' },
+          { '@type': 'SportsTeam', name: away.name || 'Away' }
+        ],
+        eventStatus: stateName || undefined,
+        url: window.location.origin + '/match.html?id=' + encodeURIComponent(fixture.id || '') + (leagueId ? '&league=' + encodeURIComponent(leagueId) : '')
+      });
     }
 
     function formatKickoff(isoString) {

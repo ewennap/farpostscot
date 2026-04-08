@@ -47,6 +47,128 @@
     }[category] || 'Article');
   }
 
+  function coerceArray(value) {
+    if (Array.isArray(value)) return value.filter(function(item) { return item != null && item !== ''; });
+    if (value == null || value === '') return [];
+    return [value];
+  }
+
+  function normalizeText(value) {
+    return String(value || '').trim().toLowerCase();
+  }
+
+  function uniqueStrings(items) {
+    var seen = new Set();
+    return coerceArray(items).reduce(function(list, item) {
+      var value = '';
+      if (typeof item === 'string') value = item;
+      else if (item && typeof item === 'object') value = item.title || item.name || item.label || item.value || '';
+      value = String(value || '').trim();
+      if (!value) return list;
+      var key = normalizeText(value);
+      if (seen.has(key)) return list;
+      seen.add(key);
+      list.push(value);
+      return list;
+    }, []);
+  }
+
+  function extractPortableText(blocks) {
+    if (!Array.isArray(blocks)) return '';
+    return blocks.map(function(block) {
+      if (!block || !Array.isArray(block.children)) return '';
+      return block.children.map(function(child) {
+        return child && child.text ? child.text : '';
+      }).join(' ');
+    }).join(' ').replace(/\s+/g, ' ').trim();
+  }
+
+  function truncateText(value, maxLength) {
+    var text = String(value || '').replace(/\s+/g, ' ').trim();
+    if (!text || !maxLength || text.length <= maxLength) return text;
+    return text.slice(0, Math.max(0, maxLength - 1)).trim() + '\u2026';
+  }
+
+  function extractNamedValues(source, keys) {
+    if (!source || !keys || !keys.length) return [];
+    var values = [];
+    keys.forEach(function(key) {
+      if (source[key] == null) return;
+      values = values.concat(uniqueStrings(source[key]));
+    });
+    return uniqueStrings(values);
+  }
+
+  function editorialNumber(post, path) {
+    var value = post;
+    for (var i = 0; i < path.length; i += 1) {
+      value = value && value[path[i]];
+    }
+    if (value == null || value === '') return null;
+    var parsed = Number(value);
+    return isNaN(parsed) ? null : parsed;
+  }
+
+  function editorialFlag(post, path) {
+    var value = post;
+    for (var i = 0; i < path.length; i += 1) {
+      value = value && value[path[i]];
+    }
+    if (value == null) return false;
+    if (typeof value === 'string') {
+      return ['1', 'true', 'yes', 'on'].indexOf(value.toLowerCase()) !== -1;
+    }
+    return Boolean(value);
+  }
+
+  function getEditorialConfig(post) {
+    var editorial = (post && post.editorial) || {};
+    var labels = uniqueStrings(
+      []
+        .concat(coerceArray(editorial.label))
+        .concat(coerceArray(post && post.editorialLabel))
+        .concat(coerceArray(editorial.labels))
+        .concat(coerceArray(post && post.labels))
+    );
+    var topics = uniqueStrings(
+      []
+        .concat(coerceArray(editorial.topics))
+        .concat(coerceArray(post && post.topics))
+        .concat(coerceArray(post && post.tags))
+    );
+    var teams = uniqueStrings(
+      []
+        .concat(extractNamedValues(editorial, ['relatedTeams', 'clubs', 'teams']))
+        .concat(extractNamedValues(post, ['relatedTeams', 'clubs', 'teams']))
+    );
+    var players = uniqueStrings(
+      []
+        .concat(extractNamedValues(editorial, ['relatedPlayers', 'players']))
+        .concat(extractNamedValues(post, ['relatedPlayers', 'players']))
+    );
+
+    return {
+      primaryLabel: labels[0] || '',
+      labels: labels,
+      topics: topics,
+      teams: teams,
+      players: players,
+      homeHeroRank: editorialNumber(post, ['editorial', 'homeHeroRank']),
+      editorsPickRank: editorialNumber(post, ['editorial', 'editorsPickRank']),
+      homeHero: editorialFlag(post, ['editorial', 'homeHero']) || editorialFlag(post, ['editorial', 'heroOverride']),
+      editorsPick: editorialFlag(post, ['editorial', 'editorsPick']),
+      suppressHomeHero: editorialFlag(post, ['editorial', 'suppressHomeHero']),
+      suppressHomepage: editorialFlag(post, ['editorial', 'suppressHomepage']) || editorialFlag(post, ['editorial', 'hideFromHomepage']),
+      seoTitle: editorial.seoTitle || ((post && post.seo && post.seo.title) || ''),
+      seoDescription: editorial.seoDescription || ((post && post.seo && post.seo.description) || '')
+    };
+  }
+
+  function storyLabel(post) {
+    var editorial = getEditorialConfig(post);
+    return editorial.primaryLabel || categoryLabel(post && post.category);
+  }
+
   function sanityImageUrl(ref) {
     if (!ref) return null;
     var parts = String(ref).replace('image-', '').split('-');
@@ -104,7 +226,7 @@
         ? '<img class="' + classes.image + '" src="' + escHtml(imgUrl + imageParams) + '" alt="' + escHtml((post && post.title) || '') + '" loading="lazy" data-fallback="hide">'
         : '<div class="' + classes.placeholder + '"></div>')
       + '<div class="' + classes.body + '">'
-      + '<div class="' + classes.label + '">' + escHtml(categoryLabel(post && post.category)) + '</div>'
+      + '<div class="' + classes.label + '">' + escHtml(storyLabel(post)) + '</div>'
       + '<div class="' + classes.title + '">' + escHtml((post && post.title) || 'Untitled') + '</div>'
       + excerpt
       + metaHtml
@@ -207,6 +329,98 @@
     bindImageFallbacks(element);
   }
 
+  function absoluteUrl(path) {
+    var origin = window.location.origin || '';
+    if (!path) return origin;
+    if (/^https?:\/\//i.test(path)) return path;
+    return origin + (path.charAt(0) === '/' ? path : '/' + path);
+  }
+
+  function ensureMeta(selector, factory) {
+    var element = document.head.querySelector(selector);
+    if (element) return element;
+    element = factory();
+    document.head.appendChild(element);
+    return element;
+  }
+
+  function setMetaByName(name, content) {
+    if (!name || content == null) return;
+    var meta = ensureMeta('meta[name="' + name + '"]', function() {
+      var el = document.createElement('meta');
+      el.setAttribute('name', name);
+      return el;
+    });
+    meta.setAttribute('content', String(content));
+  }
+
+  function setMetaByProperty(property, content) {
+    if (!property || content == null) return;
+    var meta = ensureMeta('meta[property="' + property + '"]', function() {
+      var el = document.createElement('meta');
+      el.setAttribute('property', property);
+      return el;
+    });
+    meta.setAttribute('content', String(content));
+  }
+
+  function setCanonical(path) {
+    var link = ensureMeta('link[rel="canonical"]', function() {
+      var el = document.createElement('link');
+      el.setAttribute('rel', 'canonical');
+      return el;
+    });
+    link.setAttribute('href', absoluteUrl(path || window.location.pathname + window.location.search));
+  }
+
+  function setJsonLd(id, payload) {
+    if (!id) return;
+    var selector = 'script[data-fp-jsonld="' + id + '"]';
+    var script = document.head.querySelector(selector);
+    if (!payload) {
+      if (script) script.remove();
+      return;
+    }
+    if (!script) {
+      script = document.createElement('script');
+      script.type = 'application/ld+json';
+      script.setAttribute('data-fp-jsonld', id);
+      document.head.appendChild(script);
+    }
+    script.textContent = JSON.stringify(payload);
+  }
+
+  function setPageMetadata(config) {
+    var meta = config || {};
+    var title = meta.title || 'Far Post';
+    var description = truncateText(meta.description || '', 180);
+    var path = meta.path || (window.location.pathname + window.location.search);
+    var canonicalPath = meta.canonicalPath || path;
+    var canonicalUrl = absoluteUrl(canonicalPath);
+    var image = meta.image ? absoluteUrl(meta.image) : absoluteUrl('/android-chrome-512x512.png');
+    var type = meta.type || 'website';
+
+    document.title = title;
+    setCanonical(canonicalPath);
+
+    if (description) setMetaByName('description', description);
+    setMetaByName('twitter:card', meta.twitterCard || 'summary_large_image');
+    setMetaByName('twitter:title', title);
+    if (description) setMetaByName('twitter:description', description);
+    setMetaByName('twitter:image', image);
+    setMetaByProperty('og:type', type);
+    setMetaByProperty('og:site_name', meta.siteName || 'Far Post');
+    setMetaByProperty('og:title', title);
+    if (description) setMetaByProperty('og:description', description);
+    setMetaByProperty('og:url', canonicalUrl);
+    setMetaByProperty('og:image', image);
+
+    if (meta.section) setMetaByProperty('article:section', meta.section);
+    if (meta.publishedTime) setMetaByProperty('article:published_time', meta.publishedTime);
+    if (meta.modifiedTime) setMetaByProperty('article:modified_time', meta.modifiedTime);
+    if (meta.keywords && meta.keywords.length) setMetaByName('keywords', uniqueStrings(meta.keywords).join(', '));
+  }
+
   function renderState(target, type, options) {
     setHTML(target, stateMarkup(type, options));
   }
@@ -281,18 +495,26 @@
     categoryLabel: categoryLabel,
     bindImageFallbacks: bindImageFallbacks,
     escHtml: escHtml,
+    extractPortableText: extractPortableText,
     fetchJson: fetchJson,
     formatDate: formatDate,
     formatDuration: formatDuration,
+    getEditorialConfig: getEditorialConfig,
     getItunesImage: getItunesImage,
     initials: initials,
     podcastArtFrame: podcastArtFrame,
     readTime: readTime,
     renderState: renderState,
     sanityImageUrl: sanityImageUrl,
+    setCanonical: setCanonical,
     setHTML: setHTML,
+    setJsonLd: setJsonLd,
+    setPageMetadata: setPageMetadata,
     stateMarkup: stateMarkup,
-    storyCardMarkup: storyCardMarkup
+    storyCardMarkup: storyCardMarkup,
+    storyLabel: storyLabel,
+    truncateText: truncateText,
+    uniqueStrings: uniqueStrings
   };
 
   if (document.readyState === 'loading') {
