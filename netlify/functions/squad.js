@@ -1,6 +1,6 @@
 // netlify/functions/squad.js
 // Sportmonks V3 API — squad for a given team
-// GET /v3/football/teams/{teamId}?include=squad.player
+// GET /v3/football/squads/teams/{teamId}?include=player
 
 const SPORTMONKS_TOKEN = process.env.SPORTMONKS_TOKEN;
 
@@ -22,9 +22,9 @@ exports.handler = async function (event) {
   }
 
   const url =
-    `https://api.sportmonks.com/v3/football/teams/${teamId}` +
+    `https://api.sportmonks.com/v3/football/squads/teams/${teamId}` +
     `?api_token=${SPORTMONKS_TOKEN}` +
-    `&include=squad.player`;
+    `&include=player`;
 
   console.log(`[squad] teamId=${teamId}`);
   console.log('[squad] URL:', url.replace(SPORTMONKS_TOKEN, 'TOKEN'));
@@ -42,7 +42,8 @@ exports.handler = async function (event) {
       };
     }
 
-    const squad = (data.data && data.data.squad) || [];
+    // /squads/teams returns data as an array directly
+    const squad = Array.isArray(data.data) ? data.data : [];
     if (!squad.length) {
       console.log('[squad] No squad data returned');
       return {
