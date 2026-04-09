@@ -164,6 +164,15 @@
     .split-col:last-child { border-right: none; }
     .section-intro { padding: 1rem 1.25rem; border-bottom: 1px solid #1a1b1d; font-size: 13px; color: #777; line-height: 1.65; }
 
+    /* ── SQUAD ── */
+    .squad-group { padding: 0.6rem 1.25rem 0.2rem; }
+    .squad-group + .squad-group { border-top: 1px solid #1a1b1d; }
+    .squad-group-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #444; padding: 0.6rem 0 0.4rem; }
+    .squad-player { display: flex; align-items: baseline; gap: 0.75rem; padding: 0.3rem 0; border-bottom: 1px solid #161718; }
+    .squad-player:last-child { border-bottom: none; }
+    .squad-jersey { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; min-width: 22px; text-align: right; opacity: 0.35; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+    .squad-name { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 600; color: #c8c4be; line-height: 1.2; }
+
     /* ── LEAGUE TABLE ── */
     .table-wrap { overflow-x: auto; }
     .standings-table { width: 100%; border-collapse: collapse; min-width: 460px; }
@@ -427,6 +436,15 @@
       </div>
     </section>
 
+    <!-- SQUAD -->
+    <section class="section-block" id="squadSection" style="display:none">
+      <div class="section-header">
+        <span class="section-title"><span>&#9632;</span>Squad</span>
+        <span class="section-note" id="squadNote"></span>
+      </div>
+      <div id="squadBody"></div>
+    </section>
+
     <!-- LEAGUE TABLE -->
     <section class="section-block" id="tableSection">
       <div class="section-header">
@@ -635,6 +653,7 @@
           <div class="club-jump">
             <a href="#resultsRows">Results</a>
             <a href="#fixtureRows">Fixtures</a>
+            <a href="#squadSection">Squad</a>
             <a href="#tableSection">Table</a>
             <a href="#articlesSection">Coverage</a>
           </div>
@@ -1005,6 +1024,46 @@
       }
     }
 
+    // ── Squad ──────────────────────────────────────────────────────────────────
+    function renderSquad(groups) {
+      const section = qs('#squadSection');
+      const body    = qs('#squadBody');
+      const note    = qs('#squadNote');
+
+      const ORDER = ['goalkeepers', 'defenders', 'midfielders', 'attackers'];
+      const LABELS = { goalkeepers: 'Goalkeepers', defenders: 'Defenders', midfielders: 'Midfielders', attackers: 'Attackers' };
+
+      const total = ORDER.reduce((n, k) => n + (groups[k] || []).length, 0);
+      if (!total) { section.style.display = 'none'; return; }
+
+      note.textContent = total + ' players';
+
+      const html = ORDER.filter(k => (groups[k] || []).length).map(k =>
+        `<div class="squad-group">
+          <div class="squad-group-label">${LABELS[k]}</div>
+          ${groups[k].map(p =>
+            `<div class="squad-player">
+              <span class="squad-jersey">${p.jersey_number != null ? escHtml(String(p.jersey_number)) : '—'}</span>
+              <span class="squad-name">${escHtml(p.display_name || '—')}</span>
+            </div>`
+          ).join('')}
+        </div>`
+      ).join('');
+
+      body.innerHTML = html;
+      section.style.display = '';
+    }
+
+    async function loadSquad(id) {
+      try {
+        const res  = await fetch(`/.netlify/functions/squad?teamId=${encodeURIComponent(id)}`);
+        const data = await res.json();
+        renderSquad(data);
+      } catch (err) {
+        console.warn('[squad] Failed to load:', err.message);
+      }
+    }
+
     // ── Main load ──────────────────────────────────────────────────────────────
     async function loadClub() {
       try {
@@ -1039,6 +1098,9 @@
         renderScorers(data.topScorers, data.team);
         renderHeroCards();
         renderBriefing();
+
+        // Squad — fire and forget
+        loadSquad(teamId);
 
         // Related articles — fire and forget (uses team name from payload)
         if (data.team?.name) {
