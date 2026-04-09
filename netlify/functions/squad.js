@@ -4,11 +4,13 @@
 
 const SPORTMONKS_TOKEN = process.env.SPORTMONKS_TOKEN;
 
+// Sportmonks V3 actual position_ids observed from /squads/teams endpoint:
+// 24 = Goalkeeper, 25 = Defender, 26 = Midfielder, 27 = Attacker
 const POSITION_MAP = {
-  24: 'goalkeepers', 25: 'goalkeepers',
-  26: 'defenders',   27: 'defenders',
-  28: 'midfielders', 29: 'midfielders',
-  30: 'attackers',   31: 'attackers'
+  24: 'goalkeepers',
+  25: 'defenders',
+  26: 'midfielders',
+  27: 'attackers'
 };
 
 exports.handler = async function (event) {
