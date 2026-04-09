@@ -518,27 +518,49 @@
         : 'TBC';
       var nextMeta = nextFixture ? fmtDate(nextFixture.date) : 'Upcoming fixture';
 
-      document.getElementById('heroAside').innerHTML =
-        '<div class="hero-card">' +
-        '<div class="hero-card-label">Season Goals</div>' +
-        '<div class="hero-card-value accent">' + escHtml(goalsVal) + '</div>' +
-        '<div class="hero-card-meta">Goals scored this season in ' + escHtml(leagueName) + '.</div>' +
-        '</div>' +
-        '<div class="hero-card">' +
-        '<div class="hero-card-label">Season Assists</div>' +
-        '<div class="hero-card-value">' + escHtml(assistsVal) + '</div>' +
-        '<div class="hero-card-meta">Assists recorded this season.</div>' +
-        '</div>' +
-        '<div class="hero-card">' +
-        '<div class="hero-card-label">Scorer Rank</div>' +
-        '<div class="hero-card-value">' + escHtml(rankText) + '</div>' +
-        '<div class="hero-card-meta">Current position in ' + escHtml(leagueName) + ' scoring charts.</div>' +
-        '</div>' +
-        '<div class="hero-card">' +
+      var nextCard = '<div class="hero-card">' +
         '<div class="hero-card-label">Next Fixture</div>' +
         '<div class="hero-card-value" style="font-size:17px;line-height:1.15;">' + escHtml(nextText) + '</div>' +
         '<div class="hero-card-meta">' + escHtml(nextMeta) + '</div>' +
         '</div>';
+
+      if (isGoalkeeper(player)) {
+        document.getElementById('heroAside').innerHTML =
+          '<div class="hero-card">' +
+          '<div class="hero-card-label">Appearances</div>' +
+          '<div class="hero-card-value">—</div>' +
+          '<div class="hero-card-meta">Data unavailable</div>' +
+          '</div>' +
+          '<div class="hero-card">' +
+          '<div class="hero-card-label">Goals Conceded</div>' +
+          '<div class="hero-card-value">—</div>' +
+          '<div class="hero-card-meta">Data unavailable</div>' +
+          '</div>' +
+          '<div class="hero-card">' +
+          '<div class="hero-card-label">Clean Sheets</div>' +
+          '<div class="hero-card-value">—</div>' +
+          '<div class="hero-card-meta">Data unavailable</div>' +
+          '</div>' +
+          nextCard;
+      } else {
+        document.getElementById('heroAside').innerHTML =
+          '<div class="hero-card">' +
+          '<div class="hero-card-label">Season Goals</div>' +
+          '<div class="hero-card-value accent">' + escHtml(goalsVal) + '</div>' +
+          '<div class="hero-card-meta">Goals scored this season in ' + escHtml(leagueName) + '.</div>' +
+          '</div>' +
+          '<div class="hero-card">' +
+          '<div class="hero-card-label">Season Assists</div>' +
+          '<div class="hero-card-value">' + escHtml(assistsVal) + '</div>' +
+          '<div class="hero-card-meta">Assists recorded this season.</div>' +
+          '</div>' +
+          '<div class="hero-card">' +
+          '<div class="hero-card-label">Scorer Rank</div>' +
+          '<div class="hero-card-value">' + escHtml(rankText) + '</div>' +
+          '<div class="hero-card-meta">Current position in ' + escHtml(leagueName) + ' scoring charts.</div>' +
+          '</div>' +
+          nextCard;
+      }
     }
 
     /* ── RENDER INTEL ── */
@@ -557,9 +579,12 @@
         ? wins + 'W · ' + draws + 'D · ' + losses + 'L from the last ' + form.length + ' matches'
         : 'Recent form data loading';
 
+      var gk = isGoalkeeper(player);
       var copy;
       if (view.dataUnavailable) {
         copy = 'Live player-detail data could not be loaded right now. Season goal and assist totals from the player hub are still shown here, and the club route remains available when team context is known.';
+      } else if (gk) {
+        copy = teamName + ' have recorded ' + formSummary.toLowerCase() + '.';
       } else {
         copy = name + ' currently has ' + goalsVal + ' goal' + (goalsVal !== 1 ? 's' : '') +
           (assistsVal > 0 ? ' and ' + assistsVal + ' assist' + (assistsVal !== 1 ? 's' : '') : '') +
@@ -583,8 +608,8 @@
 
       var notePosition = player.position ? ('<div class="intel-note"><div class="intel-note-label">Position</div><div class="intel-note-value">' + escHtml(player.position) + '</div></div>') : '';
       var noteNationality = player.nationality ? ('<div class="intel-note"><div class="intel-note-label">Nationality</div><div class="intel-note-value">' + escHtml(player.nationality) + '</div></div>') : '';
-      var noteGoals = '<div class="intel-note"><div class="intel-note-label">Season goals</div><div class="intel-note-value">' + escHtml(goalsVal) + '</div><div class="intel-note-copy">In the current ' + escHtml(leagueName) + ' campaign.</div></div>';
-      var noteAssists = assistsVal > 0 ? ('<div class="intel-note"><div class="intel-note-label">Season assists</div><div class="intel-note-value">' + escHtml(assistsVal) + '</div></div>') : '';
+      var noteGoals = gk ? '' : ('<div class="intel-note"><div class="intel-note-label">Season goals</div><div class="intel-note-value">' + escHtml(goalsVal) + '</div><div class="intel-note-copy">In the current ' + escHtml(leagueName) + ' campaign.</div></div>');
+      var noteAssists = (!gk && assistsVal > 0) ? ('<div class="intel-note"><div class="intel-note-label">Season assists</div><div class="intel-note-value">' + escHtml(assistsVal) + '</div></div>') : '';
       var noteStatus = view.dataUnavailable ? '<div class="intel-note"><div class="intel-note-label">Status</div><div class="intel-note-value">Limited</div><div class="intel-note-copy">Profile-specific data is temporarily unavailable.</div></div>' : '';
 
       document.getElementById('intelSide').innerHTML = noteStatus + noteGoals + noteAssists + notePosition + noteNationality;
@@ -678,6 +703,12 @@
       document.getElementById('clubLinkCrestWrap').outerHTML = teamCrestVal
         ? '<img class="club-link-crest" id="clubLinkCrestWrap" src="' + escHtml(teamCrestVal) + '" alt="" onerror="this.style.display=\'none\'">'
         : '<span class="club-link-crest-placeholder" id="clubLinkCrestWrap"></span>';
+    }
+
+    function isGoalkeeper(player) {
+      if (player && player.position_id === 24) return true;
+      if (player && player.position && player.position.toLowerCase() === 'goalkeeper') return true;
+      return false;
     }
 
     function hasUsableDetail(player, recentMatches, upcomingFixtures, form) {
