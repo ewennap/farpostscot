@@ -133,6 +133,18 @@
     .lineup-sub-group .lineup-group-title { margin-top: 0; color: #7f8186; }
     .lineup-sub-group .lineup-player { border-bottom-color: #2a2b2d; }
 
+    /* ── MATCH STATS ── */
+    .stats-container { padding: 0.4rem 0; }
+    .stat-row { display: grid; grid-template-columns: 1fr 140px 1fr; align-items: center; padding: 0.55rem 1.25rem; }
+    .stat-value { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700; color: #e8e6e1; line-height: 1; }
+    .stat-value.home { text-align: right; padding-right: 0.75rem; }
+    .stat-value.away { text-align: left; padding-left: 0.75rem; }
+    .stat-label-col { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; }
+    .stat-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #555; text-align: center; white-space: nowrap; }
+    .stat-bar { width: 100%; height: 3px; border-radius: 999px; overflow: hidden; display: flex; background: #444; }
+    .stat-bar-home { background: #CC0000; height: 100%; flex-shrink: 0; }
+    .stat-bar-away { background: #444; height: 100%; flex-shrink: 0; }
+
     /* ── SHARED STATES ── */
     .empty-state { padding: 2.5rem 1.25rem; text-align: center; color: #555; font-size: 14px; }
     .loading-state { padding: 2rem 1.25rem; text-align: center; }
@@ -295,6 +307,7 @@
     <nav class="match-jump-nav" aria-label="Match sections">
       <a class="match-jump-link active" href="#section-summary" data-jump-link="section-summary">Summary</a>
       <a class="match-jump-link" href="#section-timeline" data-jump-link="section-timeline">Timeline</a>
+      <a class="match-jump-link" href="#section-stats" data-jump-link="section-stats">Stats</a>
       <a class="match-jump-link" href="#section-lineups" data-jump-link="section-lineups">Lineups</a>
       <a class="match-jump-link" href="#section-form" data-jump-link="section-form">Form</a>
     </nav>
@@ -318,6 +331,13 @@
       <div id="timeline-container">
         <div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div></div>
       </div>
+    </section>
+
+    <section class="match-section" id="section-stats" data-jump-section style="display:none">
+      <div class="section-header">
+        <div class="section-title"><span>//</span>Match stats</div>
+      </div>
+      <div id="stats-container"></div>
     </section>
 
     <section class="match-section" id="section-lineups" data-jump-section>
@@ -466,6 +486,7 @@
         renderHero(fixture);
         renderSummary(fixture);
         renderTimeline(fixture);
+        renderStats(fixture);
         renderLineups(fixture);
         loadPlayerRoutes(fixture).then(function() {
           renderTimeline(fixture);
@@ -655,6 +676,66 @@
       });
 
       html += '</div>';
+      FarPostUI.setHTML(el, html);
+    }
+
+    function renderStats(fixture) {
+      var section = document.getElementById('section-stats');
+      var el = document.getElementById('stats-container');
+      var statistics = fixture.statistics || [];
+      var participants = fixture.participants || [];
+      var home = participants.find(function(p) { return p.meta && p.meta.location === 'home'; }) || participants[0] || {};
+      var away = participants.find(function(p) { return p.meta && p.meta.location === 'away'; }) || participants[1] || {};
+
+      var STAT_DEFS = [
+        { ids: [86, 58], label: 'Shots On Target' },
+        { ids: [41],     label: 'Shots Off Target' },
+        { ids: [34],     label: 'Corners' },
+        { ids: [45],     label: 'Fouls' },
+        { ids: [51],     label: 'Offsides' },
+        { ids: [99],     label: 'Yellow Cards' }
+      ];
+
+      function getVal(ids, loc) {
+        for (var i = 0; i < ids.length; i++) {
+          var typeId = ids[i];
+          var found = statistics.find(function(s) { return s.type_id === typeId && s.location === loc; });
+          if (found) return (found.data && found.data.value != null) ? Number(found.data.value) : 0;
+        }
+        return null;
+      }
+
+      if (!statistics.length) { section.style.display = 'none'; return; }
+
+      var rows = STAT_DEFS.map(function(def) {
+        var h = getVal(def.ids, 'home');
+        var a = getVal(def.ids, 'away');
+        if (h === null && a === null) return null;
+        return { label: def.label, home: h || 0, away: a || 0 };
+      }).filter(Boolean);
+
+      if (!rows.length) { section.style.display = 'none'; return; }
+
+      var html = '<div class="stats-container">';
+      rows.forEach(function(row) {
+        var total = row.home + row.away;
+        var homePct = total === 0 ? 50 : Math.round((row.home / total) * 100);
+        var awayPct = 100 - homePct;
+        html += '<div class="stat-row">'
+          + '<div class="stat-value home">' + row.home + '</div>'
+          + '<div class="stat-label-col">'
+          + '<div class="stat-label">' + row.label + '</div>'
+          + '<div class="stat-bar">'
+          + '<div class="stat-bar-home" style="width:' + homePct + '%"></div>'
+          + '<div class="stat-bar-away" style="width:' + awayPct + '%"></div>'
+          + '</div>'
+          + '</div>'
+          + '<div class="stat-value away">' + row.away + '</div>'
+          + '</div>';
+      });
+      html += '</div>';
+
+      section.style.display = '';
       FarPostUI.setHTML(el, html);
     }
 

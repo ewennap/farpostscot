@@ -16,7 +16,7 @@ exports.handler = async function (event) {
   const url =
     `https://api.sportmonks.com/v3/football/fixtures/${fixtureId}` +
     `?api_token=${SPORTMONKS_TOKEN}` +
-    `&include=events;lineups;participants;scores;state`;
+    `&include=events;lineups;participants;scores;state;statistics`;
 
   console.log(`[match-detail] fixtureId=${fixtureId}`);
   console.log('[match-detail] URL:', url.replace(SPORTMONKS_TOKEN, 'TOKEN'));
