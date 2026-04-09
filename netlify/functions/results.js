@@ -75,7 +75,7 @@ exports.handler = async function (event) {
         return {
           id:      f.id,
           leagueId,
-          state:   f.state?.short || '',
+          state:   f.state?.short_name || f.state?.developer_name || '',
           state_id: f.state?.id || null,
           date:    f.starting_at || null,
           round,
