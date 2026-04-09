@@ -135,6 +135,14 @@ exports.handler = async function (event) {
       }
     }
 
+    // Derive club crest from fixture participants — more reliable than URL param
+    let teamCrest = null;
+    for (let i = 0; i < allFixtures.length; i++) {
+      const fix = allFixtures[i];
+      if (String(fix.home.id) === String(teamId) && fix.home.crest) { teamCrest = fix.home.crest; break; }
+      if (String(fix.away.id) === String(teamId) && fix.away.crest) { teamCrest = fix.away.crest; break; }
+    }
+
     const recentMatches = allFixtures
       .filter(function (f) { return f.finished; })
       .sort(function (a, b) { return new Date(b.date) - new Date(a.date); })
@@ -153,7 +161,7 @@ exports.handler = async function (event) {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=300' },
       body: JSON.stringify({
-        player: player,
+        player: { ...player, teamCrest },
         recentMatches: recentMatches,
         upcomingFixtures: upcomingFixtures,
         form: form

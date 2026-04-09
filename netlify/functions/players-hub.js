@@ -30,6 +30,7 @@ async function getTopScorers(seasonId, typeId, limit) {
     `${BASE}/topscorers/seasons/${seasonId}` +
     `?include=player;participant` +
     `&filters=seasonTopscorerTypes:${typeId}` +
+    `&per_page=50` +
     `&api_token=${SPORTMONKS_TOKEN}`;
   const res = await fetch(url);
   if (!res.ok) return [];
