@@ -76,6 +76,7 @@ exports.handler = async function (event) {
           id:      f.id,
           leagueId,
           state:   f.state?.short || '',
+          state_id: f.state?.id || null,
           date:    f.starting_at || null,
           round,
           home: { id: home.id || null, name: home.name || 'Home', short: home.short_code || home.name || 'Home', crest: home.image_path || null },

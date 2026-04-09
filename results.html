@@ -134,6 +134,9 @@
     .scorer-crest { width: 24px; height: 24px; object-fit: contain; margin-right: 10px; vertical-align: middle; border-radius: 2px; }
     .scorer-team-wrap { display: inline-flex; align-items: center; min-width: 0; }
 
+    .live-badge { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #CC0000; animation: live-pulse 1.8s ease-in-out infinite; }
+    @keyframes live-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
     .empty-state { padding: 3rem 1.25rem; text-align: center; color: #555; font-size: 14px; }
     .loading-state { padding: 2rem 1.25rem; text-align: center; }
     .loading-dots { display: inline-flex; gap: 6px; }
@@ -244,6 +247,7 @@
   <div id="panel-results">
     <div class="section-header">
       <div class="section-title"><span>//</span>Latest results</div>
+      <span id="live-badge" class="live-badge" style="display:none" aria-live="polite">LIVE</span>
     </div>
     <div class="results-container" id="results-container">
       <div class="loading-state"><div class="loading-dots"><span></span><span></span><span></span></div></div>
@@ -301,6 +305,46 @@
 
     // Simple data cache per league, per content type
     var cache = {};   // cache[league][type] = data
+
+    // ─────────────────────────────────────────
+    //  LIVE MATCHDAY POLLING
+    // ─────────────────────────────────────────
+    var liveInterval = null;
+    var LIVE_STATE_IDS = [3, 4, 5, 6, 7, 13];
+
+    function hasLiveMatches(fixtures) {
+      return fixtures.some(function(f) { return LIVE_STATE_IDS.indexOf(f.state_id) !== -1; });
+    }
+
+    function stopLiveMode() {
+      if (liveInterval) { clearInterval(liveInterval); liveInterval = null; }
+      document.getElementById('live-badge').style.display = 'none';
+    }
+
+    function startLiveMode(league) {
+      stopLiveMode();
+      document.getElementById('live-badge').style.display = '';
+      liveInterval = setInterval(async function() {
+        if (activeLeague !== league || activeContentTab !== 'results') { stopLiveMode(); return; }
+        try {
+          var res  = await fetch('/.netlify/functions/results?league=' + league + '&_t=' + Date.now());
+          var data = await res.json();
+          if (!res.ok) return;
+          var fixtures = data.fixtures || [];
+          if (activeLeague !== league) return;
+          renderResults(fixtures, league);
+          if (!hasLiveMatches(fixtures)) stopLiveMode();
+        } catch(e) { /* fail silently */ }
+      }, 60000);
+    }
+
+    function updateLiveMode(fixtures, league) {
+      if (hasLiveMatches(fixtures)) {
+        if (!liveInterval) startLiveMode(league);
+      } else {
+        stopLiveMode();
+      }
+    }
 
     function buildClubHref(teamId, leagueId) {
       if (!teamId || !leagueId) return '';
@@ -367,6 +411,7 @@
     //  except hiding the Table tab for knockout competitions.
     // ─────────────────────────────────────────
     function setLeague(id) {
+      stopLiveMode();
       activeLeague = id;
 
       // Update league-tab active class
@@ -415,7 +460,7 @@
     async function loadResults() {
       var league = activeLeague;
       var cached = getCached(league, 'results');
-      if (cached) { renderResults(cached, league); return; }
+      if (cached) { renderResults(cached, league); updateLiveMode(cached, league); return; }
 
       var el = document.getElementById('results-container');
       el.innerHTML = loadingHtml();
@@ -426,7 +471,7 @@
         var fixtures = data.fixtures || [];
         setCache(league, 'results', fixtures);
         // Only render if still on this league (user may have switched)
-        if (activeLeague === league) renderResults(fixtures, league);
+        if (activeLeague === league) { renderResults(fixtures, league); updateLiveMode(fixtures, league); }
       } catch(e) {
         if (activeLeague === league)
           el.innerHTML = '<div class="empty-state">Could not load results. Please try again later.</div>';
