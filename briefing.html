@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <title>Match Briefing — Far Post</title>
+  <meta name="description" content="Internal Far Post match briefing page for Scottish Premiership fixtures, form guides, key events and editorial prompts.">
+  <meta property="og:title" content="Match Briefing — Far Post">
+  <meta property="og:description" content="Internal Far Post match briefing page for Scottish Premiership fixtures, form guides, key events and editorial prompts.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="/android-chrome-512x512.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="/briefing.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/farpost.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { min-height: 100vh; background: #1a1a1a; color: #ffffff; font-family: 'Barlow', sans-serif; }
+    button, select { font: inherit; }
+
+    .shell { width: min(1080px, calc(100% - 2rem)); margin: 0 auto; padding: 2rem 0 3rem; }
+    .page-head { display: grid; gap: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid #2b2b2b; }
+    .eyebrow { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #CC0000; }
+    .title { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(42px, 7vw, 68px); font-weight: 800; letter-spacing: 0.03em; line-height: 0.95; }
+    .subtitle { max-width: 62ch; font-size: 15px; line-height: 1.6; color: #b3b3b3; }
+
+    .controls { display: grid; gap: 0.65rem; margin-top: 1.5rem; }
+    .control-label { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #8d8d8d; }
+    .selector-wrap { position: relative; }
+    .selector { width: 100%; appearance: none; padding: 1rem 3.5rem 1rem 1rem; border: 1px solid #343434; border-radius: 0; background: #111111; color: #ffffff; }
+    .selector:focus { outline: 2px solid #CC0000; outline-offset: 2px; }
+    .selector-caret { position: absolute; top: 50%; right: 1rem; transform: translateY(-50%); font-family: 'Barlow Condensed', sans-serif; font-size: 18px; color: #CC0000; pointer-events: none; }
+
+    .panel { margin-top: 1rem; border: 1px solid #2b2b2b; background: linear-gradient(180deg, #1f1f1f 0%, #171717 100%); }
+    .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.9rem 1rem; border-bottom: 1px solid #2b2b2b; background: #121212; }
+    .panel-title { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #8d8d8d; }
+    .panel-title span { color: #CC0000; margin-right: 0.45rem; }
+    .panel-note { font-size: 12px; color: #6f6f6f; }
+    .panel-body { padding: 1rem; }
+
+    .briefing { display: grid; gap: 1rem; margin-top: 1rem; }
+    .section { border: 1px solid #2b2b2b; background: #141414; }
+    .section-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.85rem 1rem; border-bottom: 1px solid #2b2b2b; background: #101010; }
+    .section-title { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #8d8d8d; }
+    .section-subtitle { font-size: 12px; color: #6f6f6f; }
+    .section-body { padding: 1rem; }
+
+    .match-card { display: grid; gap: 1rem; }
+    .teams-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; align-items: center; }
+    .team-card { display: flex; align-items: center; gap: 0.85rem; min-width: 0; }
+    .team-card--away { justify-content: flex-end; text-align: right; }
+    .team-crest { width: 54px; height: 54px; object-fit: contain; flex-shrink: 0; background: rgba(255,255,255,0.03); border: 1px solid #2b2b2b; padding: 0.35rem; }
+    .team-meta { min-width: 0; }
+    .team-name { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(24px, 4vw, 38px); font-weight: 700; line-height: 0.95; }
+    .team-card--away .team-card-inner { display: flex; align-items: center; gap: 0.85rem; justify-content: flex-end; }
+    .score-box { display: flex; align-items: center; justify-content: center; min-width: 148px; padding: 0.75rem 1rem; border: 1px solid #2b2b2b; background: #0f0f0f; font-family: 'Barlow Condensed', sans-serif; font-size: clamp(34px, 5vw, 56px); font-weight: 800; color: #ffffff; }
+    .score-box.upcoming { font-size: 28px; letter-spacing: 0.08em; color: #CC0000; }
+    .match-meta { display: flex; align-items: center; justify-content: center; gap: 0.8rem; flex-wrap: wrap; font-size: 14px; color: #b3b3b3; }
+    .state-badge { display: inline-flex; align-items: center; padding: 0.28rem 0.6rem; border: 1px solid #3b3b3b; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #8d8d8d; }
+    .state-badge.upcoming { border-color: rgba(204,0,0,0.35); color: #CC0000; background: rgba(204,0,0,0.08); }
+
+    .form-grid, .players-grid, .events-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+    .team-block { border: 1px solid #2b2b2b; background: #101010; }
+    .team-block-head { display: flex; align-items: center; gap: 0.75rem; padding: 0.8rem 0.9rem; border-bottom: 1px solid #2b2b2b; }
+    .team-block-crest { width: 32px; height: 32px; object-fit: contain; }
+    .team-block-name { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; color: #ffffff; }
+    .form-list, .player-list, .event-list, .stats-list, .notes-list { display: grid; gap: 0.7rem; }
+    .form-item, .player-item, .event-item, .stat-row, .notes-list li { padding: 0.8rem 0.9rem; border-bottom: 1px solid #232323; }
+    .form-item:last-child, .player-item:last-child, .event-item:last-child, .stat-row:last-child { border-bottom: none; }
+    .badge { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 24px; padding: 0 0.45rem; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 800; letter-spacing: 0.08em; border-radius: 2px; }
+    .badge.W { background: #15321c; color: #78d28f; }
+    .badge.D { background: #2b2b2b; color: #d7d7d7; }
+    .badge.L { background: #3a1818; color: #ff8f8f; }
+    .form-item-top, .player-item-top, .event-item-top { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+    .form-opponent, .player-name, .event-player { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 600; color: #ffffff; line-height: 1.05; }
+    .form-meta, .player-meta, .event-meta { font-size: 13px; color: #9a9a9a; }
+    .summary-line { padding: 0.85rem 0.9rem; border-top: 1px solid #2b2b2b; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #8d8d8d; }
+    .player-item-top-left, .event-item-top-left { display: flex; align-items: center; gap: 0.75rem; min-width: 0; }
+    .mini-crest { width: 24px; height: 24px; object-fit: contain; flex-shrink: 0; }
+    .event-type { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #CC0000; }
+    .event-minute { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; color: #ffffff; }
+    .team-empty { padding: 1rem 0.9rem; color: #7f7f7f; font-size: 14px; }
+
+    .stats-list { gap: 0; }
+    .stat-row { display: grid; grid-template-columns: minmax(0, 1fr) 160px minmax(0, 1fr); align-items: center; }
+    .stat-home, .stat-away { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 700; color: #ffffff; }
+    .stat-home { text-align: right; padding-right: 0.9rem; }
+    .stat-away { padding-left: 0.9rem; }
+    .stat-label { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #8d8d8d; text-align: center; }
+
+    .notes-list { list-style: none; }
+    .notes-list li { position: relative; padding-left: 1.9rem; font-size: 15px; line-height: 1.55; color: #d7d7d7; }
+    .notes-list li::before { content: ''; position: absolute; top: 1.2rem; left: 0.9rem; width: 6px; height: 6px; border-radius: 999px; background: #CC0000; }
+
+    .actions { display: flex; justify-content: flex-end; margin-top: 1rem; }
+    .copy-btn { border: 1px solid #CC0000; background: #CC0000; color: #ffffff; padding: 0.85rem 1rem; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; transition: background 0.15s ease, color 0.15s ease; }
+    .copy-btn:hover { background: #a60000; }
+    .copy-btn:focus { outline: 2px solid #ffffff; outline-offset: 2px; }
+    .copy-btn[disabled] { opacity: 0.55; cursor: default; }
+
+    .empty { padding: 1.5rem 1rem; color: #8d8d8d; }
+    .error { color: #ff9d9d; }
+
+    @media (max-width: 900px) {
+      .teams-row, .form-grid, .players-grid, .events-grid { grid-template-columns: 1fr; }
+      .team-card--away, .team-card--away .team-card-inner { justify-content: flex-start; text-align: left; }
+      .score-box { order: -1; min-width: 0; }
+    }
+
+    @media (max-width: 640px) {
+      .shell { width: min(100% - 1rem, 1080px); padding-top: 1rem; padding-bottom: 2rem; }
+      .page-head { gap: 1rem; }
+      .panel-head, .section-head, .panel-body, .section-body { padding-left: 0.8rem; padding-right: 0.8rem; }
+      .stat-row { grid-template-columns: 72px minmax(0, 1fr) 72px; }
+      .stat-home, .stat-away { font-size: 22px; }
+      .stat-label { font-size: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="page-head">
+      <div>
+        <div class="eyebrow">Far Post internal</div>
+        <h1 class="title">MATCH BRIEFING</h1>
+      </div>
+      <p class="subtitle">Select a recent Scottish Premiership result or an upcoming fixture to pull together the match view, recent form, key players or incidents, stats and writing prompts.</p>
+    </header>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div class="panel-title"><span>//</span>Match selector</div>
+        <div class="panel-note">Scottish Premiership only</div>
+      </div>
+      <div class="panel-body">
+        <div class="controls">
+          <label class="control-label" for="match-selector">Choose a match</label>
+          <div class="selector-wrap">
+            <select id="match-selector" class="selector" aria-describedby="selector-status">
+              <option value="">Loading matches…</option>
+            </select>
+            <div class="selector-caret">▾</div>
+          </div>
+          <div id="selector-status" class="panel-note">Recent results are filtered to the last 14 days. Upcoming fixtures are filtered to the next 14 days.</div>
+        </div>
+      </div>
+    </section>
+
+    <div id="briefing-root" class="briefing">
+      <section class="panel">
+        <div class="panel-head">
+          <div class="panel-title"><span>//</span>Loading briefing</div>
+        </div>
+        <div class="panel-body">
+          <div class="fp-state fp-state--compact">
+            <div class="fp-state__eyebrow">Match briefing</div>
+            <div class="fp-loading-dots"><span></span><span></span><span></span></div>
+            <p class="fp-state__copy">Pulling in recent results and upcoming fixtures.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="/assets/farpost.js"></script>
+  <script>
+    var FarPostUI = window.FarPost;
+    var selector = document.getElementById('match-selector');
+    var root = document.getElementById('briefing-root');
+    var currentBriefing = null;
+    var matchOptions = [];
+    var STAT_DEFS = [
+      { ids: [86, 58], label: 'Shots On Target' },
+      { ids: [41], label: 'Shots Off Target' },
+      { ids: [34], label: 'Corners' },
+      { ids: [45], label: 'Fouls' },
+      { ids: [51], label: 'Offsides' },
+      { ids: [99], label: 'Yellow Cards' }
+    ];
+
+    function esc(value) {
+      return FarPostUI && FarPostUI.escHtml ? FarPostUI.escHtml(value) : String(value || '');
+    }
+
+    function parseDate(value) {
+      var date = new Date(value);
+      return Number.isNaN(date.getTime()) ? null : date;
+    }
+
+    function isoDay(value) {
+      var date = parseDate(value);
+      if (!date) return '';
+      return date.toISOString().split('T')[0];
+    }
+
+    function formatDate(value) {
+      var date = parseDate(value);
+      if (!date) return 'TBC';
+      return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    function formatDateTimeLine(value, venue) {
+      var date = parseDate(value);
+      var parts = [];
+      if (date) {
+        parts.push(date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }));
+        parts.push(date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }));
+      }
+      if (venue) parts.push(venue);
+      return parts.join(' • ');
+    }
+
+    function formatMinute(event) {
+      var minute = event && event.minute != null ? String(event.minute) : '';
+      var extra = event && event.minute_extra != null ? String(event.minute_extra) : '';
+      if (!minute) return '';
+      return minute + (extra ? '+' + extra : '') + '\'';
+    }
+
+    function isCompletedState(state) {
+      return ['FT', 'AET', 'PEN'].indexOf(String(state || '').toUpperCase()) !== -1;
+    }
+
+    function isUpcomingState(state) {
+      return !isCompletedState(state);
+    }
+
+    function getScoreDisplay(fixture) {
+      if (isCompletedState(fixture.state)) {
+        return String(fixture.homeScore != null ? fixture.homeScore : 0) + ' - ' + String(fixture.awayScore != null ? fixture.awayScore : 0);
+      }
+      return 'VS';
+    }
+
+    function countResults(form) {
+      return (form || []).reduce(function (totals, match) {
+        if (match.result === 'W') totals.wins += 1;
+        else if (match.result === 'D') totals.draws += 1;
+        else if (match.result === 'L') totals.losses += 1;
+        return totals;
+      }, { wins: 0, draws: 0, losses: 0 });
+    }
+
+    function unbeatenRun(form) {
+      var count = 0;
+      for (var i = 0; i < (form || []).length; i += 1) {
+        if (form[i].result === 'L') break;
+        count += 1;
+      }
+      return count;
+    }
+
+    function topScorerForBriefing(briefing) {
+      var scorers = Array.isArray(briefing.topScorers) ? briefing.topScorers : [];
+      if (!scorers.length) return null;
+      return scorers.slice().sort(function (a, b) {
+        return (b.goals || 0) - (a.goals || 0) || String(a.playerName || '').localeCompare(String(b.playerName || ''));
+      })[0];
+    }
+
+    function findStatValue(statistics, teamId, ids) {
+      for (var i = 0; i < ids.length; i += 1) {
+        var stat = (statistics || []).find(function (entry) {
+          return Number(entry.type_id) === Number(ids[i]) && String(entry.participant_id || '') === String(teamId || '');
+        });
+        if (!stat) {
+          stat = (statistics || []).find(function (entry) {
+            return Number(entry.type_id) === Number(ids[i]) && String(entry.location || '') === (String(teamId) === String(currentBriefing.homeTeam.id) ? 'home' : 'away');
+          });
+        }
+        if (stat) {
+          var value = stat.data && stat.data.value != null ? stat.data.value : stat.value;
+          var number = Number(value);
+          return Number.isFinite(number) ? number : 0;
+        }
+      }
+      return null;
+    }
+
+    function getTeamScorers(teamId) {
+      return (currentBriefing.topScorers || [])
+        .filter(function (row) { return String(row.participant_id || '') === String(teamId || ''); })
+        .slice(0, 3);
+    }
+
+    function eventLabel(event) {
+      var typeId = Number(event && event.type_id);
+      if (typeId === 14 || typeId === 15) return 'Goal';
+      if (typeId === 19) return 'Yellow';
+      if (typeId === 20) return 'Red';
+      return String((event && event.type && (event.type.name || event.type.developer_name)) || 'Event');
+    }
+
+    function relevantCompletedEvents(events) {
+      return (events || [])
+        .filter(function (event) {
+          return [14, 15, 19, 20].indexOf(Number(event.type_id)) !== -1 && event.player_name;
+        })
+        .sort(function (a, b) {
+          var aMinute = (a.minute || 0) * 100 + (a.minute_extra || 0);
+          var bMinute = (b.minute || 0) * 100 + (b.minute_extra || 0);
+          return aMinute - bMinute;
+        });
+    }
+
+    function renderSelector(matches) {
+      if (!matches.length) {
+        selector.innerHTML = '<option value="">No recent or upcoming matches available</option>';
+        selector.disabled = true;
+        renderEmptyState('No Scottish Premiership matches found in the selected date windows.');
+        return;
+      }
+
+      selector.disabled = false;
+      var recent = matches.filter(function (match) { return match.group === 'recent'; });
+      var upcoming = matches.filter(function (match) { return match.group === 'upcoming'; });
+      var html = '<option value="">Select a match</option>';
+
+      if (recent.length) {
+        html += '<optgroup label="Recent Results">';
+        recent.forEach(function (match) {
+          html += '<option value="' + esc(match.id) + '">' + esc(match.label) + '</option>';
+        });
+        html += '</optgroup>';
+      }
+
+      if (upcoming.length) {
+        html += '<optgroup label="Upcoming Fixtures">';
+        upcoming.forEach(function (match) {
+          html += '<option value="' + esc(match.id) + '">' + esc(match.label) + '</option>';
+        });
+        html += '</optgroup>';
+      }
+
+      selector.innerHTML = html;
+
+      var params = new URLSearchParams(window.location.search);
+      var requestedId = params.get('fixtureId');
+      var selected = matches.find(function (match) { return String(match.id) === String(requestedId || ''); }) || matches[0];
+      selector.value = selected ? String(selected.id) : '';
+
+      if (selected) loadBriefing(selected.id);
+      else renderEmptyState('Choose a match to generate the briefing.');
+    }
+
+    function renderLoading(message) {
+      root.innerHTML = '<section class="panel"><div class="panel-head"><div class="panel-title"><span>//</span>Loading briefing</div></div><div class="panel-body"><div class="fp-state fp-state--compact"><div class="fp-state__eyebrow">Match briefing</div><div class="fp-loading-dots"><span></span><span></span><span></span></div><p class="fp-state__copy">' + esc(message || 'Loading match briefing.') + '</p></div></div></section>';
+    }
+
+    function renderEmptyState(message, isError) {
+      root.innerHTML = '<section class="panel"><div class="panel-head"><div class="panel-title"><span>//</span>Match briefing</div></div><div class="panel-body"><div class="empty' + (isError ? ' error' : '') + '">' + esc(message) + '</div></div></section>';
+    }
+
+    function renderFormTeam(team) {
+      var counts = countResults(team.form);
+      var items = (team.form || []).map(function (match) {
+        return '<div class="form-item"><div class="form-item-top"><span class="badge ' + esc(match.result) + '">' + esc(match.result) + '</span><span class="form-meta">' + esc(match.date) + '</span></div><div class="form-opponent">' + esc(match.opponent) + '</div><div class="form-meta">' + esc(match.scored) + ' - ' + esc(match.conceded) + '</div></div>';
+      }).join('');
+
+      return '<div class="team-block"><div class="team-block-head">'
+        + (team.crest ? '<img class="team-block-crest" src="' + esc(team.crest) + '" alt="" onerror="this.style.display=\'none\'">' : '')
+        + '<div class="team-block-name">' + esc(team.name) + '</div></div>'
+        + ((team.form || []).length ? '<div class="form-list">' + items + '</div>' : '<div class="team-empty">No form data available.</div>')
+        + '<div class="summary-line">W' + counts.wins + ' D' + counts.draws + ' L' + counts.losses + ' — ' + (team.form || []).length + ' matches</div></div>';
+    }
+
+    function renderUpcomingPlayers(team) {
+      var scorers = getTeamScorers(team.id);
+      var items = scorers.map(function (player) {
+        return '<div class="player-item"><div class="player-item-top"><div class="player-item-top-left">'
+          + (player.teamCrest ? '<img class="mini-crest" src="' + esc(player.teamCrest) + '" alt="" onerror="this.style.display=\'none\'">' : '')
+          + '<div><div class="player-name">' + esc(player.playerName) + '</div><div class="player-meta">' + esc(player.goals) + ' goals</div></div>'
+          + '</div></div></div>';
+      }).join('');
+
+      return '<div class="team-block"><div class="team-block-head">'
+        + (team.crest ? '<img class="team-block-crest" src="' + esc(team.crest) + '" alt="" onerror="this.style.display=\'none\'">' : '')
+        + '<div class="team-block-name">' + esc(team.name) + '</div></div>'
+        + (items ? '<div class="player-list">' + items + '</div>' : '<div class="team-empty">No top-scorer data available.</div>')
+        + '</div>';
+    }
+
+    function renderCompletedEvents(team, events) {
+      var teamEvents = relevantCompletedEvents(events).filter(function (event) {
+        return String(event.participant_id || '') === String(team.id || '');
+      });
+      var items = teamEvents.map(function (event) {
+        return '<div class="event-item"><div class="event-item-top"><div><div class="event-player">' + esc(event.player_name) + '</div><div class="event-meta">' + esc(eventLabel(event)) + '</div></div><div class="event-minute">' + esc(formatMinute(event)) + '</div></div></div>';
+      }).join('');
+
+      return '<div class="team-block"><div class="team-block-head">'
+        + (team.crest ? '<img class="team-block-crest" src="' + esc(team.crest) + '" alt="" onerror="this.style.display=\'none\'">' : '')
+        + '<div class="team-block-name">' + esc(team.name) + '</div></div>'
+        + (items ? '<div class="event-list">' + items + '</div>' : '<div class="team-empty">No goals or cards available.</div>')
+        + '</div>';
+    }
+
+    function renderStatsSection() {
+      if (String(currentBriefing.fixture.state || '').toUpperCase() !== 'FT') return '';
+
+      var rows = STAT_DEFS.map(function (definition) {
+        var homeValue = findStatValue(currentBriefing.statistics, currentBriefing.homeTeam.id, definition.ids);
+        var awayValue = findStatValue(currentBriefing.statistics, currentBriefing.awayTeam.id, definition.ids);
+        if (homeValue === null && awayValue === null) return '';
+        return '<div class="stat-row"><div class="stat-home">' + esc(homeValue == null ? 0 : homeValue) + '</div><div class="stat-label">' + esc(definition.label) + '</div><div class="stat-away">' + esc(awayValue == null ? 0 : awayValue) + '</div></div>';
+      }).filter(Boolean).join('');
+
+      if (!rows) return '';
+
+      return '<section class="section"><div class="section-head"><div class="section-title">MATCH STATS</div></div><div class="section-body"><div class="stats-list">' + rows + '</div></div></section>';
+    }
+
+    function renderNotes() {
+      var notes = [];
+      var homeCounts = countResults(currentBriefing.homeTeam.form);
+      var awayRun = unbeatenRun(currentBriefing.awayTeam.form);
+      var scorer = topScorerForBriefing(currentBriefing);
+
+      notes.push(currentBriefing.homeTeam.name + ' have won ' + homeCounts.wins + ' of their last 5 matches');
+      if (awayRun > 0 && (currentBriefing.awayTeam.form || []).length && awayRun === (currentBriefing.awayTeam.form || []).length) {
+        notes.push(currentBriefing.awayTeam.name + ' are unbeaten in their last ' + awayRun + ' matches');
+      }
+      if (scorer) {
+        notes.push('Top scorer this season: ' + scorer.playerName + ' with ' + scorer.goals + ' goals');
+      }
+      notes.push('This is a Scottish Premiership fixture');
+      if (String(currentBriefing.fixture.state || '').toUpperCase() === 'FT') {
+        notes.push('Final score: ' + currentBriefing.homeTeam.name + ' ' + currentBriefing.fixture.homeScore + ' ' + currentBriefing.awayTeam.name + ' ' + currentBriefing.fixture.awayScore);
+      }
+
+      return '<section class="section"><div class="section-head"><div class="section-title">EDITORIAL NOTES</div><div class="section-subtitle">writing prompts, not published copy</div></div><div class="section-body"><ul class="notes-list">' + notes.map(function (note) {
+        return '<li>' + esc(note) + '</li>';
+      }).join('') + '</ul></div></section>';
+    }
+
+    function buildPlainText() {
+      if (!currentBriefing) return '';
+
+      var lines = [];
+      var fixture = currentBriefing.fixture;
+      var stateLine = isCompletedState(fixture.state) ? 'FT' : 'UPCOMING';
+      var homeScorers = getTeamScorers(currentBriefing.homeTeam.id);
+      var awayScorers = getTeamScorers(currentBriefing.awayTeam.id);
+      var completedEvents = relevantCompletedEvents(currentBriefing.events);
+
+      lines.push('THE MATCH');
+      lines.push(currentBriefing.homeTeam.name + ' ' + getScoreDisplay(fixture) + ' ' + currentBriefing.awayTeam.name);
+      lines.push(formatDateTimeLine(matchOptions.find(function (entry) { return String(entry.id) === String(fixture.id); }) && matchOptions.find(function (entry) { return String(entry.id) === String(fixture.id); }).date || fixture.date, fixture.venue));
+      lines.push(stateLine);
+      lines.push('');
+
+      lines.push('FORM GUIDE');
+      [currentBriefing.homeTeam, currentBriefing.awayTeam].forEach(function (team) {
+        var counts = countResults(team.form);
+        lines.push(team.name);
+        if (!(team.form || []).length) {
+          lines.push('No form data available');
+        } else {
+          (team.form || []).forEach(function (match) {
+            lines.push(match.result + ' ' + match.opponent + ' ' + match.scored + '-' + match.conceded + ' ' + match.date);
+          });
+          lines.push('W' + counts.wins + ' D' + counts.draws + ' L' + counts.losses + ' — ' + (team.form || []).length + ' matches');
+        }
+        lines.push('');
+      });
+
+      lines.push('KEY PLAYERS / MATCH EVENTS');
+      if (stateLine === 'UPCOMING') {
+        lines.push(currentBriefing.homeTeam.name);
+        if (homeScorers.length) {
+          homeScorers.forEach(function (player) {
+            lines.push(player.playerName + ' — ' + player.goals + ' goals');
+          });
+        } else {
+          lines.push('No top-scorer data available');
+        }
+        lines.push('');
+        lines.push(currentBriefing.awayTeam.name);
+        if (awayScorers.length) {
+          awayScorers.forEach(function (player) {
+            lines.push(player.playerName + ' — ' + player.goals + ' goals');
+          });
+        } else {
+          lines.push('No top-scorer data available');
+        }
+      } else {
+        [currentBriefing.homeTeam, currentBriefing.awayTeam].forEach(function (team) {
+          lines.push(team.name);
+          var teamEvents = completedEvents.filter(function (event) {
+            return String(event.participant_id || '') === String(team.id || '');
+          });
+          if (!teamEvents.length) {
+            lines.push('No goals or cards available');
+          } else {
+            teamEvents.forEach(function (event) {
+              lines.push(formatMinute(event) + ' ' + event.player_name + ' — ' + eventLabel(event));
+            });
+          }
+          lines.push('');
+        });
+      }
+      lines.push('');
+
+      if (stateLine === 'FT') {
+        lines.push('MATCH STATS');
+        STAT_DEFS.forEach(function (definition) {
+          var homeValue = findStatValue(currentBriefing.statistics, currentBriefing.homeTeam.id, definition.ids);
+          var awayValue = findStatValue(currentBriefing.statistics, currentBriefing.awayTeam.id, definition.ids);
+          if (homeValue === null && awayValue === null) return;
+          lines.push((homeValue == null ? 0 : homeValue) + ' — ' + definition.label + ' — ' + (awayValue == null ? 0 : awayValue));
+        });
+        lines.push('');
+      }
+
+      lines.push('EDITORIAL NOTES');
+      var notesMarkup = document.querySelectorAll('.notes-list li');
+      notesMarkup.forEach(function (item) {
+        lines.push(item.textContent);
+      });
+      lines.push('');
+
+      lines.push('COPY BRIEFING');
+      lines.push('Prepared for notes or AI drafting.');
+      return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+    }
+
+    function renderBriefing() {
+      if (!currentBriefing) return;
+
+      var fixture = currentBriefing.fixture;
+      var matchOption = matchOptions.find(function (entry) { return String(entry.id) === String(fixture.id); });
+      var matchDate = matchOption ? matchOption.date : fixture.date;
+      var isUpcoming = isUpcomingState(fixture.state);
+      var keySection = isUpcoming
+        ? '<section class="section"><div class="section-head"><div class="section-title">KEY PLAYERS / MATCH EVENTS</div></div><div class="section-body"><div class="players-grid">' + renderUpcomingPlayers(currentBriefing.homeTeam) + renderUpcomingPlayers(currentBriefing.awayTeam) + '</div></div></section>'
+        : '<section class="section"><div class="section-head"><div class="section-title">KEY PLAYERS / MATCH EVENTS</div></div><div class="section-body"><div class="events-grid">' + renderCompletedEvents(currentBriefing.homeTeam, currentBriefing.events) + renderCompletedEvents(currentBriefing.awayTeam, currentBriefing.events) + '</div></div></section>';
+
+      root.innerHTML = ''
+        + '<section class="section"><div class="section-head"><div class="section-title">THE MATCH</div></div><div class="section-body"><div class="match-card">'
+        + '<div class="teams-row">'
+        + '<div class="team-card">' + (currentBriefing.homeTeam.crest ? '<img class="team-crest" src="' + esc(currentBriefing.homeTeam.crest) + '" alt="" onerror="this.style.display=\'none\'">' : '') + '<div class="team-meta"><div class="team-name">' + esc(currentBriefing.homeTeam.name) + '</div></div></div>'
+        + '<div class="score-box' + (isUpcoming ? ' upcoming' : '') + '">' + esc(getScoreDisplay(fixture)) + '</div>'
+        + '<div class="team-card team-card--away"><div class="team-card-inner"><div class="team-meta"><div class="team-name">' + esc(currentBriefing.awayTeam.name) + '</div></div>' + (currentBriefing.awayTeam.crest ? '<img class="team-crest" src="' + esc(currentBriefing.awayTeam.crest) + '" alt="" onerror="this.style.display=\'none\'">' : '') + '</div></div>'
+        + '</div>'
+        + '<div class="match-meta"><span>' + esc(formatDateTimeLine(matchDate, fixture.venue)) + '</span><span class="state-badge' + (isUpcoming ? ' upcoming' : '') + '">' + esc(isUpcoming ? 'UPCOMING' : 'FT') + '</span></div>'
+        + '</div></div></section>'
+        + '<section class="section"><div class="section-head"><div class="section-title">FORM GUIDE</div></div><div class="section-body"><div class="form-grid">' + renderFormTeam(currentBriefing.homeTeam) + renderFormTeam(currentBriefing.awayTeam) + '</div></div></section>'
+        + keySection
+        + renderStatsSection()
+        + renderNotes()
+        + '<div class="actions"><button id="copy-briefing" class="copy-btn" type="button">Copy Briefing to Clipboard</button></div>';
+
+      document.getElementById('copy-briefing').addEventListener('click', async function () {
+        var button = this;
+        var original = button.textContent;
+        try {
+          await navigator.clipboard.writeText(buildPlainText());
+          button.textContent = 'Briefing Copied';
+          setTimeout(function () {
+            button.textContent = original;
+          }, 1800);
+        } catch (error) {
+          button.textContent = 'Copy Failed';
+          setTimeout(function () {
+            button.textContent = original;
+          }, 1800);
+        }
+      });
+    }
+
+    async function loadBriefing(fixtureId) {
+      renderLoading('Building the match briefing.');
+      try {
+        var response = await fetch('/.netlify/functions/match-briefing?fixtureId=' + encodeURIComponent(fixtureId));
+        var data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Failed to load briefing');
+        currentBriefing = data;
+        renderBriefing();
+
+        var params = new URLSearchParams(window.location.search);
+        params.set('fixtureId', fixtureId);
+        window.history.replaceState({}, '', window.location.pathname + '?' + params.toString());
+      } catch (error) {
+        renderEmptyState('Could not load the match briefing. Please try again later.', true);
+      }
+    }
+
+    async function loadMatches() {
+      renderLoading('Pulling in the latest results and fixtures.');
+      try {
+        var responses = await Promise.all([
+          fetch('/.netlify/functions/results?league=501'),
+          fetch('/.netlify/functions/fixtures?league=501')
+        ]);
+        var resultPayload = await responses[0].json();
+        var fixturePayload = await responses[1].json();
+        if (!responses[0].ok) throw new Error(resultPayload.error || 'Failed to load results');
+        if (!responses[1].ok) throw new Error(fixturePayload.error || 'Failed to load fixtures');
+
+        var now = new Date();
+        var pastWindow = new Date(now);
+        pastWindow.setDate(now.getDate() - 14);
+        var futureWindow = new Date(now);
+        futureWindow.setDate(now.getDate() + 14);
+
+        var recent = (resultPayload.fixtures || [])
+          .filter(function (fixture) {
+            var date = parseDate(fixture.date);
+            return date && date >= pastWindow && date <= now;
+          })
+          .sort(function (a, b) {
+            return new Date(b.date) - new Date(a.date);
+          })
+          .map(function (fixture) {
+            return {
+              id: fixture.id,
+              date: fixture.date,
+              group: 'recent',
+              label: fixture.home.name + ' vs ' + fixture.away.name + ' — ' + formatDate(fixture.date)
+            };
+          });
+
+        var upcoming = (fixturePayload.fixtures || [])
+          .filter(function (fixture) {
+            var date = parseDate(fixture.date);
+            return date && date >= now && date <= futureWindow;
+          })
+          .sort(function (a, b) {
+            return new Date(a.date) - new Date(b.date);
+          })
+          .map(function (fixture) {
+            return {
+              id: fixture.id,
+              date: fixture.date,
+              group: 'upcoming',
+              label: fixture.home.name + ' vs ' + fixture.away.name + ' — ' + formatDate(fixture.date)
+            };
+          });
+
+        matchOptions = recent.concat(upcoming);
+        renderSelector(matchOptions);
+      } catch (error) {
+        selector.innerHTML = '<option value="">Could not load matches</option>';
+        selector.disabled = true;
+        renderEmptyState('Could not load the selector data. Please try again later.', true);
+      }
+    }
+
+    selector.addEventListener('change', function () {
+      if (!this.value) {
+        currentBriefing = null;
+        renderEmptyState('Choose a match to generate the briefing.');
+        return;
+      }
+      loadBriefing(this.value);
+    });
+
+    loadMatches();
+  </script>
+</body>
+</html>
