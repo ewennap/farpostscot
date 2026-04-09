@@ -202,12 +202,12 @@ function buildTeamSummary(team, form) {
 
 exports.handler = async function (event) {
   if (!SPORTMONKS_TOKEN) {
-    return json(500, { error: 'SPORTMONKS_TOKEN not set' }, 'no-store');
+    return json(500, { error: 'Sportmonks token not configured' }, 'no-store');
   }
 
   const fixtureId = event.queryStringParameters && event.queryStringParameters.fixtureId;
   if (!fixtureId) {
-    return json(400, { error: 'fixtureId is required' }, 'no-store');
+    return json(400, { error: 'fixtureId query parameter is required' }, 'no-store');
   }
 
   let fixture = null;
