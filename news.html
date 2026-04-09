@@ -149,11 +149,9 @@
     async function loadArticles() {
       const grid = document.getElementById('news-grid');
       try {
-        const countQ = encodeURIComponent('count(*[_type=="post"])');
-        total = (await fetchJson(`/.netlify/functions/sanity-fetch?query=${countQ}`)).result || 0;
-
-        const q = encodeURIComponent(`*[_type=="post"]|order(publishedAt desc)[0...${PAGE_SIZE}]{_id,title,category,excerpt,author,publishedAt,mainImage}`);
-        const posts = (await fetchJson(`/.netlify/functions/sanity-fetch?query=${q}`)).result;
+        const payload = await fetchJson(`/.netlify/functions/content-feed?section=news&offset=0&limit=${PAGE_SIZE}`);
+        total = payload.total || 0;
+        const posts = payload.posts || [];
 
         if (!posts?.length) {
           renderState(grid, 'empty', {
@@ -187,11 +185,12 @@
       btn.disabled = true;
       btn.textContent = 'Loading...';
       try {
-        const q = encodeURIComponent(`*[_type=="post"]|order(publishedAt desc)[${offset}...${offset+PAGE_SIZE}]{_id,title,category,excerpt,author,publishedAt,mainImage}`);
-        const posts = (await fetchJson(`/.netlify/functions/sanity-fetch?query=${q}`)).result;
+        const payload = await fetchJson(`/.netlify/functions/content-feed?section=news&offset=${offset}&limit=${PAGE_SIZE}`);
+        const posts = payload.posts || [];
         if (!posts?.length) { document.getElementById('load-more').style.display='none'; return; }
         grid.insertAdjacentHTML('beforeend', renderCards(posts));
         offset += posts.length;
+        total = payload.total || total;
         if (offset >= total) document.getElementById('load-more').style.display='none';
       } catch(e) {}
       btn.disabled = false;

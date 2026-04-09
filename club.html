@@ -956,22 +956,13 @@
 
     async function loadRelatedArticles(teamName) {
       if (!teamName) return;
-
-      // Sanitise team name for GROQ string inclusion
-      const safe = teamName.replace(/['"\\]/g, '').trim();
+      const safe = String(teamName).trim();
       if (!safe) return;
 
-      const groq = `*[_type=="post"]|order(publishedAt desc)[0...8]{_id,title,category,author,publishedAt,excerpt,body,mainImage,editorial,labels,topics}`;
-
       try {
-        const res  = await fetch(`/.netlify/functions/sanity-fetch?query=${encodeURIComponent(groq)}`);
+        const res  = await fetch(`/.netlify/functions/club-coverage?team=${encodeURIComponent(safe)}`);
         const data = await res.json();
-        const articles = (data?.result || []).filter(article => {
-          const editorial = FarPostShared.getEditorialConfig(article);
-          const bodyText = FarPostShared.extractPortableText(article.body || []).toLowerCase();
-          const haystack = [article.title, article.excerpt, bodyText].join(' ').toLowerCase();
-          return editorial.teams.map(item => item.toLowerCase()).includes(safe.toLowerCase()) || haystack.includes(safe.toLowerCase());
-        }).slice(0, 3);
+        const articles = Array.isArray(data?.articles) ? data.articles : [];
 
         pageState.articles = articles;
         renderHeroCards();

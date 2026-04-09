@@ -8,6 +8,7 @@
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
+  <!-- FP_HEAD_START -->
   <title>Far Post — Scottish Football</title>
   <meta name="description" content="Far Post brings premium Scottish football editorial with club, player and match context on every story.">
   <meta property="og:title" content="Far Post — Scottish Football">
@@ -16,6 +17,7 @@
   <meta property="og:image" content="/android-chrome-512x512.png">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="canonical" href="/article.html">
+  <!-- FP_HEAD_END -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/farpost.css">
@@ -351,16 +353,11 @@
       return score;
     }
 
-    async function loadStayWithFarPost(currentId) {
+    async function loadStayWithFarPost(latestArticle) {
       const section = document.getElementById('stay-section');
       const grid = document.getElementById('stay-grid');
       try {
-        const articleQuery = encodeURIComponent(`*[_type=="post"&&_id!="${currentId}"]|order(publishedAt desc)[0...1]{_id,title,category,publishedAt,editorial,labels,topics}`);
-        const [articlesPayload, podcastResponse] = await Promise.all([
-          fetchJson(`/.netlify/functions/sanity-fetch?query=${articleQuery}`),
-          fetch('/.netlify/functions/podcast')
-        ]);
-        const latestArticle = (articlesPayload.result || [])[0];
+        const podcastResponse = await fetch('/.netlify/functions/podcast');
         const xml = podcastResponse.ok ? new DOMParser().parseFromString(await podcastResponse.text(), 'text/xml') : null;
         const latestEpisode = xml ? xml.querySelector('item') : null;
         if (!latestArticle && !latestEpisode) return;
@@ -388,8 +385,8 @@
         return;
       }
       try {
-        const q = encodeURIComponent(`*[_type=="post"&&_id=="${id}"][0]{_id,title,category,excerpt,body,author,publishedAt,_updatedAt,mainImage,editorial,labels,topics,tags,seo}`);
-        const post = (await fetchJson(`/.netlify/functions/sanity-fetch?query=${q}`)).result;
+        const payload = await fetchJson(`/.netlify/functions/article-content?id=${encodeURIComponent(id)}`);
+        const post = payload.post;
         if (!post) {
           renderState(el, 'empty', {
             eyebrow: 'Article',
@@ -473,8 +470,8 @@
           </div>
           ${renderContextLinks(relatedClubs, relatedPlayers)}`;
 
-        loadRelated(id);
-        loadStayWithFarPost(id);
+        loadRelated(post, payload.relatedPosts || []);
+        loadStayWithFarPost(payload.latestArticle || null);
       } catch(e) {
         renderState(el, 'error', {
           eyebrow: 'Article',
@@ -485,16 +482,10 @@
       }
     }
 
-    async function loadRelated(currentId) {
+    async function loadRelated(currentPost, posts) {
       const grid = document.getElementById('related-grid');
       const section = document.getElementById('related-section');
       try {
-        const currentQuery = encodeURIComponent(`*[_type=="post"&&_id=="${currentId}"][0]{_id,title,category,excerpt,body,editorial,labels,topics,tags}`);
-        const relatedQuery = encodeURIComponent(`*[_type=="post"&&_id!="${currentId}"]|order(publishedAt desc)[0...10]{_id,title,category,excerpt,body,publishedAt,mainImage,editorial,labels,topics,tags}`);
-        const [currentPost, posts] = await Promise.all([
-          fetchJson(`/.netlify/functions/sanity-fetch?query=${currentQuery}`).then(payload => payload.result),
-          fetchJson(`/.netlify/functions/sanity-fetch?query=${relatedQuery}`).then(payload => payload.result || [])
-        ]);
         const rankedPosts = posts
           .map(post => ({ post, score: scoreRelatedPost(currentPost, post) }))
           .sort((a, b) => {

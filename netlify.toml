@@ -2,5 +2,18 @@
   publish = "."
   functions = "netlify/functions"
 
+[functions]
+  included_files = ["article.html", "match.html", "lib/**"]
+
 [build.environment]
   NODE_VERSION = "18"
+
+[[redirects]]
+  from = "/article.html"
+  to = "/.netlify/functions/render-article"
+  status = 200
+
+[[redirects]]
+  from = "/match.html"
+  to = "/.netlify/functions/render-match"
+  status = 200

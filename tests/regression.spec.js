@@ -342,12 +342,227 @@ function teamFormPayload(teamName) {
   ];
 }
 
+function clubSummaryPayload(teamId = '501-club-1', leagueId = '501') {
+  const leagueNames = {
+    '501': 'Premiership',
+    '504': 'Championship',
+    '507': 'Scottish Cup',
+    '510': 'League Cup',
+    '516': 'League One'
+  };
+  const teamName = `${leagueId} Leaders`;
+  const crest = `https://images.example.com/${leagueId}-crest-1.png`;
+
+  return {
+    team: {
+      id: teamId,
+      name: teamName,
+      crest,
+      leagueId,
+      leagueName: leagueNames[leagueId] || 'Scottish football',
+      position: 1
+    },
+    form: [
+      {
+        id: `${leagueId}-result-1`,
+        date: '2026-04-05T15:00:00Z',
+        state: 'FT',
+        isFinished: true,
+        requestedIsHome: true,
+        result: 'W',
+        home: { id: teamId, name: teamName, crest },
+        away: {
+          id: `${leagueId}-club-2`,
+          name: `${leagueId} Challengers`,
+          crest: `https://images.example.com/${leagueId}-crest-2.png`
+        },
+        score: { home: 2, away: 1 }
+      },
+      {
+        id: `${leagueId}-result-2`,
+        date: '2026-03-29T15:00:00Z',
+        state: 'FT',
+        isFinished: true,
+        requestedIsHome: false,
+        result: 'D',
+        home: {
+          id: `${leagueId}-club-3`,
+          name: `${leagueId} Town`,
+          crest: `https://images.example.com/${leagueId}-crest-3.png`
+        },
+        away: { id: teamId, name: teamName, crest },
+        score: { home: 1, away: 1 }
+      }
+    ],
+    results: [
+      {
+        id: `${leagueId}-result-1`,
+        date: '2026-04-05T15:00:00Z',
+        state: 'FT',
+        isFinished: true,
+        requestedIsHome: true,
+        result: 'W',
+        home: { id: teamId, name: teamName, crest },
+        away: {
+          id: `${leagueId}-club-2`,
+          name: `${leagueId} Challengers`,
+          crest: `https://images.example.com/${leagueId}-crest-2.png`
+        },
+        score: { home: 2, away: 1 }
+      }
+    ],
+    fixtures: [
+      {
+        id: `${leagueId}-fixture-1`,
+        date: '2026-04-10T15:00:00Z',
+        state: 'NS',
+        isFinished: false,
+        requestedIsHome: true,
+        result: null,
+        home: { id: teamId, name: teamName, crest },
+        away: {
+          id: `${leagueId}-club-2`,
+          name: `${leagueId} Challengers`,
+          crest: `https://images.example.com/${leagueId}-crest-2.png`
+        },
+        score: { home: '-', away: '-' }
+      }
+    ],
+    standings: [
+      {
+        teamId,
+        team: teamName,
+        crest,
+        position: 1,
+        points: 68,
+        played: 31,
+        won: 21,
+        drawn: 5,
+        lost: 5,
+        gd: 22
+      },
+      {
+        teamId: `${leagueId}-club-2`,
+        team: `${leagueId} Challengers`,
+        crest: `https://images.example.com/${leagueId}-crest-2.png`,
+        position: 2,
+        points: 64,
+        played: 31,
+        won: 19,
+        drawn: 7,
+        lost: 5,
+        gd: 17
+      }
+    ],
+    topScorers: [
+      {
+        playerId: 'p1',
+        playerName: 'Mara Boyd',
+        playerPhoto: 'https://images.example.com/player-1.jpg',
+        teamId,
+        teamName,
+        teamCrest: crest,
+        goals: 14,
+        rank: 1,
+        leagueId,
+        seasonId: '1001'
+      }
+    ]
+  };
+}
+
+function clubCoveragePayload(teamName = '501 Leaders') {
+  return {
+    articles: [
+      {
+        _id: 'club-coverage-1',
+        title: `${teamName} are setting the pace`,
+        category: 'news',
+        excerpt: `Why ${teamName} have built momentum at the right time.`,
+        author: 'Far Post',
+        publishedAt: '2026-04-06T12:00:00Z',
+        mainImage: {
+          asset: {
+            _ref: 'image-sample-image-jpg'
+          }
+        }
+      },
+      {
+        _id: 'club-coverage-2',
+        title: `How ${teamName} control the middle of the pitch`,
+        category: 'analysis',
+        excerpt: 'A tactical read on their recent run.',
+        author: 'Far Post',
+        publishedAt: '2026-04-04T12:00:00Z',
+        mainImage: {
+          asset: {
+            _ref: 'image-sample-image-jpg'
+          }
+        }
+      },
+      {
+        _id: 'club-coverage-3',
+        title: `${teamName} and the pressure of the run-in`,
+        category: 'feature',
+        excerpt: 'The wider context around the club.',
+        author: 'Far Post',
+        publishedAt: '2026-04-02T12:00:00Z',
+        mainImage: {
+          asset: {
+            _ref: 'image-sample-image-jpg'
+          }
+        }
+      }
+    ]
+  };
+}
+
+function squadPayload() {
+  return {
+    goalkeepers: [
+      { id: 'gk-1', display_name: 'Aidan Kerr', jersey_number: 1, image_path: null }
+    ],
+    defenders: [
+      { id: 'df-1', display_name: 'Lewis Grant', jersey_number: 4, image_path: null }
+    ],
+    midfielders: [
+      { id: 'mf-1', display_name: 'Calum Ross', jersey_number: 8, image_path: null }
+    ],
+    attackers: [
+      { id: 'fw-1', display_name: 'Mara Boyd', jersey_number: 9, image_path: null }
+    ]
+  };
+}
+
 async function mockSuccessfulData(page) {
   await page.route('**/.netlify/functions/sanity-fetch**', async route => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify(articleFeed())
+    });
+  });
+
+  await page.route('**/.netlify/functions/homepage-content', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ posts: articleFeed().result })
+    });
+  });
+
+  await page.route('**/.netlify/functions/article-content?id=*', async route => {
+    const id = new URL(route.request().url()).searchParams.get('id') || 'post-1';
+    const posts = articleFeed(4).result;
+    const post = { ...posts[0], _id: id };
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        post,
+        relatedPosts: posts.slice(1, 3),
+        latestArticle: posts[1] || null
+      })
     });
   });
 
@@ -420,6 +635,34 @@ async function mockSuccessfulData(page) {
     });
   });
 
+  await page.route('**/.netlify/functions/club-summary?teamId=*', async route => {
+    const url = new URL(route.request().url());
+    const teamId = url.searchParams.get('teamId') || '501-club-1';
+    const leagueId = url.searchParams.get('leagueId') || '501';
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(clubSummaryPayload(teamId, leagueId))
+    });
+  });
+
+  await page.route('**/.netlify/functions/club-coverage?team=*', async route => {
+    const teamName = new URL(route.request().url()).searchParams.get('team') || '501 Leaders';
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(clubCoveragePayload(teamName))
+    });
+  });
+
+  await page.route('**/.netlify/functions/squad?teamId=*', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(squadPayload())
+    });
+  });
+
   await page.route('https://images.example.com/**', async route => {
     await route.fulfill({
       status: 200,
@@ -451,11 +694,11 @@ test('homepage loads core modules and nav links work', async ({ page }) => {
 
 test('homepage honours editorial hero and picks overrides', async ({ page }) => {
   await mockSuccessfulData(page);
-  await page.route('**/.netlify/functions/sanity-fetch**', async route => {
+  await page.route('**/.netlify/functions/homepage-content', async route => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify(editorialHomepageFeed())
+      body: JSON.stringify({ posts: editorialHomepageFeed().result })
     });
   });
 
@@ -464,6 +707,28 @@ test('homepage honours editorial hero and picks overrides', async ({ page }) => 
   await expect(page.locator('#hero-slides .hero-slide').first().locator('.hero-headline')).toHaveText('Homepage override story');
   await expect(page.locator('#editors-picks-list .identity-item').first().locator('.identity-name')).toHaveText('Editor pick story');
   await expect(page.locator('#hero-slides')).not.toContainText('Suppressed homepage story');
+});
+
+test('article response ships story-specific head metadata', async ({ request }) => {
+  const response = await request.get('/article.html?id=club-story');
+  const html = await response.text();
+
+  expect(response.ok()).toBeTruthy();
+  expect(html).toContain('<title>501 Leaders are setting the pace — Far Post</title>');
+  expect(html).toContain('property="og:url" content="http://127.0.0.1:4173/article.html?id=club-story"');
+  expect(html).toContain('name="twitter:title" content="501 Leaders are setting the pace — Far Post"');
+  expect(html).toContain('data-fp-jsonld="article"');
+});
+
+test('match response ships fixture-specific head metadata', async ({ request }) => {
+  const response = await request.get('/match.html?id=fixture-100');
+  const html = await response.text();
+
+  expect(response.ok()).toBeTruthy();
+  expect(html).toContain('<title>Caledonia FC vs Forth Athletic — Far Post</title>');
+  expect(html).toContain('property="og:description" content="Far Post match centre: Caledonia FC 2-1 Forth Athletic. Timeline, lineups, stats and form guide."');
+  expect(html).toContain('rel="canonical" href="http://127.0.0.1:4173/match.html?id=fixture-100&amp;league=501"');
+  expect(html).toContain('data-fp-jsonld="match-page"');
 });
 
 test('players hub renders and links to player pages', async ({ page }) => {
@@ -703,6 +968,17 @@ test('clubs hub all-directory search keeps deduped clubs discoverable across cup
   await expect(leadersCard).toHaveAttribute('href', /club\.html\?id=501-club-1&league=501/);
 });
 
+test('club page renders coverage from the dedicated club feed', async ({ page }) => {
+  await mockSuccessfulData(page);
+  await page.goto('/club.html?id=501-club-1&league=501');
+
+  await expect(page.locator('#articlesSection')).toBeVisible();
+  await expect(page.locator('#articlesGrid .coverage-feature')).toHaveCount(1);
+  await expect(page.locator('#articlesGrid .article-card')).toHaveCount(2);
+  await expect(page.locator('#heroCoverageValue')).toHaveText('03');
+  await expect(page.locator('#articlesGrid')).toContainText('501 Leaders are setting the pace');
+});
+
 test('match page renders essential match content', async ({ page }) => {
   await mockSuccessfulData(page);
   await page.route('**/.netlify/functions/players-hub', async route => {
@@ -742,29 +1018,28 @@ test('match page renders essential match content', async ({ page }) => {
 
 test('article page surfaces related club links when story mentions tracked sides', async ({ page }) => {
   await mockSuccessfulData(page);
-  await page.route('**/.netlify/functions/sanity-fetch**', async route => {
-    const url = new URL(route.request().url());
-    const query = decodeURIComponent(url.searchParams.get('query') || '');
-    if (query.includes('_id=="club-story"')) {
+  await page.route('**/.netlify/functions/article-content?id=*', async route => {
+    const id = new URL(route.request().url()).searchParams.get('id');
+    if (id === 'club-story') {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify(articleWithClubMention())
-      });
-      return;
-    }
-    if (query.includes('_id!="club-story"')) {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(articleFeed(2))
+        body: JSON.stringify({
+          post: articleWithClubMention().result,
+          relatedPosts: articleFeed(2).result,
+          latestArticle: articleFeed(2).result[0]
+        })
       });
       return;
     }
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify(articleFeed())
+      body: JSON.stringify({
+        post: articleFeed(1).result[0],
+        relatedPosts: articleFeed(2).result,
+        latestArticle: articleFeed(2).result[0]
+      })
     });
   });
 

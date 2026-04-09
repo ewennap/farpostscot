@@ -1061,9 +1061,8 @@
     async function loadArticles() {
       const grid = document.getElementById('opinions-grid');
       try {
-        const q = encodeURIComponent('*[_type=="post"]|order(publishedAt desc)[0...12]{_id,title,category,excerpt,author,publishedAt,_updatedAt,mainImage,body,editorial,labels,topics,tags,seo}');
-        const response = await fetchJson(`/.netlify/functions/sanity-fetch?query=${q}`);
-        const posts = (response.result || [])
+        const response = await fetchJson('/.netlify/functions/homepage-content');
+        const posts = (response.posts || [])
           .filter(post => !getEditorialConfig(post).suppressHomepage)
           .sort((a, b) => {
             const editorialA = getEditorialConfig(a);

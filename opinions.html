@@ -154,17 +154,14 @@
     let offset = 0;
     const PAGE_SIZE = 9;
     let currentFilter = 'all';
-
-    function filterQuery() {
-      if (currentFilter === 'all') return `_type=="post"&&category in ["opinion","analysis","feature","interview"]`;
-      return `_type=="post"&&category=="${currentFilter}"`;
-    }
+    let total = 0;
 
     function setFilter(filter, btn) {
       currentFilter = filter;
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       offset = 0;
+      total = 0;
       renderState('#news-grid', 'loading', {
         eyebrow: 'Opinion desk',
         title: 'Refreshing category',
@@ -182,8 +179,9 @@
     async function loadArticles() {
       const grid = document.getElementById('news-grid');
       try {
-        const q = encodeURIComponent(`*[${filterQuery()}]|order(publishedAt desc)[0...${PAGE_SIZE}]{_id,title,category,excerpt,author,publishedAt,mainImage}`);
-        const posts = (await fetchJson(`/.netlify/functions/sanity-fetch?query=${q}`)).result;
+        const payload = await fetchJson(`/.netlify/functions/content-feed?section=opinions&category=${encodeURIComponent(currentFilter)}&offset=0&limit=${PAGE_SIZE}`);
+        const posts = payload.posts || [];
+        total = payload.total || 0;
 
         if (!posts?.length) {
           renderState(grid, 'empty', {
@@ -198,7 +196,7 @@
         setHTML(grid, renderCards(posts));
         offset = posts.length;
 
-        if (posts.length === PAGE_SIZE) {
+        if (total > offset) {
           document.getElementById('load-more').style.display = 'flex';
         }
       } catch(e) {
@@ -217,12 +215,13 @@
       btn.disabled = true;
       btn.textContent = 'Loading...';
       try {
-        const q = encodeURIComponent(`*[${filterQuery()}]|order(publishedAt desc)[${offset}...${offset+PAGE_SIZE}]{_id,title,category,excerpt,author,publishedAt,mainImage}`);
-        const posts = (await fetchJson(`/.netlify/functions/sanity-fetch?query=${q}`)).result;
+        const payload = await fetchJson(`/.netlify/functions/content-feed?section=opinions&category=${encodeURIComponent(currentFilter)}&offset=${offset}&limit=${PAGE_SIZE}`);
+        const posts = payload.posts || [];
         if (!posts?.length) { document.getElementById('load-more').style.display='none'; return; }
         grid.insertAdjacentHTML('beforeend', renderCards(posts));
         offset += posts.length;
-        if (posts.length < PAGE_SIZE) document.getElementById('load-more').style.display='none';
+        total = payload.total || total;
+        if (offset >= total) document.getElementById('load-more').style.display='none';
       } catch(e) {}
       btn.disabled = false;
       btn.textContent = 'Load more';
